@@ -59,7 +59,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
   // Track InitiateCheckout when arriving at payment form (step 5)
   // This must be before the early return to avoid hooks order issues
   useEffect(() => {
-    if (isOpen && step === 5 && selectedPlan !== 'free') {
+    if (isOpen && step === 6 && selectedPlan !== 'free') {
       const planPrice = selectedPlan === 'unlimited' ? 
         (isDiscounted ? 38.94 : 59.90) : 
         (isDiscounted ? 29.93 : 39.90);
@@ -96,7 +96,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
     }
     
     // Go to step 5 to confirm data and generate PIX
-    setStep(5);
+    setStep(6);
   };
   
   const pollPaymentStatus = async (orderId: string) => {
@@ -229,7 +229,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
         amount: data.amount,
         orderId: data.orderId
       });
-      setStep(6);
+      setStep(7);
       
       // Start polling for payment status
       if (data.orderId) {
@@ -328,24 +328,26 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             <h2 className="text-xl font-bold text-gray-900">
               {step === 1 && "Parabéns pelos 3 livros!"}
               {step === 2 && "Sobre a Beta Reader Brasil"}
-              {step === 3 && "Análise do seu potencial"}
-              {step === 4 && "Escolha seu plano"}
-              {step === 5 && "Confirmar Pagamento"}
-              {step === 6 && "PIX Gerado"}
+              {step === 3 && "Depoimentos de Sucesso"}
+              {step === 5 && "Análise do seu potencial"}
+              {step === 6 && "Escolha seu plano"}
+              {step === 7 && "Confirmar Pagamento"}
+              {step === 7 && "PIX Gerado"}
             </h2>
             <p className="text-sm text-gray-600">
               {step === 1 && "Você alcançou um marco importante"}
               {step === 2 && "Conheça nossa história de sucesso"}
-              {step === 3 && "Veja quanto você está perdendo"}
-              {step === 4 && "Acelere seus ganhos agora"}
-              {step === 5 && "Confirme seus dados para gerar o PIX"}
-              {step === 6 && "Escaneie o QR Code ou copie o código PIX"}
+              {step === 3 && "Veja o que nossos leitores dizem"}
+              {step === 5 && "Veja quanto você está perdendo"}
+              {step === 6 && "Acelere seus ganhos agora"}
+              {step === 7 && "Confirme seus dados para gerar o PIX"}
+              {step === 7 && "Escaneie o QR Code ou copie o código PIX"}
             </p>
           </div>
 
           {/* Step Indicator - subtle green */}
           <div className="flex gap-1.5 mt-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
               <div
                 key={i}
                 className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
@@ -516,8 +518,142 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
 
-          {/* Step 3: Compelling Analysis */}
+          {/* Step 3: Testimonials */}
           {step === 3 && (
+            <div className="space-y-5">
+              {/* Header */}
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  O que nossos leitores dizem
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Histórias reais de pessoas como você que transformaram a leitura em renda
+                </p>
+              </div>
+
+              {/* Testimonials Carousel */}
+              <div className="space-y-4">
+                {/* Testimonial 1 */}
+                <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-5 border border-green-200">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-lg">M</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-bold text-gray-900">Mariana Santos</h4>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+                          São Paulo - SP
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mb-3">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-700 italic mb-3">
+                        "Em 6 meses já consegui R$ 8.400! Estava desempregada e a Beta Reader me salvou. 
+                        Agora leio 4 livros por dia e ganho mais que meu salário anterior."
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-600">
+                        <span>📚 342 livros lidos</span>
+                        <span>💰 R$ 8.400 ganhos</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 2 */}
+                <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-200">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-lg">R</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-bold text-gray-900">Rafael Oliveira</h4>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
+                          Rio de Janeiro - RJ
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mb-3">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-700 italic mb-3">
+                        "Trabalho como motorista de app e leio nos intervalos. Em 4 meses já fiz R$ 5.200! 
+                        O plano ilimitado valeu cada centavo, pago sozinho."
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-600">
+                        <span>📚 218 livros lidos</span>
+                        <span>💰 R$ 5.200 ganhos</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial 3 */}
+                <div className="relative bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-200">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-lg">C</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-bold text-gray-900">Camila Rodriguez</h4>
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">
+                          Belo Horizonte - MG
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mb-3">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-700 italic mb-3">
+                        "Mãe de 2 filhos, leio à noite depois que eles dormem. Já consegui R$ 3.800 
+                        que uso para as despesas da casa. Muito grata!"
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-600">
+                        <span>📚 156 livros lidos</span>
+                        <span>💰 R$ 3.800 ganhos</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Summary */}
+              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <p className="text-lg font-bold text-gray-900">92%</p>
+                    <p className="text-xs text-gray-600">Satisfação</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-green-600">R$ 285</p>
+                    <p className="text-xs text-gray-600">Média/dia</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-gray-900">2.673</p>
+                    <p className="text-xs text-gray-600">Leitores ativos</p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setStep(5)}
+                className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200"
+                data-testid="button-continue-to-analysis"
+              >
+                Ver Meu Potencial
+              </button>
+            </div>
+          )}
+
+          {/* Step 5: Compelling Analysis */}
+          {step === 5 && (
             <div className="space-y-5">
               {/* Alert Banner - subtle warning */}
               <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
@@ -715,7 +851,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
               </div>
 
               <button
-                onClick={() => setStep(4)}
+                onClick={() => setStep(5)}
                 className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200"
                 data-testid="button-see-plans"
               >
@@ -756,8 +892,8 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
 
-          {/* Step 4: Premium Plans Selection */}
-          {step === 4 && (
+          {/* Step 6: Premium Plans Selection */}
+          {step === 6 && (
             <div className="space-y-4">
               {/* Plans Grid */}
               <div className="space-y-4">
@@ -958,8 +1094,8 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
           
-          {/* Step 5: Payment Confirmation */}
-          {step === 5 && (
+          {/* Step 6: Payment Confirmation */}
+          {step === 6 && (
             <div className="space-y-5">
               {/* Plan Summary */}
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-4 border border-gray-200">
@@ -1118,7 +1254,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
 
               {/* Back Button */}
               <button
-                onClick={() => setStep(4)}
+                onClick={() => setStep(5)}
                 className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-all"
                 disabled={isProcessing}
                 data-testid="button-back-payment"
@@ -1141,7 +1277,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
           )}
           
           {/* Step 6: PIX QR Code Display */}
-          {step === 6 && pixData && (
+          {step === 7 && pixData && (
             <div className="space-y-4">
               {/* Logo Header */}
               <div className="flex justify-center mb-2">
