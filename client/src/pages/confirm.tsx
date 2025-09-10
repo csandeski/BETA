@@ -5,7 +5,6 @@ import { Clock, Zap, TrendingUp, CheckCircle, Star, Trophy, Calendar, Timer, Use
 import { useLocation } from 'wouter';
 import { userDataManager } from '@/utils/userDataManager';
 import { useToast } from '@/hooks/use-toast';
-import logoImg from '@assets/LOGO-BETA_1757242425943.png';
 import AcceleratorPaymentModal from '../components/AcceleratorPaymentModal';
 
 export default function Confirm() {
@@ -73,7 +72,7 @@ export default function Confirm() {
       <div className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <img src={logoImg} alt="Beta Reader Brasil" className="h-10" />
+            <div className="text-green-600 font-bold text-lg">Beta Reader Brasil</div>
             <div className="bg-red-500 text-white px-3 py-1 rounded-full flex items-center gap-2 animate-pulse">
               <Timer className="h-4 w-4" />
               <span className="font-bold text-sm">

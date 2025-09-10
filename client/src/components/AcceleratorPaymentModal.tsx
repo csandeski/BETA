@@ -4,7 +4,6 @@ import { apiClient } from '@/lib/api';
 import { QRCodeSVG } from 'qrcode.react';
 import { UtmTracker } from '@/utils/utmTracker';
 import { useToast } from '@/hooks/use-toast';
-import logoImg from '@assets/LOGO-BETA_1757242425943.png';
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/scrollLock';
 import { fbPixel } from '@/utils/facebookPixel';
 

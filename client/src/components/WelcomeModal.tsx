@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, BookOpen, CheckCircle, Star, ArrowRight, TrendingUp, Trophy, DollarSign, Sparkles } from 'lucide-react';
 import { useSound } from '@/hooks/useSound';
-import logoImg from '@assets/LOGO-BETA_1757242425943.png';
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/scrollLock';
 
 interface WelcomeModalProps {
