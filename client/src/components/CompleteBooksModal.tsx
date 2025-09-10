@@ -43,8 +43,8 @@ export function CompleteBooksModal({ isOpen, onClose, booksRead }: CompleteBooks
         {/* Content */}
         <div className="text-center">
           {/* Icon */}
-          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center">
-            <Target className="h-10 w-10 text-orange-600" />
+          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center">
+            <Target className="h-10 w-10 text-green-600" />
           </div>
 
           {/* Title */}
@@ -61,13 +61,13 @@ export function CompleteBooksModal({ isOpen, onClose, booksRead }: CompleteBooks
           <div className="bg-gray-50 rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-700">Seu Progresso</span>
-              <span className="text-sm font-bold text-orange-600">{booksRead}/3 livros</span>
+              <span className="text-sm font-bold text-green-600">{booksRead}/3 livros</span>
             </div>
             
             {/* Progress Bar */}
             <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-orange-400 to-amber-400 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500"
                 style={{ width: `${(booksRead / 3) * 100}%` }}
               />
             </div>
@@ -100,7 +100,7 @@ export function CompleteBooksModal({ isOpen, onClose, booksRead }: CompleteBooks
           {/* Action Button */}
           <button
             onClick={onClose}
-            className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all flex items-center justify-center gap-2"
             data-testid="button-continue-reading"
           >
             <BookOpen className="h-4 w-4" />
