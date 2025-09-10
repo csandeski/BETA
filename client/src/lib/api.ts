@@ -38,6 +38,7 @@ class ApiClient {
     const options: RequestInit = {
       method,
       headers,
+      credentials: 'include', // IMPORTANTE: Enviar cookies com as requisições
     };
 
     if (data && method !== 'GET') {
