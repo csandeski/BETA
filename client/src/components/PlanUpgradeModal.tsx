@@ -305,11 +305,10 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
           <div className="flex items-center justify-between mb-4">
             {/* Professional Logo - using real logo image */}
             <div className="flex items-center gap-3">
-              <img 
-                src="/logo-beta-reader.png" 
-                alt="Beta Reader Brasil" 
-                className="h-12 w-auto"
-              />
+              <div className="text-green-600 font-bold text-xl">Beta Reader Brasil</div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">Beta Reader Brasil</h1>
+              </div>
             </div>
             <button
               onClick={onClose}

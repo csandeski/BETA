@@ -49,11 +49,17 @@ export default function Home() {
         <div className="px-4 py-3">
           <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
-              <img 
-                src="/logo-beta-reader.png" 
-                alt="Beta Reader Brasil" 
-                className="h-10 w-auto"
-              />
+              <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold">
+                BR
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">
+                  Beta Reader Brasil
+                </h1>
+                <p className="text-[9px] text-gray-500 font-medium">
+                  PLATAFORMA OFICIAL DE LEITURA
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -373,7 +379,7 @@ export default function Home() {
             Cadastro gratuito • Sem mensalidade
           </p>
           
-          <div>
+          <div className="space-y-3">
             <Button 
               onClick={handleStartNow}
               className="w-full py-5 text-base font-bold bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl shadow-xl transition-all"
@@ -381,6 +387,14 @@ export default function Home() {
             >
               Criar Conta Grátis
               <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button 
+              onClick={handleLogin}
+              variant="outline"
+              className="w-full py-5 text-base font-bold border-2 border-gray-300 bg-white text-gray-700 rounded-2xl transition-all"
+              data-testid="button-final-login"
+            >
+              Entrar na Minha Conta
             </Button>
           </div>
 
