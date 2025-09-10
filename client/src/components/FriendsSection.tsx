@@ -308,9 +308,11 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
           <Users className="h-6 w-6" />
           <h2 className="text-xl font-bold">Amigos</h2>
           <div className="ml-auto flex items-center gap-2">
-            <div className="bg-white/20 backdrop-blur px-3 py-1 rounded-full text-sm font-medium">
-              {friends.length} amigos
-            </div>
+            {friends.length > 0 && (
+              <div className="bg-white/20 backdrop-blur px-3 py-1 rounded-full text-sm font-medium">
+                {friends.length} amigos
+              </div>
+            )}
             {pendingRequests.length > 0 && (
               <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
                 {pendingRequests.length} pendentes
@@ -332,7 +334,7 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
           data-testid="tab-friends"
         >
           <UserCheck className="h-4 w-4" />
-          Amigos ({friends.length})
+          Amigos{friends.length > 0 && ` (${friends.length})`}
         </button>
         <button
           onClick={() => setActiveTab('pending')}
@@ -369,14 +371,18 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
         {activeTab === 'friends' && (
           <div>
             {friends.length === 0 ? (
-              <div className="text-center py-8">
-                <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">Você ainda não tem amigos</p>
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <Users className="h-10 w-10 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Você ainda não tem amigos</h3>
+                <p className="text-sm text-gray-500 mb-6 px-4">Adicione amigos para compartilhar suas conquistas de leitura!</p>
                 <button
                   onClick={() => setActiveTab('add')}
-                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium rounded-full hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg"
                   data-testid="button-add-first-friend"
                 >
+                  <UserPlus className="h-4 w-4 inline mr-2" />
                   Adicionar primeiro amigo
                 </button>
               </div>
@@ -387,7 +393,7 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
                   <div>
                     <h3 className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-2">
                       <Circle className="h-3 w-3 fill-green-500 text-green-500" />
-                      Online ({onlineFriends.length})
+                      Online{onlineFriends.length > 0 && ` (${onlineFriends.length})`}
                     </h3>
                     <div className="space-y-2">
                       {onlineFriends.map((friend) => (
@@ -433,7 +439,7 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
                   <div>
                     <h3 className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-2">
                       <Circle className="h-3 w-3 text-gray-400" />
-                      Offline ({offlineFriends.length})
+                      Offline{offlineFriends.length > 0 && ` (${offlineFriends.length})`}
                     </h3>
                     <div className="space-y-2">
                       {offlineFriends.map((friend) => (
@@ -485,9 +491,12 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
         {activeTab === 'pending' && (
           <div>
             {pendingRequests.length === 0 ? (
-              <div className="text-center py-8">
-                <Clock className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">Nenhuma solicitação pendente</p>
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <Clock className="h-10 w-10 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Nenhuma solicitação pendente</h3>
+                <p className="text-sm text-gray-500 px-4">Quando alguém quiser ser seu amigo, aparecerá aqui</p>
               </div>
             ) : (
               <div className="space-y-3">
