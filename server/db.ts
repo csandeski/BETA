@@ -13,11 +13,6 @@ let db: ReturnType<typeof drizzle> | null = null;
 function getDatabase() {
   if (!db) {
     if (!process.env.DATABASE_URL) {
-      // Em desenvolvimento, pode continuar sem banco de dados
-      if (process.env.NODE_ENV === 'development') {
-        console.warn("DATABASE_URL not set - database features will be disabled");
-        return null;
-      }
       throw new Error(
         "DATABASE_URL must be set. Did you forget to provision a database?",
       );
