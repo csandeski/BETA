@@ -1149,7 +1149,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Digite seu nome completo"
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       data-testid="input-full-name"
                     />
                   </div>
@@ -1166,7 +1166,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="seu@email.com"
-                        className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="w-full pl-10 pr-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         data-testid="input-email"
                       />
                     </div>
@@ -1185,7 +1185,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
                         onChange={(e) => setCpf(formatCPF(e.target.value))}
                         placeholder="000.000.000-00"
                         maxLength={14}
-                        className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="w-full pl-10 pr-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         data-testid="input-cpf"
                       />
                     </div>
@@ -1201,7 +1201,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
                 </h4>
                 
                 <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-500 relative">
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute -top-2 right-2">
                     <span className="px-2 py-1 bg-green-600 text-white text-[10px] font-bold rounded-full">
                       DISPONÍVEL
                     </span>
@@ -1255,7 +1255,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
               {/* Back Button */}
               <button
                 onClick={() => setStep(5)}
-                className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-all"
+                className="w-auto px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-200 transition-all mx-auto block"
                 disabled={isProcessing}
                 data-testid="button-back-payment"
               >
