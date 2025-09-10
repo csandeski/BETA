@@ -47,13 +47,11 @@ export default function Home() {
       {/* Mobile Optimized Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-green-100/50">
         <div className="px-4 py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
-              <img 
-                src="/logo-beta-reader.png" 
-                alt="Beta Reader Brasil" 
-                className="h-8 w-auto"
-              />
+              <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold">
+                BR
+              </div>
               <div>
                 <h1 className="text-lg font-bold text-gray-900">
                   Beta Reader Brasil
@@ -63,13 +61,6 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <button 
-              onClick={handleLogin}
-              className="px-3 py-1.5 text-sm font-semibold text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-all"
-              data-testid="button-header-login"
-            >
-              Entrar
-            </button>
           </div>
         </div>
       </header>
@@ -118,23 +109,19 @@ export default function Home() {
           </div>
         </div>
 
-        {/* CTA Buttons - Stacked on Mobile */}
-        <div className="space-y-3 mb-6">
+        {/* CTA Button - 3D Effect */}
+        <div className="mb-6">
           <Button 
             onClick={handleStartNow}
-            className="w-full py-5 text-base font-semibold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-2xl shadow-lg transition-all"
+            className="w-full py-7 text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-2xl shadow-2xl transition-all transform hover:scale-105 hover:-translate-y-1"
+            style={{
+              boxShadow: '0 10px 25px -5px rgba(34, 197, 94, 0.5), 0 10px 10px -5px rgba(34, 197, 94, 0.04)',
+              transform: 'perspective(500px) rotateX(5deg)',
+            }}
             data-testid="button-start-now"
           >
             Começar Agora
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <Button 
-            onClick={handleLogin}
-            variant="outline"
-            className="w-full py-5 text-base font-semibold border-2 border-gray-300 bg-white text-gray-700 rounded-2xl hover:bg-gray-100 transition-all"
-            data-testid="button-login"
-          >
-            Já tenho conta
+            <ArrowRight className="ml-2 h-6 w-6" />
           </Button>
         </div>
 
