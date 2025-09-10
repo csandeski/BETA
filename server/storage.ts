@@ -27,7 +27,7 @@ import {
   type UserOnlineStatus,
   type InsertUserOnlineStatus,
 } from "@shared/schema";
-import { db } from "./db";
+import { db as getDb } from "./db";
 import { eq, and, desc, gte, sql } from "drizzle-orm";
 
 export interface IStorage {
@@ -79,26 +79,372 @@ export interface IStorage {
   updateOnlineStatus(userId: string, isOnline: boolean): Promise<void>;
 }
 
+// Memory storage fallback when database is not available
+class MemoryStorage implements IStorage {
+  private users: Map<string, User> = new Map();
+  private books: Map<string, Book> = new Map();
+  private booksCompleted: Map<string, BookCompleted[]> = new Map();
+  private transactions: Map<string, Transaction[]> = new Map();
+  private userStats: Map<string, UserStats> = new Map();
+  private utmTracking: Map<string, UserUtmTracking> = new Map();
+  private readingProgress: Map<string, ReadingProgress> = new Map();
+  private friendships: Friendship[] = [];
+  private onlineStatus: Map<string, boolean> = new Map();
+
+  constructor() {
+    console.warn("Using in-memory storage - data will not persist!");
+    this.initDefaultBooks();
+  }
+
+  private initDefaultBooks() {
+    // Initialize with some default books
+    const defaultBooks: Book[] = [
+      {
+        id: "1",
+        slug: "o-poder-do-habito",
+        title: "O Poder do Hábito",
+        author: "Charles Duhigg",
+        coverImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400",
+        summary: "Descubra como os hábitos funcionam e como mudá-los.",
+        totalPages: 408,
+        estimatedTime: "6-8 horas",
+        difficulty: "intermediate",
+        tags: ["Psicologia", "Desenvolvimento Pessoal"],
+        rating: 4.5,
+        totalRatings: 1250,
+        value: 3.5,
+        questions: [],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+    
+    defaultBooks.forEach(book => {
+      this.books.set(book.slug, book);
+    });
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(u => u.email === email);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const user: User = {
+      ...insertUser,
+      id: insertUser.id || Math.random().toString(36),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as User;
+    
+    this.users.set(user.id, user);
+    this.userStats.set(user.id, {
+      id: Math.random().toString(36),
+      userId: user.id,
+      totalEarnings: 0,
+      totalWithdrawals: 0,
+      currentBalance: 0,
+      booksCompleted: 0,
+      booksInProgress: 0,
+      totalReadingTime: 0,
+      averageRating: 0,
+      lastActiveAt: new Date(),
+      currentStreak: 0,
+      longestStreak: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    
+    return user;
+  }
+
+  async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updated = { ...user, ...data, updatedAt: new Date() };
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  async getAllBooks(): Promise<Book[]> {
+    return Array.from(this.books.values()).filter(b => b.isActive);
+  }
+
+  async getBookBySlug(slug: string): Promise<Book | undefined> {
+    const book = this.books.get(slug);
+    return book?.isActive ? book : undefined;
+  }
+
+  async createBook(insertBook: InsertBook): Promise<Book> {
+    const book: Book = {
+      ...insertBook,
+      id: insertBook.id || Math.random().toString(36),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as Book;
+    
+    this.books.set(book.slug, book);
+    return book;
+  }
+
+  async getUserCompletedBooks(userId: string): Promise<BookCompleted[]> {
+    return this.booksCompleted.get(userId) || [];
+  }
+
+  async isBookCompleted(userId: string, bookSlug: string): Promise<boolean> {
+    const completed = this.booksCompleted.get(userId) || [];
+    return completed.some(b => b.bookSlug === bookSlug);
+  }
+
+  async completeBook(data: InsertBookCompleted): Promise<BookCompleted> {
+    const completed: BookCompleted = {
+      ...data,
+      id: Math.random().toString(36),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as BookCompleted;
+    
+    const userCompleted = this.booksCompleted.get(data.userId) || [];
+    userCompleted.push(completed);
+    this.booksCompleted.set(data.userId, userCompleted);
+    
+    return completed;
+  }
+
+  async getUserTransactions(userId: string): Promise<Transaction[]> {
+    return this.transactions.get(userId) || [];
+  }
+
+  async createTransaction(data: InsertTransaction): Promise<Transaction> {
+    const transaction: Transaction = {
+      ...data,
+      id: Math.random().toString(36),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as Transaction;
+    
+    const userTransactions = this.transactions.get(data.userId) || [];
+    userTransactions.push(transaction);
+    this.transactions.set(data.userId, userTransactions);
+    
+    return transaction;
+  }
+
+  async getUserStats(userId: string): Promise<UserStats | undefined> {
+    return this.userStats.get(userId);
+  }
+
+  async createOrUpdateUserStats(userId: string, data: Partial<UserStats>): Promise<UserStats> {
+    const existing = this.userStats.get(userId);
+    if (existing) {
+      const updated = { ...existing, ...data, updatedAt: new Date() };
+      this.userStats.set(userId, updated);
+      return updated;
+    }
+    
+    const stats: UserStats = {
+      ...data,
+      id: Math.random().toString(36),
+      userId,
+      totalEarnings: data.totalEarnings || 0,
+      totalWithdrawals: data.totalWithdrawals || 0,
+      currentBalance: data.currentBalance || 0,
+      booksCompleted: data.booksCompleted || 0,
+      booksInProgress: data.booksInProgress || 0,
+      totalReadingTime: data.totalReadingTime || 0,
+      averageRating: data.averageRating || 0,
+      lastActiveAt: new Date(),
+      currentStreak: data.currentStreak || 0,
+      longestStreak: data.longestStreak || 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as UserStats;
+    
+    this.userStats.set(userId, stats);
+    return stats;
+  }
+
+  async updateUserBalance(userId: string, amount: number, type: 'add' | 'subtract'): Promise<void> {
+    const stats = this.userStats.get(userId);
+    if (!stats) return;
+    
+    const newBalance = type === 'add' 
+      ? stats.currentBalance + amount 
+      : stats.currentBalance - amount;
+    
+    this.userStats.set(userId, {
+      ...stats,
+      currentBalance: Math.max(0, newBalance),
+      updatedAt: new Date()
+    });
+  }
+
+  async saveUserUtmData(userId: string, data: InsertUserUtmTracking): Promise<UserUtmTracking> {
+    const tracking: UserUtmTracking = {
+      ...data,
+      id: Math.random().toString(36),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as UserUtmTracking;
+    
+    this.utmTracking.set(userId, tracking);
+    return tracking;
+  }
+
+  async getUserUtmData(userId: string): Promise<UserUtmTracking | undefined> {
+    return this.utmTracking.get(userId);
+  }
+
+  async updateUtmConversion(userId: string, plan: string): Promise<void> {
+    const tracking = this.utmTracking.get(userId);
+    if (!tracking) return;
+    
+    this.utmTracking.set(userId, {
+      ...tracking,
+      hasConverted: true,
+      conversionPlan: plan,
+      conversionDate: new Date(),
+      updatedAt: new Date()
+    });
+  }
+
+  async saveReadingProgress(data: InsertReadingProgress): Promise<ReadingProgress> {
+    const progress: ReadingProgress = {
+      ...data,
+      id: Math.random().toString(36),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as ReadingProgress;
+    
+    const key = `${data.userId}-${data.bookSlug}`;
+    this.readingProgress.set(key, progress);
+    return progress;
+  }
+
+  async getReadingProgress(userId: string, bookSlug: string): Promise<ReadingProgress | undefined> {
+    const key = `${userId}-${bookSlug}`;
+    return this.readingProgress.get(key);
+  }
+
+  async updateReadingProgress(userId: string, bookSlug: string, progress: number, timeSpent: number): Promise<void> {
+    const key = `${userId}-${bookSlug}`;
+    const existing = this.readingProgress.get(key);
+    if (!existing) return;
+    
+    this.readingProgress.set(key, {
+      ...existing,
+      currentPage: progress,
+      timeSpent: existing.timeSpent + timeSpent,
+      lastReadAt: new Date(),
+      updatedAt: new Date()
+    });
+  }
+
+  async getFriendship(userId: string, friendId: string): Promise<Friendship | undefined> {
+    return this.friendships.find(
+      f => (f.userId === userId && f.friendId === friendId) ||
+           (f.userId === friendId && f.friendId === userId && f.status === 'accepted')
+    );
+  }
+
+  async createFriendshipRequest(userId: string, friendId: string): Promise<Friendship> {
+    const friendship: Friendship = {
+      id: Math.random().toString(36),
+      userId,
+      friendId,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.friendships.push(friendship);
+    return friendship;
+  }
+
+  async getPendingFriendRequests(userId: string): Promise<any[]> {
+    return this.friendships
+      .filter(f => f.friendId === userId && f.status === 'pending')
+      .map(f => ({ 
+        ...f, 
+        user: this.users.get(f.userId) 
+      }));
+  }
+
+  async getUserFriends(userId: string): Promise<any[]> {
+    const accepted = this.friendships.filter(
+      f => f.status === 'accepted' && (f.userId === userId || f.friendId === userId)
+    );
+    
+    return accepted.map(f => {
+      const friendId = f.userId === userId ? f.friendId : f.userId;
+      return { 
+        ...f, 
+        user: this.users.get(friendId),
+        isOnline: this.onlineStatus.get(friendId) || false
+      };
+    });
+  }
+
+  async acceptFriendRequest(friendshipId: string, userId: string): Promise<void> {
+    const friendship = this.friendships.find(f => f.id === friendshipId);
+    if (friendship && friendship.friendId === userId) {
+      friendship.status = 'accepted';
+      friendship.updatedAt = new Date();
+    }
+  }
+
+  async rejectFriendRequest(friendshipId: string, userId: string): Promise<void> {
+    const index = this.friendships.findIndex(f => f.id === friendshipId);
+    if (index !== -1 && this.friendships[index].friendId === userId) {
+      this.friendships.splice(index, 1);
+    }
+  }
+
+  async removeFriend(userId: string, friendId: string): Promise<void> {
+    this.friendships = this.friendships.filter(
+      f => !((f.userId === userId && f.friendId === friendId) ||
+             (f.userId === friendId && f.friendId === userId))
+    );
+  }
+
+  async updateOnlineStatus(userId: string, isOnline: boolean): Promise<void> {
+    this.onlineStatus.set(userId, isOnline);
+  }
+}
+
 export class DatabaseStorage implements IStorage {
+  private getDb() {
+    const db = getDb();
+    if (!db) {
+      throw new Error("Database not available");
+    }
+    return db;
+  }
+
   // User operations
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const [user] = await this.getDb().select().from(users).where(eq(users.id, id));
     return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const [user] = await this.getDb().select().from(users).where(eq(users.email, email));
     return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
+    const [user] = await getDb()
       .insert(users)
       .values(insertUser)
       .returning();
       
     // Create initial stats for the user
-    await db.insert(userStats).values({
+    await this.getDb().insert(userStats).values({
       userId: user.id,
     });
     
@@ -106,7 +452,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
-    const [updated] = await db
+    const [updated] = await this.getDb()
       .update(users)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(users.id, id))
@@ -116,7 +462,7 @@ export class DatabaseStorage implements IStorage {
 
   // Books operations
   async getAllBooks(): Promise<Book[]> {
-    return await db
+    return await this.getDb()
       .select()
       .from(books)
       .where(eq(books.isActive, true))
@@ -124,7 +470,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBookBySlug(slug: string): Promise<Book | undefined> {
-    const [book] = await db
+    const [book] = await this.getDb()
       .select()
       .from(books)
       .where(and(eq(books.slug, slug), eq(books.isActive, true)));
@@ -132,7 +478,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBook(insertBook: InsertBook): Promise<Book> {
-    const [book] = await db
+    const [book] = await this.getDb()
       .insert(books)
       .values(insertBook)
       .returning();
@@ -141,7 +487,7 @@ export class DatabaseStorage implements IStorage {
 
   // Book completion operations
   async getUserCompletedBooks(userId: string): Promise<BookCompleted[]> {
-    return await db
+    return await this.getDb()
       .select()
       .from(booksCompleted)
       .where(eq(booksCompleted.userId, userId))
@@ -149,7 +495,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async isBookCompleted(userId: string, bookSlug: string): Promise<boolean> {
-    const [result] = await db
+    const [result] = await this.getDb()
       .select()
       .from(booksCompleted)
       .where(
@@ -163,7 +509,7 @@ export class DatabaseStorage implements IStorage {
 
   async completeBook(data: InsertBookCompleted): Promise<BookCompleted> {
     // Start a transaction to ensure data consistency
-    return await db.transaction(async (tx) => {
+    return await this.getDb().transaction(async (tx) => {
       // Check if book already completed
       const [existing] = await tx
         .select()
@@ -226,7 +572,7 @@ export class DatabaseStorage implements IStorage {
 
   // Transaction operations
   async getUserTransactions(userId: string): Promise<Transaction[]> {
-    return await db
+    return await this.getDb()
       .select()
       .from(transactions)
       .where(eq(transactions.userId, userId))
@@ -234,7 +580,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTransaction(data: InsertTransaction): Promise<Transaction> {
-    const [transaction] = await db
+    const [transaction] = await this.getDb()
       .insert(transactions)
       .values(data)
       .returning();
@@ -243,7 +589,7 @@ export class DatabaseStorage implements IStorage {
 
   // Stats operations
   async getUserStats(userId: string): Promise<UserStats | undefined> {
-    const [stats] = await db
+    const [stats] = await this.getDb()
       .select()
       .from(userStats)
       .where(eq(userStats.userId, userId));
@@ -258,12 +604,12 @@ export class DatabaseStorage implements IStorage {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     
     // Count books for each period
-    const [totalBooksResult] = await db
+    const [totalBooksResult] = await this.getDb()
       .select({ count: sql`count(*)` })
       .from(booksCompleted)
       .where(eq(booksCompleted.userId, userId));
       
-    const [todayBooksResult] = await db
+    const [todayBooksResult] = await this.getDb()
       .select({ count: sql`count(*)` })
       .from(booksCompleted)
       .where(
@@ -273,7 +619,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
       
-    const [weekBooksResult] = await db
+    const [weekBooksResult] = await this.getDb()
       .select({ count: sql`count(*)` })
       .from(booksCompleted)
       .where(
@@ -283,7 +629,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
       
-    const [monthBooksResult] = await db
+    const [monthBooksResult] = await this.getDb()
       .select({ count: sql`count(*)` })
       .from(booksCompleted)
       .where(
@@ -294,7 +640,7 @@ export class DatabaseStorage implements IStorage {
       );
       
     // Calculate earnings for each period
-    const [todayEarningsResult] = await db
+    const [todayEarningsResult] = await this.getDb()
       .select({ sum: sql<number>`COALESCE(SUM(amount), 0)` })
       .from(transactions)
       .where(
@@ -305,7 +651,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
       
-    const [weekEarningsResult] = await db
+    const [weekEarningsResult] = await this.getDb()
       .select({ sum: sql<number>`COALESCE(SUM(amount), 0)` })
       .from(transactions)
       .where(
@@ -316,7 +662,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
       
-    const [monthEarningsResult] = await db
+    const [monthEarningsResult] = await this.getDb()
       .select({ sum: sql<number>`COALESCE(SUM(amount), 0)` })
       .from(transactions)
       .where(
@@ -328,13 +674,13 @@ export class DatabaseStorage implements IStorage {
       );
       
     // Calculate average rating
-    const [avgRatingResult] = await db
+    const [avgRatingResult] = await this.getDb()
       .select({ avg: sql<number>`COALESCE(AVG(rating), 0)` })
       .from(booksCompleted)
       .where(eq(booksCompleted.userId, userId));
       
     // Calculate difficulty counts
-    const completedBooks = await db
+    const completedBooks = await this.getDb()
       .select()
       .from(booksCompleted)
       .where(eq(booksCompleted.userId, userId));
@@ -352,7 +698,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Get user for monthly goal
-    const [user] = await db
+    const [user] = await this.getDb()
       .select()
       .from(users)
       .where(eq(users.id, userId));
@@ -379,20 +725,20 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date(),
     };
     
-    const [existing] = await db
+    const [existing] = await this.getDb()
       .select()
       .from(userStats)
       .where(eq(userStats.userId, userId));
       
     if (existing) {
-      const [updated] = await db
+      const [updated] = await this.getDb()
         .update(userStats)
         .set(statsData)
         .where(eq(userStats.userId, userId))
         .returning();
       return updated;
     } else {
-      const [created] = await db
+      const [created] = await this.getDb()
         .insert(userStats)
         .values({ ...statsData, userId })
         .returning();
@@ -401,20 +747,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrUpdateUserStats(userId: string, data: Partial<UserStats>): Promise<UserStats> {
-    const [existing] = await db
+    const [existing] = await this.getDb()
       .select()
       .from(userStats)
       .where(eq(userStats.userId, userId));
 
     if (existing) {
-      const [updated] = await db
+      const [updated] = await this.getDb()
         .update(userStats)
         .set({ ...data, updatedAt: new Date() })
         .where(eq(userStats.userId, userId))
         .returning();
       return updated;
     } else {
-      const [created] = await db
+      const [created] = await this.getDb()
         .insert(userStats)
         .values({ ...data, userId })
         .returning();
@@ -423,7 +769,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserBalance(userId: string, amount: number, type: 'add' | 'subtract'): Promise<void> {
-    const [user] = await db
+    const [user] = await this.getDb()
       .select()
       .from(users)
       .where(eq(users.id, userId));
@@ -435,7 +781,7 @@ export class DatabaseStorage implements IStorage {
     
     if (newBalance < 0) throw new Error("Insufficient balance");
 
-    await db
+    await this.getDb()
       .update(users)
       .set({
         balance: newBalance.toString(),
@@ -447,7 +793,7 @@ export class DatabaseStorage implements IStorage {
   // UTM tracking operations
   async saveUserUtmData(userId: string, data: InsertUserUtmTracking): Promise<UserUtmTracking> {
     // Check if UTM data already exists for user
-    const [existing] = await db
+    const [existing] = await this.getDb()
       .select()
       .from(userUtmTracking)
       .where(eq(userUtmTracking.userId, userId));
@@ -455,7 +801,7 @@ export class DatabaseStorage implements IStorage {
     if (existing) {
       // Update only if new data has more complete UTM params
       if (data.utmSource || data.utmCampaign || data.fbclid) {
-        const [updated] = await db
+        const [updated] = await this.getDb()
           .update(userUtmTracking)
           .set({
             ...data,
@@ -468,7 +814,7 @@ export class DatabaseStorage implements IStorage {
       return existing;
     }
     
-    const [tracking] = await db
+    const [tracking] = await this.getDb()
       .insert(userUtmTracking)
       .values({
         ...data,
@@ -479,7 +825,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserUtmData(userId: string): Promise<UserUtmTracking | undefined> {
-    const [tracking] = await db
+    const [tracking] = await this.getDb()
       .select()
       .from(userUtmTracking)
       .where(eq(userUtmTracking.userId, userId));
@@ -487,7 +833,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUtmConversion(userId: string, plan: string): Promise<void> {
-    await db
+    await this.getDb()
       .update(userUtmTracking)
       .set({
         conversionDate: new Date(),
@@ -499,7 +845,7 @@ export class DatabaseStorage implements IStorage {
   // Reading progress operations
   async saveReadingProgress(data: InsertReadingProgress): Promise<ReadingProgress> {
     // Check if progress already exists
-    const [existing] = await db
+    const [existing] = await this.getDb()
       .select()
       .from(readingProgress)
       .where(
@@ -510,7 +856,7 @@ export class DatabaseStorage implements IStorage {
       );
     
     if (existing) {
-      const [updated] = await db
+      const [updated] = await this.getDb()
         .update(readingProgress)
         .set({
           ...data,
@@ -521,7 +867,7 @@ export class DatabaseStorage implements IStorage {
       return updated;
     }
     
-    const [progress] = await db
+    const [progress] = await this.getDb()
       .insert(readingProgress)
       .values(data)
       .returning();
@@ -529,7 +875,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getReadingProgress(userId: string, bookSlug: string): Promise<ReadingProgress | undefined> {
-    const [progress] = await db
+    const [progress] = await this.getDb()
       .select()
       .from(readingProgress)
       .where(
@@ -542,7 +888,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateReadingProgress(userId: string, bookSlug: string, progress: number, timeSpent: number): Promise<void> {
-    const [existing] = await db
+    const [existing] = await this.getDb()
       .select()
       .from(readingProgress)
       .where(
@@ -553,7 +899,7 @@ export class DatabaseStorage implements IStorage {
       );
     
     if (existing) {
-      await db
+      await this.getDb()
         .update(readingProgress)
         .set({
           progress,
@@ -563,7 +909,7 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(readingProgress.id, existing.id));
     } else {
-      await db
+      await this.getDb()
         .insert(readingProgress)
         .values({
           userId,
@@ -698,7 +1044,7 @@ export class DatabaseStorage implements IStorage {
   
   
   async getAllUsersWithStats(): Promise<any[]> {
-    const usersData = await db
+    const usersData = await this.getDb()
       .select({
         user: users,
         stats: userStats,
@@ -711,7 +1057,7 @@ export class DatabaseStorage implements IStorage {
 
   // Friendship operations
   async getFriendship(userId: string, friendId: string): Promise<Friendship | undefined> {
-    const [friendship] = await db
+    const [friendship] = await this.getDb()
       .select()
       .from(friendships)
       .where(
@@ -724,7 +1070,7 @@ export class DatabaseStorage implements IStorage {
     if (friendship) return friendship;
     
     // Check reverse direction
-    const [reverseFriendship] = await db
+    const [reverseFriendship] = await this.getDb()
       .select()
       .from(friendships)
       .where(
@@ -738,7 +1084,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createFriendshipRequest(userId: string, friendId: string): Promise<Friendship> {
-    const [friendship] = await db
+    const [friendship] = await this.getDb()
       .insert(friendships)
       .values({
         userId,
@@ -749,7 +1095,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     // Also create the reverse relationship for easier queries
-    await db
+    await this.getDb()
       .insert(friendships)
       .values({
         userId: friendId,
@@ -763,7 +1109,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPendingFriendRequests(userId: string): Promise<any[]> {
-    const requests = await db
+    const requests = await this.getDb()
       .select({
         friendship: friendships,
         requester: users,
@@ -782,7 +1128,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserFriends(userId: string): Promise<any[]> {
-    const friends = await db
+    const friends = await this.getDb()
       .select({
         friendship: friendships,
         friend: users,
@@ -803,7 +1149,7 @@ export class DatabaseStorage implements IStorage {
 
   async acceptFriendRequest(friendshipId: string, userId: string): Promise<void> {
     // Update both directions to accepted
-    await db
+    await this.getDb()
       .update(friendships)
       .set({
         status: 'accepted',
@@ -812,14 +1158,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(friendships.id, friendshipId));
     
     // Get the friendship to update the reverse
-    const [friendship] = await db
+    const [friendship] = await this.getDb()
       .select()
       .from(friendships)
       .where(eq(friendships.id, friendshipId));
     
     if (friendship) {
       // Update reverse friendship
-      await db
+      await this.getDb()
         .update(friendships)
         .set({
           status: 'accepted',
@@ -836,18 +1182,18 @@ export class DatabaseStorage implements IStorage {
 
   async rejectFriendRequest(friendshipId: string, userId: string): Promise<void> {
     // Delete both directions
-    const [friendship] = await db
+    const [friendship] = await this.getDb()
       .select()
       .from(friendships)
       .where(eq(friendships.id, friendshipId));
     
     if (friendship) {
-      await db
+      await this.getDb()
         .delete(friendships)
         .where(eq(friendships.id, friendshipId));
       
       // Delete reverse
-      await db
+      await this.getDb()
         .delete(friendships)
         .where(
           and(
@@ -860,7 +1206,7 @@ export class DatabaseStorage implements IStorage {
 
   async removeFriend(userId: string, friendId: string): Promise<void> {
     // Delete both directions
-    await db
+    await getDb()
       .delete(friendships)
       .where(
         and(
@@ -869,7 +1215,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
     
-    await db
+    await getDb()
       .delete(friendships)
       .where(
         and(
@@ -881,7 +1227,7 @@ export class DatabaseStorage implements IStorage {
 
   // Online status operations
   async updateOnlineStatus(userId: string, isOnline: boolean): Promise<void> {
-    await db
+    await getDb()
       .insert(userOnlineStatus)
       .values({
         userId,
@@ -898,4 +1244,14 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Choose the appropriate storage implementation based on database availability
+function createStorage(): IStorage {
+  const db = getDb();
+  if (!db) {
+    console.warn("DATABASE_URL not configured - using in-memory storage");
+    return new MemoryStorage();
+  }
+  return new DatabaseStorage();
+}
+
+export const storage = createStorage();
