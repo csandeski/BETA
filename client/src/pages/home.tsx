@@ -391,14 +391,6 @@ export default function Home() {
               Criar Conta Grátis
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button 
-              onClick={handleLogin}
-              variant="outline"
-              className="w-full py-5 text-base font-bold border-2 border-gray-300 bg-white text-gray-700 rounded-2xl transition-all"
-              data-testid="button-final-login"
-            >
-              Entrar na Minha Conta
-            </Button>
           </div>
 
           <div className="flex flex-col gap-2 mt-6 text-xs text-gray-600">
