@@ -25,6 +25,7 @@ export default function ProfilePage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
+  const [friendsData, setFriendsData] = useState<{friends: any[], onlineFriends: any[]}>({ friends: [], onlineFriends: [] });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,6 +37,18 @@ export default function ProfilePage() {
       setTempName(data?.fullName || "");
       setTempEmail(data?.email || "");
       setTempPhone(data?.phone || "");
+      
+      // Load friends data
+      try {
+        const friendsResponse = await apiClient.getUserFriends();
+        const onlineFriends = friendsResponse.filter((f: any) => f.onlineStatus?.isOnline);
+        setFriendsData({ 
+          friends: friendsResponse, 
+          onlineFriends 
+        });
+      } catch (error) {
+        console.error('Failed to load friends:', error);
+      }
     };
     
     loadData();
@@ -316,8 +329,10 @@ export default function ProfilePage() {
                   <div className="w-11 h-11 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
                     <Users className="h-5 w-5 text-white" />
                   </div>
-                  {/* Notification dot */}
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></div>
+                  {/* Notification dot - only show if there are friends */}
+                  {friendsData.friends.length > 0 && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></div>
+                  )}
                 </div>
                 
                 {/* Text content */}
@@ -334,34 +349,59 @@ export default function ProfilePage() {
               
               {/* Arrow and action */}
               <div className="flex items-center gap-1">
-                <div className="flex -space-x-2">
-                  {/* Friend avatars preview */}
-                  <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <span className="text-[8px] text-white font-bold">M</span>
+                {friendsData.friends.length > 0 && (
+                  <div className="flex -space-x-2">
+                    {/* Friend avatars preview - show up to 3 */}
+                    {friendsData.friends.slice(0, 3).map((friend, index) => {
+                      const colors = [
+                        'from-purple-400 to-purple-500',
+                        'from-blue-400 to-blue-500',
+                        'from-amber-400 to-amber-500'
+                      ];
+                      return (
+                        <div 
+                          key={friend.friendship.id}
+                          className={`w-6 h-6 bg-gradient-to-br ${colors[index % 3]} rounded-full border-2 border-white flex items-center justify-center`}
+                        >
+                          <span className="text-[8px] text-white font-bold">
+                            {friend.friend.fullName.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {friendsData.friends.length > 3 && (
+                      <div className="w-6 h-6 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full border-2 border-white flex items-center justify-center">
+                        <span className="text-[8px] text-white font-bold">+{friendsData.friends.length - 3}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <span className="text-[8px] text-white font-bold">J</span>
-                  </div>
-                  <div className="w-6 h-6 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <span className="text-[8px] text-white font-bold">A</span>
-                  </div>
-                </div>
+                )}
                 <ChevronRight className="h-5 w-5 text-green-600 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
             
             {/* Bottom info bar */}
-            <div className="mt-3 pt-3 border-t border-green-100 flex items-center justify-between">
-              <div className="flex items-center gap-4 text-[11px]">
-                <span className="flex items-center gap-1 text-gray-600">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  3 online
-                </span>
-                <span className="text-gray-500">•</span>
-                <span className="text-gray-600">12 amigos</span>
+            {friendsData.friends.length > 0 ? (
+              <div className="mt-3 pt-3 border-t border-green-100 flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-4 text-[11px]">
+                  {friendsData.onlineFriends.length > 0 && (
+                    <>
+                      <span className="flex items-center gap-1 text-gray-600">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        {friendsData.onlineFriends.length} online
+                      </span>
+                      <span className="text-gray-500">•</span>
+                    </>
+                  )}
+                  <span className="text-gray-600">{friendsData.friends.length} {friendsData.friends.length === 1 ? 'amigo' : 'amigos'}</span>
+                </div>
+                <span className="text-[10px] text-green-600 font-semibold">Ver todos →</span>
               </div>
-              <span className="text-[10px] text-green-600 font-semibold">Ver todos →</span>
-            </div>
+            ) : (
+              <div className="mt-3 pt-3 border-t border-green-100">
+                <p className="text-center text-xs text-gray-500">Adicione amigos para começar</p>
+              </div>
+            )}
           </div>
         </button>
       </section>
