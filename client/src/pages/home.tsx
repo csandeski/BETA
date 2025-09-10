@@ -49,17 +49,11 @@ export default function Home() {
         <div className="px-4 py-3">
           <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold">
-                BR
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900">
-                  Beta Reader Brasil
-                </h1>
-                <p className="text-[9px] text-gray-500 font-medium">
-                  PLATAFORMA OFICIAL DE LEITURA
-                </p>
-              </div>
+              <img 
+                src="/logo-beta-reader.png" 
+                alt="Beta Reader Brasil" 
+                className="h-10 w-auto"
+              />
             </div>
           </div>
         </div>

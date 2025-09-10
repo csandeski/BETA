@@ -305,10 +305,11 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
           <div className="flex items-center justify-between mb-4">
             {/* Professional Logo - using real logo image */}
             <div className="flex items-center gap-3">
-              <div className="text-green-600 font-bold text-xl">Beta Reader Brasil</div>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900">Beta Reader Brasil</h1>
-              </div>
+              <img 
+                src="/logo-beta-reader.png" 
+                alt="Beta Reader Brasil" 
+                className="h-12 w-auto"
+              />
             </div>
             <button
               onClick={onClose}
@@ -412,7 +413,11 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
               {/* Company Info Card */}
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 border border-gray-200">
                 <div className="text-center mb-4">
-                  <div className="text-green-600 font-bold text-xl mx-auto mb-3">Beta Reader Brasil</div>
+                  <img 
+                    src="/logo-beta-reader.png" 
+                    alt="Beta Reader Brasil" 
+                    className="h-12 w-auto mx-auto mb-3"
+                  />
                   <h3 className="text-lg font-bold text-gray-900 mb-2">
                     Uma Empresa Séria e Consolidada
                   </h3>
@@ -1137,7 +1142,11 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             <div className="space-y-4">
               {/* Logo Header */}
               <div className="flex justify-center mb-2">
-                <div className="text-green-600 font-bold text-xl">Beta Reader Brasil</div>
+                <img 
+                  src="/logo-beta-reader.png" 
+                  alt="Beta Reader Brasil" 
+                  className="h-12 w-auto"
+                />
               </div>
               
               {/* Combined QR Code and Copy Section */}

@@ -72,7 +72,11 @@ export default function Confirm() {
       <div className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="text-green-600 font-bold text-lg">Beta Reader Brasil</div>
+            <img 
+              src="/logo-beta-reader.png" 
+              alt="Beta Reader Brasil" 
+              className="h-10 w-auto"
+            />
             <div className="bg-red-500 text-white px-3 py-1 rounded-full flex items-center gap-2 animate-pulse">
               <Timer className="h-4 w-4" />
               <span className="font-bold text-sm">
