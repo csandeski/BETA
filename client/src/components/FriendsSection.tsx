@@ -301,12 +301,12 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
   const offlineFriends = friends.filter(f => !f.onlineStatus?.isOnline);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="bg-white sm:rounded-2xl sm:shadow-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6">
+      <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-4 sm:p-6">
         <div className="flex items-center gap-3 text-white">
-          <Users className="h-6 w-6" />
-          <h2 className="text-xl font-bold">Amigos</h2>
+          <Users className="h-5 w-5 sm:h-6 sm:w-6" />
+          <h2 className="text-lg sm:text-xl font-bold">Amigos</h2>
           <div className="ml-auto flex items-center gap-2">
             {friends.length > 0 && (
               <div className="bg-white/20 backdrop-blur px-3 py-1 rounded-full text-sm font-medium">
@@ -326,7 +326,7 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
       <div className="flex border-b">
         <button
           onClick={() => setActiveTab('friends')}
-          className={`flex-1 py-3 px-4 font-medium transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-2 sm:px-4 text-sm sm:text-base font-medium transition-colors flex items-center justify-center gap-1 sm:gap-2 ${
             activeTab === 'friends' 
               ? 'text-green-600 border-b-2 border-green-600 bg-green-50' 
               : 'text-gray-600 hover:bg-gray-50'
@@ -334,11 +334,13 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
           data-testid="tab-friends"
         >
           <UserCheck className="h-4 w-4" />
-          Amigos{friends.length > 0 && ` (${friends.length})`}
+          <span className="hidden sm:inline">Amigos</span>
+          <span className="sm:hidden">Amigos</span>
+          {friends.length > 0 && <span className="hidden sm:inline"> ({friends.length})</span>}
         </button>
         <button
           onClick={() => setActiveTab('pending')}
-          className={`flex-1 py-3 px-4 font-medium transition-colors flex items-center justify-center gap-2 relative ${
+          className={`flex-1 py-3 px-2 sm:px-4 text-sm sm:text-base font-medium transition-colors flex items-center justify-center gap-1 sm:gap-2 relative ${
             activeTab === 'pending' 
               ? 'text-green-600 border-b-2 border-green-600 bg-green-50' 
               : 'text-gray-600 hover:bg-gray-50'
@@ -348,12 +350,12 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
           <Clock className="h-4 w-4" />
           Pendentes
           {pendingRequests.length > 0 && (
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="absolute top-2 right-1 sm:right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
           )}
         </button>
         <button
           onClick={() => setActiveTab('add')}
-          className={`flex-1 py-3 px-4 font-medium transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3 px-2 sm:px-4 text-sm sm:text-base font-medium transition-colors flex items-center justify-center gap-1 sm:gap-2 ${
             activeTab === 'add' 
               ? 'text-green-600 border-b-2 border-green-600 bg-green-50' 
               : 'text-gray-600 hover:bg-gray-50'
@@ -366,20 +368,20 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Friends Tab */}
         {activeTab === 'friends' && (
           <div>
             {friends.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <Users className="h-10 w-10 text-gray-400" />
+              <div className="text-center py-8 sm:py-12">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <Users className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Você ainda não tem amigos</h3>
-                <p className="text-sm text-gray-500 mb-6 px-4">Adicione amigos para compartilhar suas conquistas de leitura!</p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Você ainda não tem amigos</h3>
+                <p className="text-xs sm:text-sm text-gray-500 mb-6 px-4">Adicione amigos para compartilhar suas conquistas de leitura!</p>
                 <button
                   onClick={() => setActiveTab('add')}
-                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium rounded-full hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg"
+                  className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm sm:text-base font-medium rounded-full hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg"
                   data-testid="button-add-first-friend"
                 >
                   <UserPlus className="h-4 w-4 inline mr-2" />
@@ -491,12 +493,12 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
         {activeTab === 'pending' && (
           <div>
             {pendingRequests.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <Clock className="h-10 w-10 text-gray-400" />
+              <div className="text-center py-8 sm:py-12">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Nenhuma solicitação pendente</h3>
-                <p className="text-sm text-gray-500 px-4">Quando alguém quiser ser seu amigo, aparecerá aqui</p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-2">Nenhuma solicitação pendente</h3>
+                <p className="text-xs sm:text-sm text-gray-500 px-4">Quando alguém quiser ser seu amigo, aparecerá aqui</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -547,7 +549,7 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email do amigo
                 </label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="flex-1 relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input
@@ -562,7 +564,7 @@ export default function FriendsSection({ isModalOpen, onModalClose }: FriendsSec
                   <button
                     onClick={sendFriendRequest}
                     disabled={isLoading || !friendEmail.trim()}
-                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     data-testid="button-send-friend-request"
                   >
                     {isLoading ? (

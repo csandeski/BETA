@@ -765,8 +765,8 @@ export default function ProfilePage() {
       
       {/* Friends Modal */}
       {showFriendsModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-0 sm:p-4 z-50">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-lg font-semibold">Amigos</h2>
               <button
@@ -777,7 +777,7 @@ export default function ProfilePage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="overflow-y-auto max-h-[calc(90vh-4rem)]">
+            <div className="overflow-y-auto h-[calc(100vh-4rem)] sm:h-auto sm:max-h-[calc(90vh-4rem)]">
               <FriendsSection 
                 isModalOpen={showFriendsModal}
                 onModalClose={() => setShowFriendsModal(false)}
