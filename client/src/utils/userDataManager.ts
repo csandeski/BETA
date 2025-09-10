@@ -88,43 +88,30 @@ class UserDataManager {
     if (!this.userId) return;
     
     try {
-      // Load everything from database
+      // ALWAYS load everything from database - no localStorage
       const dbUser = await apiClient.getUserData(this.userId);
       if (dbUser) {
+        // Use database data as the single source of truth
         this.userData = dbUser;
+        console.log('Loaded user data from database:', {
+          totalBooksRead: dbUser.stats?.totalBooksRead,
+          balance: dbUser.balance,
+          booksCompleted: dbUser.booksCompleted?.length
+        });
       } else {
-        // Create default user data structure if not in database
+        console.warn('No user data found in database');
+        // Only create basic structure if completely missing
         const user = await apiClient.getCurrentUser();
         if (user) {
           this.userData = this.createFullUserData(user);
-          await this.saveUserData();
         }
       }
     } catch (error) {
       console.error('Error loading user from database:', error);
-      // Create minimal user data structure
-      const user = await apiClient.getCurrentUser();
-      if (user) {
-        this.userData = this.createFullUserData(user);
-      }
+      throw error; // Don't create fake data on error
     }
   }
 
-  private mergeUserData(dbData: any, localData: any): UserData {
-    // Merge database data with local data, preferring database
-    const merged = {
-      ...localData,
-      ...dbData,
-      booksCompleted: dbData.booksCompleted || localData.booksCompleted || [],
-      transactions: dbData.transactions || localData.transactions || [],
-      completedBooks: dbData.completedBooks || localData.completedBooks || [],
-      stats: {
-        ...localData.stats,
-        ...dbData.stats
-      }
-    };
-    return merged;
-  }
 
   private createFullUserData(basicData: any): UserData {
     const now = new Date();
@@ -215,116 +202,11 @@ class UserDataManager {
     rating: number;
     difficulty?: string;
   }): Promise<void> {
-    if (!this.userData) return;
-
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    const weekStart = new Date(now);
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    // Ensure arrays are initialized
-    if (!this.userData.booksCompleted) {
-      this.userData.booksCompleted = [];
-    }
-    if (!this.userData.completedBooks) {
-      this.userData.completedBooks = [];
-    }
-    if (!this.userData.transactions) {
-      this.userData.transactions = [];
-    }
-
-    // Add book to completed list
-    const bookRead: BookRead = {
-      id: `book_${Date.now()}`,
-      ...bookData,
-      completedAt: now.toISOString()
-    };
-    
-    this.userData.booksCompleted.push(bookRead);
-    this.userData.completedBooks.push(bookData.bookSlug);
-    
-    // Add transaction
-    this.userData.transactions.push({
-      type: 'earning',
-      description: `${bookData.title} - Leitura completa`,
-      amount: bookData.reward,
-      date: now.toISOString()
-    });
-    
-    // Update difficulty counters
-    const stats = this.userData.stats as any;
-    if (bookData.difficulty === 'Fácil') {
-      stats.easyBooksCount = (stats.easyBooksCount || 0) + 1;
-    } else if (bookData.difficulty === 'Médio') {
-      stats.mediumBooksCount = (stats.mediumBooksCount || 0) + 1;
-    } else if (bookData.difficulty === 'Difícil') {
-      stats.hardBooksCount = (stats.hardBooksCount || 0) + 1;
-    }
-    
-    // Update balance and total earnings
-    this.userData.balance += bookData.reward;
-    this.userData.totalEarnings += bookData.reward;
-    
-    // Update stats
-    this.userData.stats.totalEarnings += bookData.reward;
-    this.userData.stats.totalBooksRead += 1;
-    
-    // Update today's earnings
-    const todayBooks = this.userData.booksCompleted.filter(b => 
-      b.completedAt.split('T')[0] === today
-    );
-    this.userData.stats.todayEarnings = todayBooks.reduce((sum, b) => sum + b.reward, 0);
-    this.userData.stats.todayBooksRead = todayBooks.length;
-    
-    // Update week earnings
-    const weekBooks = this.userData.booksCompleted.filter(b => 
-      new Date(b.completedAt) >= weekStart
-    );
-    this.userData.stats.weekEarnings = weekBooks.reduce((sum, b) => sum + b.reward, 0);
-    
-    // Update month earnings
-    const monthBooks = this.userData.booksCompleted.filter(b => 
-      new Date(b.completedAt) >= monthStart
-    );
-    this.userData.stats.monthEarnings = monthBooks.reduce((sum, b) => sum + b.reward, 0);
-    
-    // Update progress percentages
-    this.userData.stats.weeklyProgress = Math.min(100, 
-      (this.userData.stats.weekEarnings / this.userData.stats.weeklyGoal) * 100
-    );
-    this.userData.stats.monthlyProgress = Math.min(100,
-      (this.userData.stats.monthEarnings / this.userData.stats.monthlyGoal) * 100
-    );
-    
-    // Update average rating
-    const totalRatings = this.userData.booksCompleted.reduce((sum, b) => sum + b.rating, 0);
-    this.userData.stats.averageRating = totalRatings / this.userData.booksCompleted.length;
-    
-    // Update last 7 days chart
-    const last7Days = this.generateLastSevenDays();
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
-      const dateStr = date.toISOString().split('T')[0];
-      
-      const dayBooks = this.userData.booksCompleted.filter(b =>
-        b.completedAt.split('T')[0] === dateStr
-      );
-      
-      last7Days[i].valor = dayBooks.reduce((sum, b) => sum + b.reward, 0);
-    }
-    this.userData.stats.lastSevenDays = last7Days;
-    
-    // Check if can withdraw (3+ books)
-    if (this.userData.stats.totalBooksRead >= 3) {
-      this.userData.canWithdraw = true;
-    }
-    
-    // Book already saved to database via apiClient.completeBook()
-    // No need to save again here
-    
-    await this.saveUserData();
+    // Book completion is handled by the backend via apiClient.completeBook()
+    // This method is no longer needed as all data processing happens server-side
+    // The frontend just needs to reload data after completion
+    console.log('Book completion handled by backend, reloading user data...');
+    await this.loadUserData();
   }
 
   public async withdraw(amount: number): Promise<boolean> {
