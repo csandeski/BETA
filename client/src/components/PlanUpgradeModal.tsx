@@ -329,18 +329,18 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
               {step === 1 && "Parabéns pelos 3 livros!"}
               {step === 2 && "Sobre a Beta Reader Brasil"}
               {step === 3 && "Depoimentos de Sucesso"}
-              {step === 5 && "Análise do seu potencial"}
-              {step === 6 && "Escolha seu plano"}
-              {step === 7 && "Confirmar Pagamento"}
+              {step === 4 && "Análise do seu potencial"}
+              {step === 5 && "Escolha seu plano"}
+              {step === 6 && "Confirmar Pagamento"}
               {step === 7 && "PIX Gerado"}
             </h2>
             <p className="text-sm text-gray-600">
               {step === 1 && "Você alcançou um marco importante"}
               {step === 2 && "Conheça nossa história de sucesso"}
               {step === 3 && "Veja o que nossos leitores dizem"}
-              {step === 5 && "Veja quanto você está perdendo"}
-              {step === 6 && "Acelere seus ganhos agora"}
-              {step === 7 && "Confirme seus dados para gerar o PIX"}
+              {step === 4 && "Veja quanto você está perdendo"}
+              {step === 5 && "Acelere seus ganhos agora"}
+              {step === 6 && "Confirme seus dados para gerar o PIX"}
               {step === 7 && "Escaneie o QR Code ou copie o código PIX"}
             </p>
           </div>
@@ -359,7 +359,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
         </div>
 
         {/* Scrollable Content - clean white background */}
-        <div className="overflow-y-auto max-h-[calc(100vh-220px)] p-5 pb-12 bg-white" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="overflow-y-auto max-h-[calc(100vh-200px)] p-5 pb-20 bg-white" style={{ WebkitOverflowScrolling: 'touch' }}>
           {/* Step 1: Achievement Celebration */}
           {step === 1 && (
             <div className="space-y-5">
