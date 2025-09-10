@@ -7,6 +7,7 @@ import RegistrationModal from "@/components/RegistrationModal";
 import LoginModal from "@/components/LoginModal";
 import { useSound } from "@/hooks/useSound";
 import { userDataManager } from "@/utils/userDataManager";
+import logoImage from "@/assets/logo.png";
 
 export default function Home() {
   const [showRegistration, setShowRegistration] = useState(false);
@@ -49,9 +50,11 @@ export default function Home() {
         <div className="px-4 py-3">
           <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold">
-                BR
-              </div>
+              <img 
+                src={logoImage} 
+                alt="Beta Reader Brasil Logo" 
+                className="h-8 w-8 object-contain"
+              />
               <div>
                 <h1 className="text-lg font-bold text-gray-900">
                   Beta Reader Brasil
