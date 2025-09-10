@@ -66,38 +66,6 @@ export default function WelcomeModal({ isOpen, onClose, userName }: WelcomeModal
 
         {/* Content */}
         <div className="px-6 pb-6">
-          {/* Card principal */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-5 mb-5 border border-green-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                <DollarSign className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900">Ganhe dinheiro lendo</h3>
-                <p className="text-xs text-gray-600">Receba até R$ 45 por livro</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              <div className="bg-white rounded-lg p-2 text-center">
-                <p className="text-lg font-bold text-gray-900">3</p>
-                <p className="text-xs text-gray-600">Atividades</p>
-              </div>
-              <div className="bg-white rounded-lg p-2 text-center">
-                <p className="text-lg font-bold text-green-600">R$ 135</p>
-                <p className="text-xs text-gray-600">Potencial</p>
-              </div>
-              <div className="bg-white rounded-lg p-2 text-center">
-                <p className="text-lg font-bold text-gray-900">Hoje</p>
-                <p className="text-xs text-gray-600">Disponível</p>
-              </div>
-            </div>
-            
-            <p className="text-xs text-gray-700 text-center bg-white/50 rounded-lg p-2">
-              💡 Você tem <span className="font-bold">3 livros disponíveis</span> agora mesmo
-            </p>
-          </div>
-
           {/* Como funciona */}
           <div className="space-y-3 mb-5">
             <h4 className="text-sm font-bold text-gray-900 mb-3">Como funciona:</h4>
