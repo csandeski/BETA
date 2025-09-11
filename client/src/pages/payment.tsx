@@ -293,6 +293,8 @@ export default function Payment() {
       // Hide loading after a short delay
       setTimeout(() => {
         setShowPixLoading(false);
+        // Scroll to top when showing PIX payment
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         // Show confetti when PIX screen appears
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
@@ -622,8 +624,7 @@ export default function Payment() {
                   </div>
                   <Button
                     onClick={handleCopyPixCode}
-                    variant="outline"
-                    className="w-full h-12 font-medium"
+                    className="w-full h-12 font-medium bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border-b-4 border-green-700 active:translate-y-0 active:border-b-2"
                     data-testid="button-copy-pix"
                   >
                     {copied ? (
