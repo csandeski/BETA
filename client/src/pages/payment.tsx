@@ -516,7 +516,6 @@ export default function Payment() {
                       alt="PIX" 
                       className="h-6 object-contain"
                     />
-                    <span className="text-sm font-semibold text-gray-900">PIX</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Shield className="h-3.5 w-3.5 text-green-600" />
