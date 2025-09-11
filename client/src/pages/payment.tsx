@@ -417,16 +417,18 @@ export default function Payment() {
                       <h2 className="text-base font-semibold text-gray-900">{currentPlan.name}</h2>
                     </div>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xs text-gray-300 line-through">
-                      R$ {currentPlan.anchorPrice.toFixed(2)}
-                    </span>
-                    <span className="text-lg font-semibold text-gray-600">
-                      R$ {planPrice.toFixed(2)}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-xs text-gray-400 line-through mb-0.5">
+                        R$ {currentPlan.anchorPrice.toFixed(2)}
+                      </p>
+                      <p className="text-xl font-bold text-gray-900">
+                        R$ {planPrice.toFixed(2)}
+                      </p>
+                    </div>
                     {(currentPlan.anchorPrice > planPrice) && (
-                      <span className="px-2 py-0.5 bg-green-100 text-green-600 text-xs font-medium rounded-full">
-                        {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}% OFF
+                      <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-md">
+                        {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}%<br/>OFF
                       </span>
                     )}
                   </div>
@@ -522,21 +524,18 @@ export default function Payment() {
                   </div>
                 </div>
                 
-                {/* Valores organizados */}
-                <div className="space-y-3">
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">De R$ {currentPlan.anchorPrice.toFixed(2)} por</p>
-                      <p className="text-2xl font-bold text-gray-900">R$ {planPrice.toFixed(2)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-green-600 font-medium">
-                        Economize R$
-                      </p>
-                      <p className="text-lg font-bold text-green-600">
-                        {(currentPlan.anchorPrice - planPrice).toFixed(2)}
-                      </p>
-                    </div>
+                {/* Valores centralizados verticalmente */}
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 mb-1">
+                    De R$ {currentPlan.anchorPrice.toFixed(2)} por
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
+                    <p className="text-3xl font-bold text-gray-900">
+                      R$ {planPrice.toFixed(2)}
+                    </p>
+                    <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-md">
+                      Economize R$ {(currentPlan.anchorPrice - planPrice).toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
