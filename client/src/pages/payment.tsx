@@ -551,7 +551,7 @@ export default function Payment() {
 
               {/* Security Badges */}
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-center">
                   <div className="flex items-start gap-2">
                     <Lock className="h-4 w-4 text-gray-400 mt-0.5" />
                     <div>
@@ -563,20 +563,6 @@ export default function Payment() {
                       </p>
                       <p className="text-[10px] text-gray-400 mt-1">
                         © 2025. Todos os direitos reservados
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="bg-blue-500 text-white px-3 py-1.5 rounded-lg">
-                      <span className="text-xs font-bold">PCI</span>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600">
-                        Padrão
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Certificado Level 1
                       </p>
                     </div>
                   </div>
