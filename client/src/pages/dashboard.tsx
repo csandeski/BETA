@@ -50,8 +50,11 @@ export default function Dashboard() {
   const { playSound } = useSound();
   const { toast } = useToast();
   
-  // Load user data from manager
+  // Load user data from manager and scroll to top
   useEffect(() => {
+    // Scroll to top when dashboard loads
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
     const loadData = async () => {
       // Check if user is logged in via API
       const authResponse = await fetch('/api/auth/status');

@@ -28,8 +28,11 @@ export default function BookReading() {
 
   const bookSlug = params?.slug || "";
   
-  // Load user data on mount
+  // Load user data on mount and scroll to top
   useEffect(() => {
+    // Scroll to top when book page loads
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
     const loadData = async () => {
       // Load fresh data from database
       await userDataManager.loadUserData();
@@ -47,6 +50,20 @@ export default function BookReading() {
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
+  
+  // Scroll to top when quiz step changes
+  useEffect(() => {
+    if (currentQuizStep > 0) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [currentQuizStep]);
+  
+  // Scroll to top when validation step changes
+  useEffect(() => {
+    if (validationStep > 0) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [validationStep]);
   
   // Book data based on slug
   const books: Record<string, any> = {

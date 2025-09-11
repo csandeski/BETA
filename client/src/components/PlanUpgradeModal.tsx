@@ -79,6 +79,19 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
     }
   }, [isOpen, step, selectedPlan, isDiscounted]);
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (isOpen && step) {
+      // Scroll the modal content container to top
+      const modalContent = document.querySelector('.modal-scroll-content');
+      if (modalContent) {
+        modalContent.scrollTop = 0;
+      }
+      // Also scroll the window to top for mobile
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [step, isOpen]);
+
   if (!isOpen) return null;
 
   const getDiscountedPrice = (originalPrice: number, plan: 'premium' | 'unlimited') => {
@@ -361,7 +374,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
         </div>
 
         {/* Scrollable Content - clean white background */}
-        <div className="max-h-[60vh] overflow-y-auto p-5 pb-20 bg-white rounded-b-3xl" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="modal-scroll-content max-h-[60vh] overflow-y-auto p-5 pb-20 bg-white rounded-b-3xl" style={{ WebkitOverflowScrolling: 'touch' }}>
           {/* Step 1: Achievement Celebration */}
           {step === 1 && (
             <div className="space-y-5">

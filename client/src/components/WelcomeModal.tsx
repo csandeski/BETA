@@ -12,10 +12,12 @@ interface WelcomeModalProps {
 export default function WelcomeModal({ isOpen, onClose, userName }: WelcomeModalProps) {
   const { playSound } = useSound();
 
-  // Lock body scroll when modal is open
+  // Lock body scroll when modal is open and scroll to top
   useEffect(() => {
     if (isOpen) {
       lockBodyScroll();
+      // Ensure modal content is at top when opened
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     return () => {

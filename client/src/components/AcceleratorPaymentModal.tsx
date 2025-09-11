@@ -58,6 +58,19 @@ export default function AcceleratorPaymentModal({ isOpen, onClose, onSuccess }: 
     }
   }, [isOpen, step]);
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (isOpen && step) {
+      // Scroll the modal content container to top
+      const modalContent = document.querySelector('.accelerator-modal-scroll');
+      if (modalContent) {
+        modalContent.scrollTop = 0;
+      }
+      // Also scroll the window to top for mobile
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [step, isOpen]);
+
   if (!isOpen) return null;
 
   const formatCPF = (value: string) => {
@@ -287,7 +300,7 @@ export default function AcceleratorPaymentModal({ isOpen, onClose, onSuccess }: 
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+      <div className="accelerator-modal-scroll relative w-full max-w-md bg-white rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 p-6 pb-4 border-b border-gray-100">
           <button
