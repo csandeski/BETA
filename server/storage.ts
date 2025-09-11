@@ -96,15 +96,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    console.log('[createUser] Creating new user:', insertUser.email);
+    
     const [user] = await getDb()
       .insert(users)
       .values(insertUser)
       .returning();
-      
+    
+    console.log('[createUser] User created with ID:', user.id);
+    
     // Create initial stats for the user
-    await this.getDb().insert(userStats).values({
+    const initialStats = {
       userId: user.id,
-    });
+      totalBooksRead: 0,
+      todayBooksRead: 0,
+      weekBooksRead: 0,
+      monthBooksRead: 0,
+      todayEarnings: '0',
+      weekEarnings: '0',
+      monthEarnings: '0',
+      averageRating: '0',
+      streak: 0,
+      easyBooksCount: 0,
+      mediumBooksCount: 0,
+      hardBooksCount: 0,
+      weeklyProgress: '0',
+      monthlyProgress: '0'
+    };
+    
+    console.log('[createUser] Creating initial stats:', initialStats);
+    
+    const [createdStats] = await this.getDb().insert(userStats).values(initialStats).returning();
+    
+    console.log('[createUser] Initial stats created:', createdStats);
     
     return user;
   }
@@ -247,10 +271,25 @@ export class DatabaseStorage implements IStorage {
 
   // Stats operations
   async getUserStats(userId: string): Promise<UserStats | undefined> {
+    console.log('[getUserStats] Fetching stats for userId:', userId);
+    
     const [stats] = await this.getDb()
       .select()
       .from(userStats)
       .where(eq(userStats.userId, userId));
+    
+    console.log('[getUserStats] Stats found:', !!stats);
+    if (stats) {
+      console.log('[getUserStats] Stats data:', {
+        id: stats.id,
+        userId: stats.userId,
+        totalBooksRead: stats.totalBooksRead,
+        todayEarnings: stats.todayEarnings,
+        weekEarnings: stats.weekEarnings,
+        monthEarnings: stats.monthEarnings
+      });
+    }
+    
     return stats;
   }
   
@@ -582,11 +621,18 @@ export class DatabaseStorage implements IStorage {
 
   // Helper method to update stats after book completion
   private async updateStatsAfterCompletion(tx: any, userId: string, rewardAmount: number) {
+    console.log('[updateStatsAfterCompletion] Starting stats update for user:', userId, 'with reward:', rewardAmount);
+    
     const now = new Date();
-    const todayStart = new Date(now.setHours(0, 0, 0, 0));
-    const weekStart = new Date(now);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    
+    const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    monthStart.setHours(0, 0, 0, 0);
 
     // Get current stats
     const [stats] = await tx
@@ -594,9 +640,12 @@ export class DatabaseStorage implements IStorage {
       .from(userStats)
       .where(eq(userStats.userId, userId));
 
+    console.log('[updateStatsAfterCompletion] Current stats found:', !!stats, stats ? 'Stats ID: ' + stats.id : 'No stats');
+
     if (!stats) {
+      console.log('[updateStatsAfterCompletion] Creating new stats for user:', userId);
       // Create new stats if doesn't exist
-      await tx.insert(userStats).values({
+      const newStats = {
         userId,
         totalBooksRead: 1,
         todayBooksRead: 1,
@@ -607,8 +656,18 @@ export class DatabaseStorage implements IStorage {
         monthEarnings: rewardAmount.toString(),
         averageRating: '0',
         streak: 1,
-        lastReadDate: now,
-      });
+        lastReadDate: new Date(), // Use new Date() instead of now
+        easyBooksCount: 0,
+        mediumBooksCount: 0,
+        hardBooksCount: 0,
+        weeklyProgress: '0',
+        monthlyProgress: '0'
+      };
+      
+      console.log('[updateStatsAfterCompletion] Inserting new stats:', newStats);
+      
+      const [insertedStats] = await tx.insert(userStats).values(newStats).returning();
+      console.log('[updateStatsAfterCompletion] Stats inserted successfully:', insertedStats);
     } else {
       // Calculate books read today, this week, this month
       const todayBooks = await tx
@@ -682,21 +741,28 @@ export class DatabaseStorage implements IStorage {
         .where(eq(booksCompleted.userId, userId));
 
       // Update stats
-      await tx
+      const updatedData = {
+        totalBooksRead: Number(stats.totalBooksRead) + 1,
+        todayBooksRead: Number(todayBooks[0].count),
+        weekBooksRead: Number(weekBooks[0].count),
+        monthBooksRead: Number(monthBooks[0].count),
+        todayEarnings: todayEarnings[0].sum.toString(),
+        weekEarnings: weekEarnings[0].sum.toString(),
+        monthEarnings: monthEarnings[0].sum.toString(),
+        averageRating: avgRating[0].avg.toString(),
+        lastReadDate: new Date(), // Use new Date() instead of now
+        updatedAt: new Date(),
+      };
+      
+      console.log('[updateStatsAfterCompletion] Updating existing stats with:', updatedData);
+      
+      const [updatedStats] = await tx
         .update(userStats)
-        .set({
-          totalBooksRead: Number(stats.totalBooksRead) + 1,
-          todayBooksRead: Number(todayBooks[0].count),
-          weekBooksRead: Number(weekBooks[0].count),
-          monthBooksRead: Number(monthBooks[0].count),
-          todayEarnings: todayEarnings[0].sum.toString(),
-          weekEarnings: weekEarnings[0].sum.toString(),
-          monthEarnings: monthEarnings[0].sum.toString(),
-          averageRating: avgRating[0].avg.toString(),
-          lastReadDate: now,
-          updatedAt: new Date(),
-        })
-        .where(eq(userStats.userId, userId));
+        .set(updatedData)
+        .where(eq(userStats.userId, userId))
+        .returning();
+        
+      console.log('[updateStatsAfterCompletion] Stats updated successfully:', updatedStats);
     }
   }
   

@@ -680,6 +680,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? req.session.userId 
         : req.params.userId;
         
+      console.log('[GET /api/users/data] Fetching data for userId:', userId);
+      
       if (!userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
@@ -688,12 +690,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
+      console.log('[GET /api/users/data] User found:', user.email, 'Balance:', user.balance);
+      
       // Stats are already calculated when books are completed
       // No need to recalculate on every read
       
       // Get all user related data
-      const stats = await storage.getUserStats(userId);
+      let stats = await storage.getUserStats(userId);
+      console.log('[GET /api/users/data] Stats retrieved:', stats ? 'Found' : 'Not found');
+      
+      // If stats don't exist, create them by recalculating from existing data
+      if (!stats) {
+        console.log('[GET /api/users/data] Stats missing for user:', userId);
+        console.log('[GET /api/users/data] Recalculating stats from existing data...');
+        stats = await storage.recalculateUserStats(userId);
+        console.log('[GET /api/users/data] Stats recalculated and created successfully');
+      }
+      
+      if (stats) {
+        console.log('[GET /api/users/data] Stats details:', {
+          totalBooksRead: stats.totalBooksRead,
+          todayBooksRead: stats.todayBooksRead,
+          todayEarnings: stats.todayEarnings,
+          weekEarnings: stats.weekEarnings,
+          monthEarnings: stats.monthEarnings
+        });
+      }
       const booksCompleted = await storage.getUserCompletedBooks(userId);
+      
+      // Check if stats are outdated
+      if (stats && booksCompleted.length > 0 && stats.totalBooksRead !== booksCompleted.length) {
+        console.log('[GET /api/users/data] Stats outdated - Books completed:', booksCompleted.length, 'Stats totalBooksRead:', stats.totalBooksRead);
+        console.log('[GET /api/users/data] Recalculating stats...');
+        stats = await storage.recalculateUserStats(userId);
+        console.log('[GET /api/users/data] Stats updated successfully');
+      }
+      
       const transactions = await storage.getUserTransactions(userId);
       
       // Calculate last 7 days data for chart
@@ -722,6 +754,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Format the response to match frontend UserData structure
+      console.log('[GET /api/users/data] Books completed count:', booksCompleted.length);
+      console.log('[GET /api/users/data] Transactions count:', transactions.length);
+      
       const userData = {
         id: user.id,
         fullName: user.fullName,
@@ -774,6 +809,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } : null
       };
       
+      console.log('[GET /api/users/data] Returning userData with stats:', userData.stats ? 'Present' : 'Null');
       res.json(userData);
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Failed to get user data" });
