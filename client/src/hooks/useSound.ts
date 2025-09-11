@@ -260,11 +260,11 @@ export function useSound() {
     // Criar e tocar o arquivo MP3 (importar como módulo)
     const audio = new Audio(new URL('../assets/reading-music.mp3', import.meta.url).href);
     audio.loop = true;
-    audio.volume = 0.65; // Volume um pouco mais alto para leitura (65%)
+    audio.volume = 0.85; // Volume mais alto para leitura (85%)
     
     // Garantir que o volume seja aplicado antes de tocar
     audio.addEventListener('loadedmetadata', () => {
-      audio.volume = 0.65;
+      audio.volume = 0.85;
     });
     
     const playPromise = audio.play();
