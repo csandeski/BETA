@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Check, CreditCard, Clock, Star, Trophy, Copy, CheckCheck, ChevronLeft, DollarSign, QrCode, Shield, Users, Info, ArrowRight, Book, CheckCircle, User, Mail, CreditCard as CardIcon, Lock, Sparkles, Calendar } from "lucide-react";
+import { Check, Clock, Copy, CheckCheck, ChevronLeft, QrCode, Shield, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { UtmTracker } from '@/utils/utmTracker';
 import { fbPixel } from '@/utils/facebookPixel';
 import { useToast } from "@/hooks/use-toast";
 import Confetti from 'react-confetti';
+import { lockBodyScroll, unlockBodyScroll } from "@/utils/scrollLock";
 
 export default function Payment() {
   const [location, setLocation] = useLocation();
@@ -26,9 +27,7 @@ export default function Payment() {
   const [email, setEmail] = useState('');
   const [cpf, setCpf] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Get user data
-  const [userName, setUserName] = useState('');
+  const [showLoadingPopup, setShowLoadingPopup] = useState(false);
   
   // PIX data
   const [pixData, setPixData] = useState<{
@@ -40,6 +39,9 @@ export default function Payment() {
   const [copied, setCopied] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   
+  // Countdown timer (10 minutes = 600 seconds)
+  const [timeRemaining, setTimeRemaining] = useState(600);
+  
   // Window size for confetti
   useEffect(() => {
     const handleResize = () => {
@@ -50,29 +52,40 @@ export default function Payment() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Get user data and redirect if no plan selected
+  // Redirect if no plan selected
   useEffect(() => {
-    const loadUserData = async () => {
-      if (!planFromUrl) {
-        setLocation('/dashboard');
-        return;
-      }
-      
-      // Get user info for personalized greeting
-      try {
-        const response = await fetch('/api/auth/status');
-        const data = await response.json();
-        if (data.isLoggedIn && data.fullName) {
-          const firstName = data.fullName.split(' ')[0];
-          setUserName(firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase());
-        }
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    };
-    
-    loadUserData();
+    if (!planFromUrl) {
+      setLocation('/dashboard');
+    }
   }, [planFromUrl, setLocation]);
+  
+  // Countdown timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (pixData && timeRemaining > 0) {
+      interval = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            // Timer expired
+            toast({
+              title: "Tempo expirado",
+              description: "O código PIX expirou. Por favor, gere um novo código.",
+              variant: "destructive",
+            });
+            setPixData(null);
+            setTimeRemaining(600);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [pixData, timeRemaining, toast]);
   
   // Track InitiateCheckout when page loads
   useEffect(() => {
@@ -128,6 +141,12 @@ export default function Payment() {
     return value;
   };
   
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
   const pollPaymentStatus = async (orderId: string) => {
     const maxAttempts = 60;
     let attempts = 0;
@@ -138,7 +157,8 @@ export default function Payment() {
       }
 
       try {
-        const response = await fetch(`/api/payments/status/${orderId}`);
+        // Using LiraPay status endpoint
+        const response = await fetch(`/api/payments/lira/status/${orderId}`);
         const data = await response.json();
         
         if (data.status === 'paid' || data.status === 'approved') {
@@ -162,9 +182,13 @@ export default function Payment() {
             paymentMethod: 'pix'
           });
 
+          // Show confetti
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 5000);
+
           // Show success message
           toast({
-            title: "Pagamento confirmado!",
+            title: "Pagamento confirmado! 🎉",
             description: "Seu plano foi ativado com sucesso.",
           });
           
@@ -220,6 +244,12 @@ export default function Payment() {
     }
     
     setIsProcessing(true);
+    setShowLoadingPopup(true);
+    lockBodyScroll();
+    
+    // Simulate loading time for better UX
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     try {
       // Get user ID from auth status
       const authResponse = await fetch('/api/auth/status');
@@ -236,11 +266,11 @@ export default function Payment() {
       }
       const userId = authData.userId;
       
-      // Get UTM parameters to send to OrinPay
+      // Get UTM parameters to send to LiraPay
       const utmParams = UtmTracker.getForOrinPay();
       
-      // Call backend to generate PIX via OrinPay
-      const response = await fetch('/api/payment/generate-pix', {
+      // Call backend to generate PIX via LiraPay
+      const response = await fetch('/api/payments/lira/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -283,7 +313,7 @@ export default function Payment() {
         currency: 'BRL',
         plan: planFromUrl,
         planName: planName,
-        pixCode: data.pixCode,
+        pixCode: data.copyPasteCode,
         orderId: data.orderId
       });
       
@@ -299,15 +329,14 @@ export default function Payment() {
 
       // Save PIX data
       setPixData({
-        pixCode: data.pixQrCode,
-        pixQrCode: data.pixQrCode,
+        pixCode: data.copyPasteCode,
+        pixQrCode: data.qrCodeText || data.copyPasteCode,
         amount: data.amount,
         orderId: data.orderId
       });
       
-      // Show confetti
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
+      // Reset timer
+      setTimeRemaining(600);
       
       // Start polling for payment status
       if (data.orderId) {
@@ -323,6 +352,8 @@ export default function Payment() {
       });
     } finally {
       setIsProcessing(false);
+      setShowLoadingPopup(false);
+      unlockBodyScroll();
     }
   };
   
@@ -341,31 +372,11 @@ export default function Payment() {
   const planDetails = {
     premium: {
       name: 'Beta Reader Oficial',
-      description: 'Ganhe até R$ 240 por dia lendo livros',
-      features: [
-        'Leia 8 livros por dia',
-        'Ganhe até R$ 240 diários',
-        'Leitura rápida (5-8 min)',
-        'Bônus de conclusão diário',
-        'Suporte prioritário'
-      ],
       originalPrice: 39.90,
-      color: 'from-blue-500 to-indigo-500',
-      icon: Book
     },
     unlimited: {
       name: 'Beta Reader Ilimitado',
-      description: 'Ganhe até R$ 450 por dia lendo livros',
-      features: [
-        'Leia 15 livros por dia',
-        'Ganhe até R$ 450 diários',
-        'Leitura super rápida (3-5 min)',
-        'Bônus exclusivos diários',
-        'Acesso VIP completo'
-      ],
       originalPrice: 59.90,
-      color: 'from-green-500 to-emerald-500',
-      icon: Sparkles
     }
   };
   
@@ -374,13 +385,6 @@ export default function Payment() {
   const discount = isDiscounted ? (
     planFromUrl === 'premium' ? 25 : 35
   ) : 0;
-  
-  // Get current date
-  const currentDate = new Date().toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long'
-  });
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -394,10 +398,31 @@ export default function Payment() {
         />
       )}
       
-      {/* Header similar to dashboard */}
+      {/* Loading Popup */}
+      {showLoadingPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-xl">
+            <div className="flex flex-col items-center space-y-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                <Loader2 className="h-8 w-8 text-white animate-spin" />
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-semibold text-gray-900">
+                  Gerando seu pagamento
+                </p>
+                <p className="text-sm text-gray-600 mt-2">
+                  e confirmando sua conta...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Header - Simplified without date/time */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-md mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <button
               onClick={() => setLocation('/dashboard')}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -411,17 +436,9 @@ export default function Payment() {
                 alt="Beta Reader" 
                 className="h-8 w-auto object-contain"
               />
-              <span className="font-bold text-gray-900">Beta Reader</span>
+              <span className="text-lg font-semibold text-gray-900">Beta Reader Brasil</span>
             </div>
             <div className="w-9" />
-          </div>
-          <div className="text-center">
-            <p className="text-xs text-gray-500 capitalize">{currentDate}</p>
-            {userName && (
-              <h2 className="text-lg font-semibold text-gray-900 mt-1">
-                Olá, {userName}! 👋
-              </h2>
-            )}
           </div>
         </div>
       </div>
@@ -429,156 +446,125 @@ export default function Payment() {
       <div className="max-w-md mx-auto px-4 py-6 space-y-4">
         {!pixData ? (
           <>
-            {/* Selected Plan Card */}
-            <Card className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-              <div className={`h-2 bg-gradient-to-r ${currentPlan.color}`} />
-              <div className="p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">{currentPlan.name}</h3>
-                    <p className="text-xs text-gray-600 mt-1">{currentPlan.description}</p>
-                  </div>
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${currentPlan.color} text-white`}>
-                    <currentPlan.icon className="h-5 w-5" />
-                  </div>
+            {/* Plan Banner (Simplified) */}
+            <Card className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">{currentPlan.name}</h3>
                 </div>
-                
-                {/* Price with anchoring */}
-                <div className="flex items-baseline gap-2 mb-4">
+                <div className="text-right">
                   {isDiscounted && (
-                    <>
-                      <span className="text-sm text-gray-400 line-through">
-                        R$ {currentPlan.originalPrice.toFixed(2).replace('.', ',')}
-                      </span>
-                      <span className="text-2xl font-bold text-gray-900">
-                        R$ {planPrice.toFixed(2).replace('.', ',')}
-                      </span>
-                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">
-                        {discount}% OFF
-                      </span>
-                    </>
+                    <p className="text-sm text-gray-400 line-through">
+                      R$ {currentPlan.originalPrice.toFixed(2).replace('.', ',')}
+                    </p>
                   )}
-                  {!isDiscounted && (
-                    <span className="text-2xl font-bold text-gray-900">
-                      R$ {planPrice.toFixed(2).replace('.', ',')}
+                  <p className="text-xl font-bold text-gray-900">
+                    R$ {planPrice.toFixed(2).replace('.', ',')}
+                  </p>
+                  {isDiscounted && (
+                    <span className="text-xs text-green-600 font-semibold">
+                      {discount}% OFF
                     </span>
                   )}
                 </div>
-                
-                {/* Features */}
-                <div className="space-y-2">
-                  {currentPlan.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">{feature}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </Card>
             
-            {/* Payment Method Card */}
-            <Card className="bg-white rounded-2xl border border-gray-200 p-5">
-              <h3 className="text-sm font-bold text-gray-900 mb-3">Método de Pagamento</h3>
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white rounded-lg">
-                    <QrCode className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">PIX</p>
-                    <p className="text-xs text-gray-600">Pagamento instantâneo</p>
-                  </div>
-                </div>
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
-                  DISPONÍVEL
-                </span>
-              </div>
-            </Card>
-            
-            {/* Form Card */}
-            <Card className="bg-white rounded-2xl border border-gray-200 p-5">
-              <h3 className="text-sm font-bold text-gray-900 mb-4">Dados para pagamento</h3>
+            {/* User Data Form with more spacing */}
+            <Card className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-5">Confirme seus dados</h3>
               
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="name" className="text-xs font-semibold text-gray-700 mb-1.5 block">
+                  <Label htmlFor="name" className="text-sm font-medium text-gray-700 mb-2 block">
                     Nome completo
                   </Label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Digite seu nome completo"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="pl-11 py-3.5 px-4 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500"
-                      data-testid="input-name"
-                    />
-                  </div>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Digite seu nome completo"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="h-12 px-4 text-base rounded-lg border-gray-200 focus:border-green-500 focus:ring-green-500"
+                    data-testid="input-name"
+                  />
                 </div>
                 
                 <div>
-                  <Label htmlFor="email" className="text-xs font-semibold text-gray-700 mb-1.5 block">
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">
                     Email
                   </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-11 py-3.5 px-4 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500"
-                      data-testid="input-email"
-                    />
-                  </div>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-12 px-4 text-base rounded-lg border-gray-200 focus:border-green-500 focus:ring-green-500"
+                    data-testid="input-email"
+                  />
                 </div>
                 
                 <div>
-                  <Label htmlFor="cpf" className="text-xs font-semibold text-gray-700 mb-1.5 block">
+                  <Label htmlFor="cpf" className="text-sm font-medium text-gray-700 mb-2 block">
                     CPF
                   </Label>
-                  <div className="relative">
-                    <CardIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="cpf"
-                      type="text"
-                      placeholder="000.000.000-00"
-                      value={cpf}
-                      onChange={(e) => setCpf(formatCPF(e.target.value))}
-                      maxLength={14}
-                      className="pl-11 py-3.5 px-4 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500"
-                      data-testid="input-cpf"
-                    />
+                  <Input
+                    id="cpf"
+                    type="text"
+                    placeholder="000.000.000-00"
+                    value={cpf}
+                    onChange={(e) => setCpf(formatCPF(e.target.value))}
+                    maxLength={14}
+                    className="h-12 px-4 text-base rounded-lg border-gray-200 focus:border-green-500 focus:ring-green-500"
+                    data-testid="input-cpf"
+                  />
+                </div>
+              </div>
+            </Card>
+            
+            {/* PIX Payment Method Card - More beautiful */}
+            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-white rounded-lg shadow-sm">
+                    <QrCode className="h-6 w-6 text-green-600" />
                   </div>
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900">Pagamento via PIX</p>
+                    <p className="text-sm text-gray-600">Aprovação instantânea</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Total a pagar</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    R$ {planPrice.toFixed(2).replace('.', ',')}
+                  </span>
                 </div>
               </div>
               
               <Button
                 onClick={handleGeneratePix}
                 disabled={isProcessing}
-                className="w-full mt-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold h-12 text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                 data-testid="button-generate-pix"
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 animate-spin" />
-                    Gerando PIX...
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Processando...
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
-                    <QrCode className="h-4 w-4" />
-                    Gerar código PIX
-                  </span>
+                  'Gerar PIX'
                 )}
               </Button>
             </Card>
             
             {/* Security badges */}
-            <div className="flex items-center justify-center gap-6 py-4">
+            <div className="flex items-center justify-center gap-6 py-2">
               <div className="flex items-center gap-1.5">
                 <Shield className="h-4 w-4 text-green-600" />
                 <span className="text-xs text-gray-600">100% Seguro</span>
@@ -590,26 +576,35 @@ export default function Payment() {
             </div>
           </>
         ) : (
-          /* PIX Generated */
+          /* PIX Generated Screen with Timer */
           <div className="space-y-4">
-            <Card className="bg-white rounded-2xl border border-gray-200 p-6">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-3">
-                  <CheckCircle className="h-8 w-8 text-white" />
+            {/* Timer Card at the top */}
+            <Card className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-200 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-orange-600" />
+                  <span className="text-sm font-medium text-gray-700">Tempo restante</span>
                 </div>
+                <span className="text-lg font-bold text-orange-600">{formatTime(timeRemaining)}</span>
+              </div>
+            </Card>
+            
+            {/* QR Code Card */}
+            <Card className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="text-center mb-4">
                 <h2 className="text-xl font-bold text-gray-900 mb-2">
-                  PIX Gerado com Sucesso!
+                  PIX Gerado!
                 </h2>
                 <p className="text-sm text-gray-600">
-                  Escaneie o QR Code ou copie o código PIX
+                  Escaneie o código ou copie e cole no seu banco
                 </p>
               </div>
               
               {/* QR Code */}
-              <div className="bg-gray-50 rounded-xl p-6 mb-4 flex justify-center">
-                <div className="bg-white p-4 rounded-lg">
+              <div className="bg-gray-50 rounded-lg p-6 mb-4 flex justify-center">
+                <div className="bg-white p-4 rounded-lg shadow-sm">
                   <QRCodeSVG
-                    value={pixData.pixCode}
+                    value={pixData.pixQrCode}
                     size={200}
                     level="H"
                     includeMargin={false}
@@ -617,24 +612,41 @@ export default function Payment() {
                 </div>
               </div>
               
+              {/* Amount with discrete anchoring */}
+              <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Valor</span>
+                  <div className="text-right">
+                    {isDiscounted && (
+                      <span className="text-xs text-gray-400 line-through mr-2">
+                        R$ {currentPlan.originalPrice.toFixed(2).replace('.', ',')}
+                      </span>
+                    )}
+                    <span className="text-lg font-bold text-gray-900">
+                      R$ {pixData.amount.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
               {/* PIX Code */}
               <div className="space-y-3">
-                <Label className="text-xs font-semibold text-gray-700">
-                  Ou copie o código PIX:
+                <Label className="text-sm font-medium text-gray-700">
+                  Código PIX copia e cola
                 </Label>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-600 font-mono break-all mb-3">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-xs text-gray-600 font-mono break-all mb-3 line-clamp-3">
                     {pixData.pixCode}
                   </p>
                   <Button
                     onClick={handleCopyPixCode}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 rounded-xl"
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold h-11 rounded-lg"
                     data-testid="button-copy-pix"
                   >
                     {copied ? (
                       <span className="flex items-center gap-2">
                         <CheckCheck className="h-4 w-4" />
-                        Código copiado!
+                        Copiado!
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
@@ -645,50 +657,17 @@ export default function Payment() {
                   </Button>
                 </div>
               </div>
-              
-              {/* Instructions */}
-              <div className="mt-6 space-y-2">
-                <p className="text-sm font-semibold text-gray-900">Como pagar:</p>
-                <ol className="space-y-2 text-sm text-gray-600">
-                  <li className="flex gap-2">
-                    <span className="font-semibold text-green-600">1.</span>
-                    Abra o app do seu banco
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-semibold text-green-600">2.</span>
-                    Escolha pagar com PIX
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-semibold text-green-600">3.</span>
-                    Escaneie o QR Code ou cole o código
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-semibold text-green-600">4.</span>
-                    Confirme o pagamento
-                  </li>
-                </ol>
-              </div>
-              
-              {/* Amount */}
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Valor a pagar:</span>
-                  <span className="text-xl font-bold text-gray-900">
-                    R$ {pixData.amount.toFixed(2).replace('.', ',')}
-                  </span>
-                </div>
-              </div>
             </Card>
             
-            {/* Loading status card */}
-            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+            {/* Status Card */}
+            <Card className="bg-blue-50 rounded-xl border border-blue-200 p-4">
               <div className="flex items-center gap-3">
-                <div className="animate-spin">
-                  <Clock className="h-5 w-5 text-blue-600" />
+                <div className="animate-pulse">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">
-                    Aguardando pagamento...
+                  <p className="text-sm font-medium text-gray-900">
+                    Aguardando pagamento
                   </p>
                   <p className="text-xs text-gray-600">
                     Você será redirecionado automaticamente
@@ -697,14 +676,17 @@ export default function Payment() {
               </div>
             </Card>
             
-            {/* Back button */}
+            {/* New PIX button */}
             <Button
-              onClick={() => setLocation('/dashboard')}
+              onClick={() => {
+                setPixData(null);
+                setTimeRemaining(600);
+              }}
               variant="outline"
-              className="w-full py-3 rounded-xl border-gray-200"
-              data-testid="button-back-dashboard"
+              className="w-full h-11 rounded-lg border-gray-200"
+              data-testid="button-new-pix"
             >
-              Voltar ao Dashboard
+              Gerar novo código PIX
             </Button>
           </div>
         )}

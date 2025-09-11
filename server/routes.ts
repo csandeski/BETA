@@ -653,12 +653,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Store transaction in database as pending
       if (req.session.userId) {
-        await storage.createTransaction({
-          userId: req.session.userId,
-          type: 'pending',
-          amount: amount.toString(),
-          description: `Plano ${plan === 'unlimited' ? 'Ilimitado' : 'Premium'} - PIX`
-        });
+        const user = await storage.getUser(req.session.userId);
+        if (user) {
+          const currentBalance = Number(user.balance);
+          await storage.createTransaction({
+            userId: req.session.userId,
+            type: 'pending',
+            amount: amount.toString(),
+            description: `Plano ${plan === 'unlimited' ? 'Ilimitado' : 'Premium'} - PIX`,
+            balanceBefore: currentBalance.toString(),
+            balanceAfter: currentBalance.toString() // No balance change yet
+          });
+        }
       }
       
       // Return PIX data
@@ -717,12 +723,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           
           // Update transaction status
-          await storage.createTransaction({
-            userId: req.session.userId,
-            type: 'deposit',
-            amount: lirapayData.amount.toString(),
-            description: `Plano ${plan === 'unlimited' ? 'Ilimitado' : 'Premium'} - Confirmado`
-          });
+          const user = await storage.getUser(req.session.userId);
+          if (user) {
+            const currentBalance = Number(user.balance);
+            await storage.createTransaction({
+              userId: req.session.userId,
+              type: 'deposit',
+              amount: lirapayData.amount.toString(),
+              description: `Plano ${plan === 'unlimited' ? 'Ilimitado' : 'Premium'} - Confirmado`,
+              balanceBefore: currentBalance.toString(),
+              balanceAfter: currentBalance.toString() // Balance doesn't change for plan purchase
+            });
+          }
         }
       } else if (lirapayData.status === 'EXPIRED') {
         status = 'expired';
