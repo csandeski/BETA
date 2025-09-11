@@ -134,20 +134,45 @@
   }
 }
 
-/* Confetti Animation */
-@keyframes confetti {
+/* Confetti Animation - Enhanced */
+@keyframes confetti-fall {
   0% {
-    transform: translateY(-100vh) rotate(0deg);
+    transform: translateY(-10vh) translateX(0) rotate(0deg) scale(1);
+    opacity: 0;
+  }
+  10% {
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) rotate(720deg);
+    transform: translateY(110vh) translateX(20px) rotate(720deg) scale(0.5);
     opacity: 0;
   }
 }
 
+@keyframes confetti-sway {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  33% {
+    transform: translateX(25px);
+  }
+  66% {
+    transform: translateX(-25px);
+  }
+}
+
 .animate-confetti {
-  animation: confetti linear forwards;
+  animation: confetti-fall 4s ease-in forwards, confetti-sway 2s ease-in-out infinite;
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Confetti particles styles */
+.confetti-particle {
+  width: 10px;
+  height: 10px;
+  position: absolute;
 }
 
 /* Modal Styles - Better scrolling and responsiveness */

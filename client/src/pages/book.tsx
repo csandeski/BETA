@@ -2696,39 +2696,86 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
       {/* Reward Modal (continuation of validation) */}
       {showReward && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          {/* Confetti Animation */}
-          <div className="fixed inset-0 pointer-events-none overflow-hidden">
-            {[...Array(50)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute animate-confetti"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${3 + Math.random() * 2}s`
-                }}
-              >
+          {/* Enhanced Confetti Animation */}
+          <div className="fixed inset-0 pointer-events-none overflow-hidden z-[60]">
+            {[...Array(80)].map((_, i) => {
+              const colors = [
+                '#10b981', '#059669', '#fbbf24', '#f59e0b', 
+                '#ef4444', '#dc2626', '#8b5cf6', '#7c3aed',
+                '#3b82f6', '#2563eb', '#ec4899', '#db2777',
+                '#14b8a6', '#06b6d4', '#facc15', '#fb923c'
+              ];
+              const shapes = ['square', 'circle', 'triangle'];
+              const shape = shapes[Math.floor(Math.random() * shapes.length)];
+              const color = colors[Math.floor(Math.random() * colors.length)];
+              const size = Math.random() * 8 + 6; // 6px to 14px
+              const delay = Math.random() * 2;
+              const duration = Math.random() * 2 + 3; // 3s to 5s
+              const startX = Math.random() * 100;
+              
+              return (
                 <div
-                  className="w-2 h-3 rounded-sm"
+                  key={i}
+                  className="animate-confetti"
                   style={{
-                    backgroundColor: [
-                      '#10b981', '#059669', '#fbbf24', '#f59e0b', 
-                      '#ef4444', '#dc2626', '#8b5cf6', '#7c3aed',
-                      '#3b82f6', '#2563eb', '#ec4899', '#db2777'
-                    ][Math.floor(Math.random() * 12)],
-                    transform: `rotate(${Math.random() * 360}deg)`
+                    left: `${startX}%`,
+                    top: '-10px',
+                    animationDelay: `${delay}s`,
+                    animationDuration: `${duration}s`
                   }}
-                />
-              </div>
-            ))}
+                >
+                  {shape === 'circle' ? (
+                    <div
+                      className="confetti-particle"
+                      style={{
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        backgroundColor: color,
+                        borderRadius: '50%',
+                        transform: `rotate(${Math.random() * 360}deg)`,
+                        boxShadow: `0 0 ${size/2}px ${color}40`
+                      }}
+                    />
+                  ) : shape === 'triangle' ? (
+                    <div
+                      style={{
+                        width: 0,
+                        height: 0,
+                        borderLeft: `${size/2}px solid transparent`,
+                        borderRight: `${size/2}px solid transparent`,
+                        borderBottom: `${size}px solid ${color}`,
+                        transform: `rotate(${Math.random() * 360}deg)`,
+                        filter: `drop-shadow(0 0 ${size/3}px ${color}40)`
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="confetti-particle"
+                      style={{
+                        width: `${size}px`,
+                        height: `${size * 1.5}px`,
+                        backgroundColor: color,
+                        borderRadius: '2px',
+                        transform: `rotate(${Math.random() * 360}deg)`,
+                        boxShadow: `0 0 ${size/2}px ${color}40`
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <div className="bg-white rounded-3xl max-w-md w-full p-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 opacity-5"></div>
             
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
-                <Trophy className="h-8 w-8 text-white" />
+              <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl p-2">
+                <img 
+                  src="/logo-beta-reader.png" 
+                  alt="Beta Reader Brasil" 
+                  className="w-full h-full object-contain"
+                />
               </div>
 
               <h1 className="text-lg font-semibold text-gray-900 text-center mb-2">
