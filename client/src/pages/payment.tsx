@@ -434,12 +434,14 @@ export default function Payment() {
 
             {/* User Data Form */}
             <Card className="p-6 border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                Confirme seus dados
-              </h3>
-              <p className="text-sm text-gray-600 mb-6">
-                Preencha suas informações para continuar
-              </p>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                  1
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                  DADOS PESSOAIS
+                </h3>
+              </div>
               
               <div className="space-y-6">
                 <div>
