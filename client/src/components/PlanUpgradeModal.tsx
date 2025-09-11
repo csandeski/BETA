@@ -109,7 +109,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
     }
     
     // Go to step 5 to confirm data and generate PIX
-    setStep(6);
+    setStep(5);
   };
   
   const pollPaymentStatus = async (orderId: string) => {
@@ -323,10 +323,10 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
               <img 
                 src="/logo-beta-reader.png" 
                 alt="Beta Reader Brasil" 
-                className="h-10 w-auto object-contain"
+                className="h-8 w-auto object-contain"
               />
               <div>
-                <h1 className="text-lg font-bold text-gray-900">Beta Reader Brasil</h1>
+                <h1 className="text-base font-bold text-gray-900">Beta Reader Brasil</h1>
               </div>
             </div>
             <button
@@ -338,39 +338,37 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </button>
           </div>
           
-          {/* Dynamic Step Title - clean design */}
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold text-gray-900">
-              {step === 1 && "Parabéns pelos 3 livros!"}
-              {step === 2 && "Sobre a Beta Reader Brasil"}
-              {step === 3 && "Depoimentos de Sucesso"}
-              {step === 4 && "Análise do seu potencial"}
-              {step === 5 && "Escolha seu plano"}
-              {step === 6 && "Confirmar Pagamento"}
-              {step === 7 && "PIX Gerado"}
-            </h2>
-            <p className="text-sm text-gray-600">
-              {step === 1 && "Você alcançou um marco importante"}
-              {step === 2 && "Conheça nossa história de sucesso"}
-              {step === 3 && "Veja o que nossos leitores dizem"}
-              {step === 4 && "Veja quanto você está perdendo"}
-              {step === 5 && "Acelere seus ganhos agora"}
-              {step === 6 && "Confirme seus dados para gerar o PIX"}
-              {step === 7 && "Escaneie o QR Code ou copie o código PIX"}
-            </p>
-          </div>
+          {/* Dynamic Step Title - clean design - hide for step >= 5 */}
+          {step < 5 && (
+            <>
+              <div className="space-y-2">
+                <h2 className="text-lg font-bold text-gray-900">
+                  {step === 1 && "Parabéns pelos 3 livros!"}
+                  {step === 2 && "Sobre a Beta Reader Brasil"}
+                  {step === 3 && "Análise do seu potencial"}
+                  {step === 4 && "Escolha seu plano"}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  {step === 1 && "Você alcançou um marco importante"}
+                  {step === 2 && "Conheça nossa história de sucesso"}
+                  {step === 3 && "Veja quanto você está perdendo"}
+                  {step === 4 && "Acelere seus ganhos agora"}
+                </p>
+              </div>
 
-          {/* Step Indicator - subtle green */}
-          <div className="flex gap-1.5 mt-4">
-            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-              <div
-                key={i}
-                className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                  i <= step ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-200'
-                }`}
-              />
-            ))}
-          </div>
+              {/* Step Indicator - subtle green */}
+              <div className="flex gap-1.5 mt-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
+                      i <= step ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Scrollable Content - clean white background */}
@@ -533,142 +531,8 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
 
-          {/* Step 3: Testimonials */}
+          {/* Step 3: Compelling Analysis (formerly Step 5) */}
           {step === 3 && (
-            <div className="space-y-5">
-              {/* Header */}
-              <div className="text-center">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  O que nossos leitores dizem
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Histórias reais de pessoas como você que transformaram a leitura em renda
-                </p>
-              </div>
-
-              {/* Testimonials Carousel */}
-              <div className="space-y-4">
-                {/* Testimonial 1 */}
-                <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-5 border border-green-200">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-lg">M</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-bold text-gray-900">Mariana Santos</h4>
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
-                          São Paulo - SP
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 mb-3">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-700 italic mb-3">
-                        "Em 6 meses já consegui R$ 8.400! Estava desempregada e a Beta Reader me salvou. 
-                        Agora leio 4 livros por dia e ganho mais que meu salário anterior."
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-600">
-                        <span>📚 342 livros lidos</span>
-                        <span>💰 R$ 8.400 ganhos</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Testimonial 2 */}
-                <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-200">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-lg">R</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-bold text-gray-900">Rafael Oliveira</h4>
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
-                          Rio de Janeiro - RJ
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 mb-3">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-700 italic mb-3">
-                        "Trabalho como motorista de app e leio nos intervalos. Em 4 meses já fiz R$ 5.200! 
-                        O plano ilimitado valeu cada centavo, pago sozinho."
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-600">
-                        <span>📚 218 livros lidos</span>
-                        <span>💰 R$ 5.200 ganhos</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Testimonial 3 */}
-                <div className="relative bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-200">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-lg">C</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-bold text-gray-900">Camila Rodriguez</h4>
-                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">
-                          Belo Horizonte - MG
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 mb-3">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-700 italic mb-3">
-                        "Mãe de 2 filhos, leio à noite depois que eles dormem. Já consegui R$ 3.800 
-                        que uso para as despesas da casa. Muito grata!"
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-600">
-                        <span>📚 156 livros lidos</span>
-                        <span>💰 R$ 3.800 ganhos</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stats Summary */}
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <p className="text-lg font-bold text-gray-900">92%</p>
-                    <p className="text-xs text-gray-600">Satisfação</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-green-600">R$ 285</p>
-                    <p className="text-xs text-gray-600">Média/dia</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-gray-900">2.673</p>
-                    <p className="text-xs text-gray-600">Leitores ativos</p>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setStep(5)}
-                className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200"
-                data-testid="button-continue-to-analysis"
-              >
-                Ver Meu Potencial
-              </button>
-            </div>
-          )}
-
-          {/* Step 5: Compelling Analysis */}
-          {step === 5 && (
             <div className="space-y-5">
               {/* Alert Banner - subtle warning */}
               <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
@@ -866,7 +730,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
               </div>
 
               <button
-                onClick={() => setStep(6)}
+                onClick={() => setStep(4)}
                 className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200"
                 data-testid="button-see-plans"
               >
@@ -907,8 +771,32 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
 
-          {/* Step 6: Premium Plans Selection */}
-          {step === 6 && (
+          {/* Step 4: Continue to Plans */}
+          {step === 4 && (
+            <div className="space-y-5">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl mb-4 shadow-lg">
+                  <Zap className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                  Pronto para acelerar seus ganhos?
+                </h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  Escolha o plano ideal para você e comece a ganhar mais hoje mesmo!
+                </p>
+                <button
+                  onClick={() => setStep(5)}
+                  className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200"
+                  data-testid="button-choose-plan"
+                >
+                  ESCOLHER MEU PLANO
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 5: Premium Plans Selection */}
+          {step === 5 && (
             <div className="space-y-4">
               {/* Plans Grid */}
               <div className="space-y-4">
@@ -1109,7 +997,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
           
-          {/* Step 6: Payment Confirmation */}
+          {/* Step 6: Payment Data Entry */}
           {step === 6 && (
             <div className="space-y-5">
               {/* Plan Summary */}
@@ -1291,7 +1179,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
           
-          {/* Step 6: PIX QR Code Display */}
+          {/* Step 7: PIX QR Code Display */}
           {step === 7 && pixData && (
             <div className="space-y-4">
               {/* Logo Header */}
