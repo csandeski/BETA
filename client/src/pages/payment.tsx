@@ -340,12 +340,16 @@ export default function Payment() {
   const planDetails = {
     premium: {
       name: 'Beta Reader Oficial',
-      originalPrice: 39.90,
+      originalPrice: 59.90,
+      anchorPrice: 59.90,
+      finalPrice: 39.90,
       color: 'blue'
     },
     unlimited: {
       name: 'Beta Reader Ilimitado',
-      originalPrice: 59.90,
+      originalPrice: 97.90,
+      anchorPrice: 97.90,
+      finalPrice: 59.90,
       color: 'green'
     }
   };
@@ -408,17 +412,15 @@ export default function Payment() {
                       <h2 className="text-lg font-semibold text-gray-900">{currentPlan.name}</h2>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      {isDiscounted && (
-                        <span className="text-sm text-gray-400 line-through">
-                          R$ {currentPlan.originalPrice.toFixed(2)}
-                        </span>
-                      )}
+                      <span className="text-sm text-gray-400 line-through">
+                        R$ {currentPlan.anchorPrice.toFixed(2)}
+                      </span>
                       <span className="text-xl font-bold text-gray-900">
                         R$ {planPrice.toFixed(2)}
                       </span>
-                      {isDiscounted && (
+                      {(currentPlan.anchorPrice > planPrice) && (
                         <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                          {discount}% OFF
+                          {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}% OFF
                         </span>
                       )}
                     </div>
@@ -523,15 +525,13 @@ export default function Payment() {
                 
                 <div className="flex items-center justify-between pt-3 border-t border-green-200">
                   <div className="text-sm text-gray-600">
-                    <span className="text-xs">De R$ {currentPlan.originalPrice.toFixed(2)} por</span>
+                    <span className="text-xs">De R$ {currentPlan.anchorPrice.toFixed(2)} por</span>
                   </div>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-gray-900">R$ {planPrice.toFixed(2)}</span>
-                    {isDiscounted && (
-                      <span className="text-xs text-green-700 font-semibold ml-2">
-                        Economize R$ {(currentPlan.originalPrice - planPrice).toFixed(2)}
-                      </span>
-                    )}
+                    <span className="text-xs text-green-700 font-semibold ml-2">
+                      Economize R$ {(currentPlan.anchorPrice - planPrice).toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
