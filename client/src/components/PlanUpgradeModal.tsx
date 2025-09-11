@@ -59,7 +59,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
   // Track InitiateCheckout when arriving at payment form (step 5)
   // This must be before the early return to avoid hooks order issues
   useEffect(() => {
-    if (isOpen && step === 6 && selectedPlan !== 'free') {
+    if (isOpen && step === 5 && selectedPlan !== 'free') {
       const planPrice = selectedPlan === 'unlimited' ? 
         (isDiscounted ? 38.94 : 59.90) : 
         (isDiscounted ? 29.93 : 39.90);
@@ -242,7 +242,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
         amount: data.amount,
         orderId: data.orderId
       });
-      setStep(7);
+      setStep(6);
       
       // Start polling for payment status
       if (data.orderId) {
@@ -338,27 +338,25 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </button>
           </div>
           
-          {/* Dynamic Step Title - clean design - hide for step >= 5 */}
-          {step < 5 && (
+          {/* Dynamic Step Title - clean design - hide for step >= 4 */}
+          {step < 4 && (
             <>
               <div className="space-y-2">
                 <h2 className="text-lg font-bold text-gray-900">
                   {step === 1 && "Parabéns pelos 3 livros!"}
                   {step === 2 && "Sobre a Beta Reader Brasil"}
                   {step === 3 && "Análise do seu potencial"}
-                  {step === 4 && "Escolha seu plano"}
                 </h2>
                 <p className="text-sm text-gray-600">
                   {step === 1 && "Você alcançou um marco importante"}
                   {step === 2 && "Conheça nossa história de sucesso"}
                   {step === 3 && "Veja quanto você está perdendo"}
-                  {step === 4 && "Acelere seus ganhos agora"}
                 </p>
               </div>
 
               {/* Step Indicator - subtle green */}
               <div className="flex gap-1.5 mt-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3].map((i) => (
                   <div
                     key={i}
                     className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
@@ -771,32 +769,8 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
 
-          {/* Step 4: Continue to Plans */}
+          {/* Step 4: Premium Plans Selection */}
           {step === 4 && (
-            <div className="space-y-5">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl mb-4 shadow-lg">
-                  <Zap className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
-                  Pronto para acelerar seus ganhos?
-                </h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  Escolha o plano ideal para você e comece a ganhar mais hoje mesmo!
-                </p>
-                <button
-                  onClick={() => setStep(5)}
-                  className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200"
-                  data-testid="button-choose-plan"
-                >
-                  ESCOLHER MEU PLANO
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 5: Premium Plans Selection */}
-          {step === 5 && (
             <div className="space-y-4">
               {/* Plans Grid */}
               <div className="space-y-4">
@@ -997,8 +971,8 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
           
-          {/* Step 6: Payment Data Entry */}
-          {step === 6 && (
+          {/* Step 5: Payment Data Entry */}
+          {step === 5 && (
             <div className="space-y-5">
               {/* Plan Summary */}
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-4 border border-gray-200">
@@ -1157,7 +1131,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
 
               {/* Back Button */}
               <button
-                onClick={() => setStep(5)}
+                onClick={() => setStep(4)}
                 className="w-auto px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-200 transition-all mx-auto block"
                 disabled={isProcessing}
                 data-testid="button-back-payment"
@@ -1179,8 +1153,8 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </div>
           )}
           
-          {/* Step 7: PIX QR Code Display */}
-          {step === 7 && pixData && (
+          {/* Step 6: PIX QR Code Display */}
+          {step === 6 && pixData && (
             <div className="space-y-4">
               {/* Logo Header */}
               <div className="flex justify-center mb-2">
