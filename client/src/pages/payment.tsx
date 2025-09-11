@@ -455,7 +455,7 @@ export default function Payment() {
                     placeholder="Digite seu nome completo"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="h-11 text-sm border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
+                    className="h-14 text-base px-4 border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
                     data-testid="input-name"
                   />
                 </div>
@@ -470,7 +470,7 @@ export default function Payment() {
                     placeholder="Digite seu E-mail"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 text-sm border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
+                    className="h-14 text-base px-4 border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
                     data-testid="input-email"
                   />
                 </div>
@@ -486,7 +486,7 @@ export default function Payment() {
                     value={cpf}
                     onChange={(e) => setCpf(formatCPF(e.target.value))}
                     maxLength={14}
-                    className="h-11 text-sm border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
+                    className="h-14 text-base px-4 border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
                     data-testid="input-cpf"
                   />
                 </div>
