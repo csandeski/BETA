@@ -86,20 +86,20 @@ export default function Home() {
         {/* Main Title */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold leading-tight text-gray-900 mb-3">
-            Ganhe dinheiro
+            Faça parte do Beta Reader
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
-              lendo livros
+              com benefícios exclusivos
             </span>
           </h1>
           <p className="text-base text-gray-600 px-4">
-            Transforme sua paixão por leitura em renda extra
+            Faça da sua paixão Renda usando seu celular
           </p>
         </div>
 
         {/* Quick Stats - Mobile Grid */}
         <div className="grid grid-cols-3 gap-3 mb-8 max-w-sm mx-auto">
           <div className="text-center p-3 bg-white rounded-xl shadow-sm">
-            <p className="text-xl font-bold text-gray-900">8mil+</p>
+            <p className="text-xl font-bold text-gray-900">2.8Mil+</p>
             <p className="text-[10px] text-gray-600">Leitores</p>
           </div>
           <div className="text-center p-3 bg-white rounded-xl shadow-sm">
