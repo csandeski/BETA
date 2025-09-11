@@ -294,14 +294,16 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
   ];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center pb-16" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+    <div className="fixed inset-0 z-[100] overflow-y-auto" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
       {/* Backdrop with enhanced blur */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
       
-      {/* Modal with sophisticated design - increased max-width */}
-      <div className="relative w-full max-w-xl mx-4 max-h-[calc(100vh-80px)] overflow-hidden bg-white rounded-3xl shadow-2xl">
+      {/* Modal container for scroll */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        {/* Modal with sophisticated design - increased max-width */}
+        <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl">
         {/* Clean Header - white background with subtle accent */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 p-5">
+        <div className="bg-white border-b border-gray-100 p-5 rounded-t-3xl">
           <div className="flex items-center justify-between mb-4">
             {/* Professional Logo - using real logo image */}
             <div className="flex items-center gap-3">
@@ -359,7 +361,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
         </div>
 
         {/* Scrollable Content - clean white background */}
-        <div className="overflow-y-auto max-h-[calc(100vh-200px)] p-5 pb-20 bg-white" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="max-h-[60vh] overflow-y-auto p-5 pb-20 bg-white rounded-b-3xl" style={{ WebkitOverflowScrolling: 'touch' }}>
           {/* Step 1: Achievement Celebration */}
           {step === 1 && (
             <div className="space-y-5">
@@ -1568,6 +1570,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
