@@ -407,29 +407,29 @@ export default function Payment() {
             <Card className="overflow-hidden border border-gray-200 bg-white">
               <div className="p-5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src="/logo-beta-reader.png" 
+                      alt="Beta Reader Brasil" 
+                      className="h-8 w-auto object-contain"
+                    />
                     <div>
-                      <h2 className="text-lg font-semibold text-gray-900">{currentPlan.name}</h2>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-sm text-gray-400 line-through">
-                        R$ {currentPlan.anchorPrice.toFixed(2)}
-                      </span>
-                      <span className="text-xl font-bold text-gray-900">
-                        R$ {planPrice.toFixed(2)}
-                      </span>
-                      {(currentPlan.anchorPrice > planPrice) && (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                          {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}% OFF
-                        </span>
-                      )}
+                      <h2 className="text-base font-semibold text-gray-900">{currentPlan.name}</h2>
                     </div>
                   </div>
-                  <img 
-                    src="/logo-beta-reader.png" 
-                    alt="Beta Reader Brasil" 
-                    className="h-10 w-auto object-contain opacity-60"
-                  />
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs text-gray-300 line-through">
+                      R$ {currentPlan.anchorPrice.toFixed(2)}
+                    </span>
+                    <span className="text-lg font-semibold text-gray-600">
+                      R$ {planPrice.toFixed(2)}
+                    </span>
+                    {(currentPlan.anchorPrice > planPrice) && (
+                      <span className="px-2 py-0.5 bg-green-100 text-green-600 text-xs font-medium rounded-full">
+                        {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}% OFF
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </Card>
