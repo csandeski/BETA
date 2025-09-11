@@ -851,7 +851,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
               </div>
 
               <button
-                onClick={() => setStep(5)}
+                onClick={() => setStep(6)}
                 className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200"
                 data-testid="button-see-plans"
               >
