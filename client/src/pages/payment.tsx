@@ -441,10 +441,10 @@ export default function Payment() {
                 Preencha suas informações para continuar
               </p>
               
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div>
-                  <Label htmlFor="name" className="text-sm font-medium text-gray-700 mb-2 block">
-                    Nome completo
+                  <Label htmlFor="name" className="text-xs font-normal text-gray-600 mb-1.5 block">
+                    Seu Nome
                   </Label>
                   <Input
                     id="name"
@@ -452,29 +452,29 @@ export default function Payment() {
                     placeholder="Digite seu nome completo"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="h-12 text-base"
+                    className="h-11 text-sm border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
                     data-testid="input-name"
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">
-                    Email
+                  <Label htmlFor="email" className="text-xs font-normal text-gray-600 mb-1.5 block">
+                    E-mail que receberá a compra
                   </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="seu@email.com"
+                    placeholder="Digite seu E-mail"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 text-base"
+                    className="h-11 text-sm border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
                     data-testid="input-email"
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="cpf" className="text-sm font-medium text-gray-700 mb-2 block">
-                    CPF
+                  <Label htmlFor="cpf" className="text-xs font-normal text-gray-600 mb-1.5 block">
+                    Seu CPF/CNPJ
                   </Label>
                   <Input
                     id="cpf"
@@ -483,7 +483,7 @@ export default function Payment() {
                     value={cpf}
                     onChange={(e) => setCpf(formatCPF(e.target.value))}
                     maxLength={14}
-                    className="h-12 text-base"
+                    className="h-11 text-sm border-gray-200 focus:border-gray-300 bg-white placeholder:text-gray-400"
                     data-testid="input-cpf"
                   />
                 </div>
