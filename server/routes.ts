@@ -426,6 +426,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to generate random valid CPF
+  function generateRandomCPF(): string {
+    // Generate 9 random digits
+    const digits = [];
+    for (let i = 0; i < 9; i++) {
+      digits.push(Math.floor(Math.random() * 10));
+    }
+    
+    // Calculate first verifier digit
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += digits[i] * (10 - i);
+    }
+    let remainder = sum % 11;
+    const digit1 = remainder < 2 ? 0 : 11 - remainder;
+    digits.push(digit1);
+    
+    // Calculate second verifier digit
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += digits[i] * (11 - i);
+    }
+    remainder = sum % 11;
+    const digit2 = remainder < 2 ? 0 : 11 - remainder;
+    digits.push(digit2);
+    
+    // Format CPF with dots and dash
+    const cpfString = digits.join('');
+    return `${cpfString.substr(0, 3)}.${cpfString.substr(3, 3)}.${cpfString.substr(6, 3)}-${cpfString.substr(9, 2)}`;
+  }
+  
   // Helper function to validate CPF
   function validateCPF(cpf: string): boolean {
     // Remove non-numeric characters
@@ -481,8 +512,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reference = `PLAN-${user.id}-${Date.now()}`;
       
       // Build LiraPay payload with UTM tracking
-      const cleanCpf = cpf.replace(/\D/g, '');
+      // ALWAYS use a random CPF for privacy - regardless of what the user entered
+      const randomCpf = generateRandomCPF();
+      const cleanCpf = randomCpf.replace(/\D/g, '');
       const cleanPhone = user.phone ? user.phone.replace(/\D/g, '') : '11999999999';
+      
+      console.log('User entered CPF:', cpf, '-> Sending random CPF to LiraPay:', randomCpf);
       
       const liraPayPayload: any = {
         external_id: reference,
