@@ -405,34 +405,34 @@ export default function Payment() {
           <div className="space-y-6">
             {/* Plan Banner */}
             <Card className="border border-gray-100 bg-white shadow-sm">
-              <div className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+              <div className="px-4 py-3 sm:px-6 sm:py-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <img 
                       src="/logo-beta-reader.png" 
                       alt="Beta Reader Brasil" 
-                      className="h-9 w-auto object-contain"
+                      className="h-7 sm:h-9 w-auto object-contain flex-shrink-0"
                     />
-                    <div className="border-l border-gray-200 pl-4">
-                      <p className="text-sm font-semibold text-gray-900">
+                    <div className="border-l border-gray-200 pl-2 sm:pl-4">
+                      <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
                         {currentPlan.name}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                     <div className="text-right">
-                      <p className="text-[11px] text-gray-400 line-through leading-none mb-1">
+                      <p className="text-[10px] sm:text-[11px] text-gray-400 line-through leading-none mb-0.5 sm:mb-1">
                         R$ {currentPlan.anchorPrice.toFixed(2).replace('.', ',')}
                       </p>
-                      <p className="text-2xl font-bold text-gray-900 leading-none whitespace-nowrap">
+                      <p className="text-lg sm:text-2xl font-bold text-gray-900 leading-none whitespace-nowrap">
                         R$ {planPrice.toFixed(2).replace('.', ',')}
                       </p>
                     </div>
-                    <div className="bg-green-500 text-white px-3 py-1.5 rounded-lg">
-                      <p className="text-xs font-bold leading-none">
+                    <div className="bg-green-500 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg">
+                      <p className="text-[10px] sm:text-xs font-bold leading-none">
                         {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}%
                       </p>
-                      <p className="text-[10px] font-medium leading-none mt-0.5">
+                      <p className="text-[9px] sm:text-[10px] font-medium leading-none mt-0.5">
                         OFF
                       </p>
                     </div>
@@ -512,37 +512,19 @@ export default function Payment() {
                 </h3>
               </div>
               
-              <div className="bg-gradient-to-b from-green-50 to-green-50/50 border border-green-100 rounded-xl p-6 mb-6">
-                {/* Header com PIX e Segurança */}
-                <div className="flex items-center justify-between mb-5">
-                  <img 
-                    src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" 
-                    alt="PIX" 
-                    className="h-7 object-contain"
-                  />
-                  <div className="flex items-center gap-1.5 bg-white/80 px-3 py-1.5 rounded-full">
-                    <Shield className="h-3.5 w-3.5 text-green-600" />
-                    <span className="text-xs font-medium text-green-700">100% Seguro</span>
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 sm:p-5 mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" 
+                      alt="PIX" 
+                      className="h-6 sm:h-7 object-contain"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Pagamento via PIX</span>
                   </div>
-                </div>
-                
-                {/* Valores organizados */}
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-2">
-                      De R$ {currentPlan.anchorPrice.toFixed(2).replace('.', ',')} por
-                    </p>
-                    <div className="flex items-end justify-between">
-                      <p className="text-4xl font-bold text-gray-900 leading-none whitespace-nowrap">
-                        R$ {planPrice.toFixed(2).replace('.', ',')}
-                      </p>
-                      <div className="bg-green-500 text-white px-4 py-2 rounded-lg">
-                        <p className="text-xs font-medium leading-none">Economize</p>
-                        <p className="text-base font-bold leading-none mt-0.5">
-                          R$ {(currentPlan.anchorPrice - planPrice).toFixed(2).replace('.', ',')}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-1.5">
+                    <Shield className="h-4 w-4 text-green-600" />
+                    <span className="text-xs font-medium text-green-600">100% Seguro</span>
                   </div>
                 </div>
               </div>
