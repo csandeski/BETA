@@ -141,6 +141,29 @@ export default function Payment() {
     return value;
   };
   
+  const isValidCPF = (cpf: string): boolean => {
+    const cleanCpf = cpf.replace(/\D/g, '');
+    
+    if (cleanCpf.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(cleanCpf)) return false; // All digits are the same
+    
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cleanCpf[i]) * (10 - i);
+    }
+    let digit1 = 11 - (sum % 11);
+    if (digit1 > 9) digit1 = 0;
+    
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cleanCpf[i]) * (11 - i);
+    }
+    let digit2 = 11 - (sum % 11);
+    if (digit2 > 9) digit2 = 0;
+    
+    return digit1 === parseInt(cleanCpf[9]) && digit2 === parseInt(cleanCpf[10]);
+  };
+  
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -221,12 +244,21 @@ export default function Payment() {
       return;
     }
     
-    // Validate CPF length
+    // Validate CPF
     const cpfDigits = cpf.replace(/\D/g, '');
     if (cpfDigits.length !== 11) {
       toast({
         title: "CPF inválido",
-        description: "Por favor, insira um CPF válido com 11 dígitos.",
+        description: "Por favor, insira um CPF com 11 dígitos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!isValidCPF(cpf)) {
+      toast({
+        title: "CPF inválido",
+        description: "Por favor, insira um CPF válido.",
         variant: "destructive",
       });
       return;
@@ -566,15 +598,37 @@ export default function Payment() {
               </button>
             </Card>
             
-            {/* Security badges */}
-            <div className="flex items-center justify-center gap-6 py-2">
-              <div className="flex items-center gap-1.5">
-                <Shield className="h-4 w-4 text-green-600" />
-                <span className="text-xs text-gray-600">100% Seguro</span>
+            {/* Info section similar to the image */}
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div className="text-xs text-gray-600 leading-relaxed">
+                Ao clicar em <span className="font-semibold">Comprar agora</span>, eu declaro que li e concordo que a <span className="font-semibold">Beta Reader</span> está processando este pedido a serviço do vendedor e não possui responsabilidade pelo conteúdo e/ou uso, controle prévio deste, com os <span className="text-green-600 underline cursor-pointer">Termos de Uso</span>, <span className="text-green-600 underline cursor-pointer">Política de Privacidade</span> e <span className="text-green-600 underline cursor-pointer">Políticas da Beta Reader</span> e que sou maior de idade ou autorizado e acompanhado por um responsável.
               </div>
-              <div className="flex items-center gap-1.5">
-                <Lock className="h-4 w-4 text-gray-600" />
-                <span className="text-xs text-gray-600">Dados Protegidos</span>
+              
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <img 
+                      src="/logo-beta-reader.png" 
+                      alt="Beta Reader" 
+                      className="h-6 w-auto object-contain"
+                    />
+                    <div>
+                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Protegido por</p>
+                      <p className="text-xs font-bold text-gray-700 -mt-0.5">BETA READER TECNOLOGIA</p>
+                      <p className="text-[10px] text-gray-500">Políticas de Privacidade e dados protegidos</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-white rounded-lg border border-gray-200">
+                    <Shield className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Crédito</p>
+                    <p className="text-xs font-bold text-gray-700 -mt-0.5">Proteção digital</p>
+                  </div>
+                </div>
               </div>
             </div>
           </>

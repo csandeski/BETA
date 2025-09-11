@@ -606,6 +606,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test LiraPay API connection
+  app.get('/api/payments/lira/test', async (req: Request, res: Response) => {
+    try {
+      const lirapayApiKey = process.env.LIRAPAY_API_KEY;
+      if (!lirapayApiKey) {
+        return res.status(500).json({ error: 'LiraPay API key not configured' });
+      }
+      
+      const response = await fetch('https://api.lirapaybr.com/v1/account-info', {
+        headers: {
+          'api-secret': lirapayApiKey
+        }
+      });
+      
+      if (!response.ok) {
+        const error = await response.text();
+        return res.status(response.status).json({ 
+          error: 'LiraPay API test failed',
+          details: error,
+          status: response.status
+        });
+      }
+      
+      const data = await response.json();
+      res.json({ 
+        success: true,
+        message: 'LiraPay API connected successfully',
+        account: data
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to test LiraPay API',
+        message: error.message
+      });
+    }
+  });
+  
+  // CPF validation function
+  const isValidCPF = (cpf: string): boolean => {
+    if (cpf.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(cpf)) return false; // All digits are the same
+    
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cpf[i]) * (10 - i);
+    }
+    let digit1 = 11 - (sum % 11);
+    if (digit1 > 9) digit1 = 0;
+    
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cpf[i]) * (11 - i);
+    }
+    let digit2 = 11 - (sum % 11);
+    if (digit2 > 9) digit2 = 0;
+    
+    return digit1 === parseInt(cpf[9]) && digit2 === parseInt(cpf[10]);
+  };
+  
   // LiraPay Payment Routes
   app.post('/api/payments/lira/create', async (req: Request, res: Response) => {
     try {
@@ -629,48 +688,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error('LiraPay API key not configured');
       }
       
+      // Validate CPF
+      const cleanCpf = cpf.replace(/\D/g, '');
+      if (cleanCpf.length !== 11) {
+        return res.status(400).json({ message: "CPF inválido - deve ter 11 dígitos" });
+      }
+      
+      if (!isValidCPF(cleanCpf)) {
+        return res.status(400).json({ message: "CPF inválido - verifique os dígitos" });
+      }
+      
+      const requestBody = {
+        external_id: externalId,
+        total_amount: amount,
+        payment_method: 'PIX',
+        webhook_url: `${req.protocol}://${req.get('host')}/api/webhook/payment-status`,
+        items: [{
+          id: plan,
+          title: plan === 'unlimited' ? 'Plano Ilimitado' : 'Plano Premium',
+          description: plan === 'unlimited' ? 'Acesso ilimitado ao Beta Reader' : 'Acesso premium ao Beta Reader',
+          price: amount,
+          quantity: 1,
+          is_physical: false
+        }],
+        ip: req.ip || '127.0.0.1',
+        customer: {
+          name: fullName,
+          email,
+          phone: '11999999999', // Default phone if not provided
+          document_type: 'CPF',
+          document: cleanCpf,
+          utm_source: utm?.source || '',
+          utm_medium: utm?.medium || '',
+          utm_campaign: utm?.campaign || '',
+          utm_content: utm?.content || '',
+          utm_term: utm?.term || ''
+        }
+      };
+      
+      console.log('Creating LiraPay transaction with:', {
+        url: 'https://api.lirapaybr.com/v1/transactions',
+        external_id: externalId,
+        amount,
+        customer_email: email
+      });
+      
       const lirapayResponse = await fetch('https://api.lirapaybr.com/v1/transactions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'api-secret': lirapayApiKey
         },
-        body: JSON.stringify({
-          external_id: externalId,
-          total_amount: amount,
-          payment_method: 'PIX',
-          webhook_url: 'https://betareader.com/api/webhook/payment-status',
-          items: [{
-            id: plan,
-            title: plan === 'unlimited' ? 'Plano Ilimitado' : 'Plano Premium',
-            description: plan === 'unlimited' ? 'Acesso ilimitado ao Beta Reader' : 'Acesso premium ao Beta Reader',
-            price: amount,
-            quantity: 1,
-            is_physical: false
-          }],
-          ip: req.ip || '127.0.0.1',
-          customer: {
-            name: fullName,
-            email,
-            phone: '00000000000', // Default phone if not provided
-            document_type: 'CPF',
-            document: cpf.replace(/\D/g, ''),
-            utm_source: utm?.source || '',
-            utm_medium: utm?.medium || '',
-            utm_campaign: utm?.campaign || '',
-            utm_content: utm?.content || '',
-            utm_term: utm?.term || ''
-          }
-        })
+        body: JSON.stringify(requestBody)
       });
       
+      const responseText = await lirapayResponse.text();
+      console.log('LiraPay Response Status:', lirapayResponse.status);
+      console.log('LiraPay Response:', responseText.substring(0, 500)); // Log first 500 chars
+      
       if (!lirapayResponse.ok) {
-        const error = await lirapayResponse.text();
-        console.error('LiraPay API error:', error);
-        throw new Error('Failed to create PIX payment');
+        console.error('LiraPay API error:', responseText);
+        
+        // Parse error if possible
+        try {
+          const errorData = JSON.parse(responseText);
+          if (errorData.errorFields) {
+            const errorMessage = errorData.errorFields.join(', ');
+            return res.status(400).json({ 
+              message: `Erro na validação: ${errorMessage}` 
+            });
+          }
+          return res.status(400).json({ 
+            message: errorData.error || 'Erro ao processar pagamento' 
+          });
+        } catch (e) {
+          throw new Error(`LiraPay API error: ${lirapayResponse.status}`);
+        }
       }
       
-      const lirapayData = await lirapayResponse.json();
+      let lirapayData;
+      try {
+        lirapayData = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse LiraPay response:', e);
+        throw new Error('Invalid response from LiraPay');
+      }
+      
+      console.log('LiraPay transaction created:', {
+        id: lirapayData.id,
+        status: lirapayData.status,
+        hasPixPayload: !!lirapayData.pix?.payload
+      });
       
       // Store transaction in database as pending
       if (req.session.userId) {
@@ -689,13 +797,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Return PIX data from real API response
-      res.json({
+      const pixResponse = {
         orderId: lirapayData.id,
-        amount: lirapayData.total_value || amount,
+        amount: lirapayData.total_value || lirapayData.total_amount || amount,
         copyPasteCode: lirapayData.pix?.payload || '',
         qrCodeText: lirapayData.pix?.payload || '',
         expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
+      };
+      
+      console.log('Returning PIX data to frontend:', {
+        orderId: pixResponse.orderId,
+        hasPixCode: !!pixResponse.copyPasteCode
       });
+      
+      res.json(pixResponse);
     } catch (error: any) {
       console.error('LiraPay create payment error:', error);
       res.status(500).json({ 
@@ -714,13 +829,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error('LiraPay API key not configured');
       }
       
+      console.log('Checking payment status for:', orderId);
+      
       const lirapayResponse = await fetch(`https://api.lirapaybr.com/v1/transactions/${orderId}`, {
         headers: {
           'api-secret': lirapayApiKey
         }
       });
       
+      console.log('LiraPay status check response:', lirapayResponse.status);
+      
       if (!lirapayResponse.ok) {
+        console.log('Transaction not found or error, returning pending');
         // Transaction not found or error
         return res.json({
           status: 'pending'
@@ -728,6 +848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const lirapayData = await lirapayResponse.json();
+      console.log('Payment status:', lirapayData.status);
       
       // Map LiraPay status to our status
       let status = 'pending';
