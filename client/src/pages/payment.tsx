@@ -421,23 +421,13 @@ export default function Payment() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                    <div className="text-right">
-                      <p className="text-[10px] sm:text-[11px] text-gray-400 line-through leading-none mb-0.5 sm:mb-1">
-                        R$ {currentPlan.anchorPrice.toFixed(2).replace('.', ',')}
-                      </p>
-                      <p className="text-lg sm:text-2xl font-bold text-gray-900 leading-none whitespace-nowrap">
-                        R$ {planPrice.toFixed(2).replace('.', ',')}
-                      </p>
-                    </div>
-                    <div className="bg-green-500 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg">
-                      <p className="text-[10px] sm:text-xs font-bold leading-none">
-                        {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}%
-                      </p>
-                      <p className="text-[9px] sm:text-[10px] font-medium leading-none mt-0.5">
-                        OFF
-                      </p>
-                    </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-[11px] text-gray-400 line-through leading-none mb-0.5 sm:mb-1">
+                      R$ {currentPlan.anchorPrice.toFixed(2).replace('.', ',')}
+                    </p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900 leading-none whitespace-nowrap">
+                      R$ {planPrice.toFixed(2).replace('.', ',')}
+                    </p>
                   </div>
                 </div>
               </div>
