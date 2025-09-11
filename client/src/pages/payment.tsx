@@ -404,33 +404,38 @@ export default function Payment() {
         {!pixData ? (
           <div className="space-y-6">
             {/* Plan Banner */}
-            <Card className="overflow-hidden border border-gray-200 bg-white">
-              <div className="p-5">
+            <Card className="border border-gray-100 bg-white shadow-sm">
+              <div className="px-6 py-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <img 
                       src="/logo-beta-reader.png" 
                       alt="Beta Reader Brasil" 
-                      className="h-8 w-auto object-contain"
+                      className="h-9 w-auto object-contain"
                     />
-                    <div>
-                      <h2 className="text-base font-semibold text-gray-900">{currentPlan.name}</h2>
+                    <div className="border-l border-gray-200 pl-4">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {currentPlan.name}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-xs text-gray-400 line-through mb-0.5">
-                        R$ {currentPlan.anchorPrice.toFixed(2)}
+                      <p className="text-[11px] text-gray-400 line-through leading-none mb-1">
+                        R$ {currentPlan.anchorPrice.toFixed(2).replace('.', ',')}
                       </p>
-                      <p className="text-xl font-bold text-gray-900">
-                        R$ {planPrice.toFixed(2)}
+                      <p className="text-2xl font-bold text-gray-900 leading-none whitespace-nowrap">
+                        R$ {planPrice.toFixed(2).replace('.', ',')}
                       </p>
                     </div>
-                    {(currentPlan.anchorPrice > planPrice) && (
-                      <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-md">
-                        {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}%<br/>OFF
-                      </span>
-                    )}
+                    <div className="bg-green-500 text-white px-3 py-1.5 rounded-lg">
+                      <p className="text-xs font-bold leading-none">
+                        {Math.round(((currentPlan.anchorPrice - planPrice) / currentPlan.anchorPrice) * 100)}%
+                      </p>
+                      <p className="text-[10px] font-medium leading-none mt-0.5">
+                        OFF
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -507,34 +512,37 @@ export default function Payment() {
                 </h3>
               </div>
               
-              <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-6">
+              <div className="bg-gradient-to-b from-green-50 to-green-50/50 border border-green-100 rounded-xl p-6 mb-6">
                 {/* Header com PIX e Segurança */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" 
-                      alt="PIX" 
-                      className="h-6 object-contain"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between mb-5">
+                  <img 
+                    src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" 
+                    alt="PIX" 
+                    className="h-7 object-contain"
+                  />
+                  <div className="flex items-center gap-1.5 bg-white/80 px-3 py-1.5 rounded-full">
                     <Shield className="h-3.5 w-3.5 text-green-600" />
                     <span className="text-xs font-medium text-green-700">100% Seguro</span>
                   </div>
                 </div>
                 
-                {/* Valores centralizados verticalmente */}
-                <div className="text-center">
-                  <p className="text-xs text-gray-500 mb-1">
-                    De R$ {currentPlan.anchorPrice.toFixed(2)} por
-                  </p>
-                  <div className="flex items-center justify-center gap-3">
-                    <p className="text-3xl font-bold text-gray-900">
-                      R$ {planPrice.toFixed(2)}
+                {/* Valores organizados */}
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">
+                      De R$ {currentPlan.anchorPrice.toFixed(2).replace('.', ',')} por
                     </p>
-                    <span className="px-2.5 py-1 bg-green-500 text-white text-xs font-bold rounded-md">
-                      Economize R$ {(currentPlan.anchorPrice - planPrice).toFixed(2)}
-                    </span>
+                    <div className="flex items-end justify-between">
+                      <p className="text-4xl font-bold text-gray-900 leading-none whitespace-nowrap">
+                        R$ {planPrice.toFixed(2).replace('.', ',')}
+                      </p>
+                      <div className="bg-green-500 text-white px-4 py-2 rounded-lg">
+                        <p className="text-xs font-medium leading-none">Economize</p>
+                        <p className="text-base font-bold leading-none mt-0.5">
+                          R$ {(currentPlan.anchorPrice - planPrice).toFixed(2).replace('.', ',')}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
