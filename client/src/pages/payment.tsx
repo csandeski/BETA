@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Check, Clock, Copy, CheckCheck, ChevronLeft, QrCode, Shield, Lock, Loader2 } from "lucide-react";
+import { Check, CreditCard, Clock, Star, Trophy, Copy, CheckCheck, ChevronLeft, DollarSign, QrCode, Shield, Users, Info, ArrowRight, Book, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { UtmTracker } from '@/utils/utmTracker';
 import { fbPixel } from '@/utils/facebookPixel';
 import { useToast } from "@/hooks/use-toast";
 import Confetti from 'react-confetti';
-import { lockBodyScroll, unlockBodyScroll } from "@/utils/scrollLock";
 
 export default function Payment() {
   const [location, setLocation] = useLocation();
@@ -27,7 +26,6 @@ export default function Payment() {
   const [email, setEmail] = useState('');
   const [cpf, setCpf] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showLoadingPopup, setShowLoadingPopup] = useState(false);
   
   // PIX data
   const [pixData, setPixData] = useState<{
@@ -38,9 +36,6 @@ export default function Payment() {
   } | null>(null);
   const [copied, setCopied] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  
-  // Countdown timer (10 minutes = 600 seconds)
-  const [timeRemaining, setTimeRemaining] = useState(600);
   
   // Window size for confetti
   useEffect(() => {
@@ -58,34 +53,6 @@ export default function Payment() {
       setLocation('/dashboard');
     }
   }, [planFromUrl, setLocation]);
-  
-  // Countdown timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (pixData && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            // Timer expired
-            toast({
-              title: "Tempo expirado",
-              description: "O código PIX expirou. Por favor, gere um novo código.",
-              variant: "destructive",
-            });
-            setPixData(null);
-            setTimeRemaining(600);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [pixData, timeRemaining, toast]);
   
   // Track InitiateCheckout when page loads
   useEffect(() => {
@@ -136,15 +103,9 @@ export default function Payment() {
       return digits
         .replace(/(\d{3})(\d)/, '$1.$2')
         .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d{3})(\d{1,2})/, '$1-$2');
+        .replace(/(\d{3})(\d{1,2})/, '$1-$2');
     }
     return value;
-  };
-  
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
   
   const pollPaymentStatus = async (orderId: string) => {
@@ -157,8 +118,7 @@ export default function Payment() {
       }
 
       try {
-        // Using LiraPay status endpoint
-        const response = await fetch(`/api/payments/lira/status/${orderId}`);
+        const response = await fetch(`/api/payments/status/${orderId}`);
         const data = await response.json();
         
         if (data.status === 'paid' || data.status === 'approved') {
@@ -182,13 +142,9 @@ export default function Payment() {
             paymentMethod: 'pix'
           });
 
-          // Show confetti
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 5000);
-
           // Show success message
           toast({
-            title: "Pagamento confirmado! 🎉",
+            title: "Pagamento confirmado!",
             description: "Seu plano foi ativado com sucesso.",
           });
           
@@ -244,12 +200,6 @@ export default function Payment() {
     }
     
     setIsProcessing(true);
-    setShowLoadingPopup(true);
-    lockBodyScroll();
-    
-    // Simulate loading time for better UX
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     try {
       // Get user ID from auth status
       const authResponse = await fetch('/api/auth/status');
@@ -266,11 +216,11 @@ export default function Payment() {
       }
       const userId = authData.userId;
       
-      // Get UTM parameters to send to LiraPay
+      // Get UTM parameters to send to OrinPay
       const utmParams = UtmTracker.getForOrinPay();
       
-      // Call backend to generate PIX via LiraPay
-      const response = await fetch('/api/payments/lira/create', {
+      // Call backend to generate PIX via OrinPay
+      const response = await fetch('/api/payment/generate-pix', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -313,7 +263,7 @@ export default function Payment() {
         currency: 'BRL',
         plan: planFromUrl,
         planName: planName,
-        pixCode: data.copyPasteCode,
+        pixCode: data.pixCode,
         orderId: data.orderId
       });
       
@@ -329,14 +279,15 @@ export default function Payment() {
 
       // Save PIX data
       setPixData({
-        pixCode: data.copyPasteCode,
-        pixQrCode: data.qrCodeText || data.copyPasteCode,
+        pixCode: data.pixQrCode,
+        pixQrCode: data.pixQrCode,
         amount: data.amount,
         orderId: data.orderId
       });
       
-      // Reset timer
-      setTimeRemaining(600);
+      // Show confetti
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
       
       // Start polling for payment status
       if (data.orderId) {
@@ -352,8 +303,6 @@ export default function Payment() {
       });
     } finally {
       setIsProcessing(false);
-      setShowLoadingPopup(false);
-      unlockBodyScroll();
     }
   };
   
@@ -372,11 +321,29 @@ export default function Payment() {
   const planDetails = {
     premium: {
       name: 'Beta Reader Oficial',
+      description: 'Ganhe até R$ 240 por dia lendo livros',
+      features: [
+        { icon: Book, text: '8 livros novos por dia' },
+        { icon: DollarSign, text: 'Até R$ 240 por dia' },
+        { icon: Clock, text: 'Leitura rápida (5-8 min)' },
+        { icon: Trophy, text: 'Bônus de conclusão diário' },
+        { icon: Shield, text: 'Suporte prioritário' }
+      ],
       originalPrice: 39.90,
+      color: 'blue'
     },
     unlimited: {
       name: 'Beta Reader Ilimitado',
+      description: 'Ganhe até R$ 450 por dia lendo livros',
+      features: [
+        { icon: Book, text: '15 livros novos por dia' },
+        { icon: DollarSign, text: 'Até R$ 450 por dia' },
+        { icon: Clock, text: 'Leitura super rápida (3-5 min)' },
+        { icon: Trophy, text: 'Bônus exclusivos diários' },
+        { icon: Star, text: 'Acesso VIP completo' }
+      ],
       originalPrice: 59.90,
+      color: 'green'
     }
   };
   
@@ -387,7 +354,7 @@ export default function Payment() {
   ) : 0;
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -398,301 +365,319 @@ export default function Payment() {
         />
       )}
       
-      {/* Loading Popup */}
-      {showLoadingPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-xl">
-            <div className="flex flex-col items-center space-y-6">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                <Loader2 className="h-8 w-8 text-white animate-spin" />
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-semibold text-gray-900">
-                  Gerando seu pagamento
-                </p>
-                <p className="text-sm text-gray-600 mt-2">
-                  e confirmando sua conta...
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Header - Simplified without date/time */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-md mx-auto px-4 py-4">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => setLocation('/dashboard')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              data-testid="button-back"
-            >
-              <ChevronLeft className="h-5 w-5 text-gray-600" />
-            </button>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setLocation('/dashboard')}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                data-testid="button-back"
+              >
+                <ChevronLeft className="h-5 w-5 text-gray-600" />
+              </button>
               <img 
                 src="/logo-beta-reader.png" 
-                alt="Beta Reader" 
+                alt="Beta Reader Brasil" 
                 className="h-8 w-auto object-contain"
               />
-              <span className="text-lg font-semibold text-gray-900">Beta Reader Brasil</span>
+              <div>
+                <h1 className="text-base font-bold text-gray-900">Beta Reader Brasil</h1>
+                <p className="text-xs text-gray-600">Pagamento Seguro</p>
+              </div>
             </div>
-            <div className="w-9" />
+            
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-green-600" />
+              <span className="text-sm text-gray-600">100% Seguro</span>
+            </div>
           </div>
         </div>
       </div>
       
-      <div className="max-w-md mx-auto px-4 py-6 space-y-4">
-        {!pixData ? (
-          <>
-            {/* Plan Banner (Simplified) */}
-            <Card className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900">{currentPlan.name}</h3>
-                </div>
-                <div className="text-right">
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Column - Plan Details */}
+          <div className="lg:col-span-1">
+            <Card className="overflow-hidden border-gray-200 sticky top-20">
+              {/* Plan Header */}
+              <div className={`p-4 ${
+                planFromUrl === 'unlimited' 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                  : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+              } text-white`}>
+                <h2 className="text-xl font-bold">{currentPlan.name}</h2>
+                <p className="text-sm opacity-90 mt-1">{currentPlan.description}</p>
+              </div>
+              
+              {/* Price Section */}
+              <div className="p-6 bg-white">
+                <div className="flex items-baseline gap-2 mb-4">
                   {isDiscounted && (
-                    <p className="text-sm text-gray-400 line-through">
-                      R$ {currentPlan.originalPrice.toFixed(2).replace('.', ',')}
-                    </p>
+                    <span className="text-lg text-gray-400 line-through">
+                      R$ {currentPlan.originalPrice.toFixed(2)}
+                    </span>
                   )}
-                  <p className="text-xl font-bold text-gray-900">
-                    R$ {planPrice.toFixed(2).replace('.', ',')}
-                  </p>
+                  <span className="text-3xl font-bold text-gray-900">
+                    R$ {planPrice.toFixed(2)}
+                  </span>
                   {isDiscounted && (
-                    <span className="text-xs text-green-600 font-semibold">
+                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
                       {discount}% OFF
                     </span>
                   )}
                 </div>
-              </div>
-            </Card>
-            
-            {/* User Data Form with more spacing */}
-            <Card className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-5">Confirme seus dados</h3>
-              
-              <div className="space-y-5">
-                <div>
-                  <Label htmlFor="name" className="text-sm font-medium text-gray-700 mb-2 block">
-                    Nome completo
-                  </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Digite seu nome completo"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="h-12 px-4 text-base rounded-lg border-gray-200 focus:border-green-500 focus:ring-green-500"
-                    data-testid="input-name"
-                  />
+                
+                {/* Features */}
+                <div className="space-y-3">
+                  {currentPlan.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${
+                        planFromUrl === 'unlimited'
+                          ? 'bg-green-50 text-green-600'
+                          : 'bg-blue-50 text-blue-600'
+                      }`}>
+                        <feature.icon className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm text-gray-700">{feature.text}</span>
+                    </div>
+                  ))}
                 </div>
                 
-                <div>
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 px-4 text-base rounded-lg border-gray-200 focus:border-green-500 focus:ring-green-500"
-                    data-testid="input-email"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="cpf" className="text-sm font-medium text-gray-700 mb-2 block">
-                    CPF
-                  </Label>
-                  <Input
-                    id="cpf"
-                    type="text"
-                    placeholder="000.000.000-00"
-                    value={cpf}
-                    onChange={(e) => setCpf(formatCPF(e.target.value))}
-                    maxLength={14}
-                    className="h-12 px-4 text-base rounded-lg border-gray-200 focus:border-green-500 focus:ring-green-500"
-                    data-testid="input-cpf"
-                  />
-                </div>
-              </div>
-            </Card>
-            
-            {/* PIX Payment Method Card - More beautiful */}
-            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-white rounded-lg shadow-sm">
-                    <QrCode className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-semibold text-gray-900">Pagamento via PIX</p>
-                    <p className="text-sm text-gray-600">Aprovação instantânea</p>
+                {/* Trust Badges */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-center">
+                      <Users className="h-5 w-5 mx-auto mb-1 text-gray-600" />
+                      <p className="text-xs font-semibold text-gray-900">2.673</p>
+                      <p className="text-xs text-gray-600">Leitores</p>
+                    </div>
+                    <div className="text-center">
+                      <Star className="h-5 w-5 mx-auto mb-1 text-yellow-500" />
+                      <p className="text-xs font-semibold text-gray-900">4.9/5</p>
+                      <p className="text-xs text-gray-600">Avaliação</p>
+                    </div>
+                    <div className="text-center">
+                      <Shield className="h-5 w-5 mx-auto mb-1 text-green-600" />
+                      <p className="text-xs font-semibold text-gray-900">100%</p>
+                      <p className="text-xs text-gray-600">Seguro</p>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="bg-white rounded-lg p-4 mb-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Total a pagar</span>
-                  <span className="text-2xl font-bold text-gray-900">
-                    R$ {planPrice.toFixed(2).replace('.', ',')}
-                  </span>
-                </div>
-              </div>
-              
-              <button
-                onClick={handleGeneratePix}
-                disabled={isProcessing || !fullName || !email || !cpf}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_6px_0_0_rgb(22,101,52)] hover:shadow-[0_4px_0_0_rgb(22,101,52)] hover:translate-y-[2px] active:shadow-[0_2px_0_0_rgb(22,101,52)] active:translate-y-[4px] transform text-base"
-                data-testid="button-generate-pix"
-              >
-                {isProcessing ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Processando...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <QrCode className="h-5 w-5" />
-                    Gerar PIX
-                  </span>
-                )}
-              </button>
             </Card>
-            
-            {/* Security badges */}
-            <div className="flex items-center justify-center gap-6 py-2">
-              <div className="flex items-center gap-1.5">
-                <Shield className="h-4 w-4 text-green-600" />
-                <span className="text-xs text-gray-600">100% Seguro</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Lock className="h-4 w-4 text-gray-600" />
-                <span className="text-xs text-gray-600">Dados Protegidos</span>
-              </div>
-            </div>
-          </>
-        ) : (
-          /* PIX Generated Screen with Timer */
-          <div className="space-y-4">
-            {/* Timer Card at the top */}
-            <Card className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-200 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-orange-600" />
-                  <span className="text-sm font-medium text-gray-700">Tempo restante</span>
-                </div>
-                <span className="text-lg font-bold text-orange-600">{formatTime(timeRemaining)}</span>
-              </div>
-            </Card>
-            
-            {/* QR Code Card */}
-            <Card className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900 mb-2">
-                  PIX Gerado!
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Escaneie o código ou copie e cole no seu banco
-                </p>
-              </div>
-              
-              {/* QR Code */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-4 flex justify-center">
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <QRCodeSVG
-                    value={pixData.pixQrCode}
-                    size={200}
-                    level="H"
-                    includeMargin={false}
-                  />
-                </div>
-              </div>
-              
-              {/* Amount with discrete anchoring */}
-              <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Valor</span>
-                  <div className="text-right">
-                    {isDiscounted && (
-                      <span className="text-xs text-gray-400 line-through mr-2">
-                        R$ {currentPlan.originalPrice.toFixed(2).replace('.', ',')}
-                      </span>
-                    )}
-                    <span className="text-lg font-bold text-gray-900">
-                      R$ {pixData.amount.toFixed(2).replace('.', ',')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* PIX Code */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-gray-700">
-                  Código PIX copia e cola
-                </Label>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 font-mono break-all mb-3 line-clamp-3">
-                    {pixData.pixCode}
+          </div>
+          
+          {/* Right Column - Form or PIX */}
+          <div className="lg:col-span-2">
+            {!pixData ? (
+              /* Payment Form */
+              <Card className="p-6 border-gray-200">
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">
+                    Finalize seu pagamento
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Preencha seus dados para gerar o código PIX
                   </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name" className="text-gray-700">
+                      Nome completo
+                    </Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Digite seu nome completo"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="mt-1"
+                      data-testid="input-name"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="email" className="text-gray-700">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-1"
+                      data-testid="input-email"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="cpf" className="text-gray-700">
+                      CPF
+                    </Label>
+                    <Input
+                      id="cpf"
+                      type="text"
+                      placeholder="000.000.000-00"
+                      value={cpf}
+                      onChange={(e) => setCpf(formatCPF(e.target.value))}
+                      maxLength={14}
+                      className="mt-1"
+                      data-testid="input-cpf"
+                    />
+                  </div>
+                  
+                  {/* Security Info */}
+                  <div className="bg-gray-50 rounded-lg p-4 flex items-start gap-3">
+                    <Shield className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">
+                        Pagamento 100% seguro
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">
+                        Seus dados estão protegidos com criptografia de ponta a ponta.
+                        Processamento via PIX instantâneo.
+                      </p>
+                    </div>
+                  </div>
+                  
                   <Button
-                    onClick={handleCopyPixCode}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold h-11 rounded-lg"
-                    data-testid="button-copy-pix"
+                    onClick={handleGeneratePix}
+                    disabled={isProcessing}
+                    className={`w-full py-6 text-base font-semibold ${
+                      planFromUrl === 'unlimited'
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
+                        : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600'
+                    } text-white`}
+                    data-testid="button-generate-pix"
                   >
-                    {copied ? (
-                      <span className="flex items-center gap-2">
-                        <CheckCheck className="h-4 w-4" />
-                        Copiado!
+                    {isProcessing ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Gerando PIX...
                       </span>
                     ) : (
-                      <span className="flex items-center gap-2">
-                        <Copy className="h-4 w-4" />
-                        Copiar código PIX
+                      <span className="flex items-center justify-center gap-2">
+                        <QrCode className="h-5 w-5" />
+                        Gerar Código PIX
                       </span>
                     )}
                   </Button>
+                  
+                  {/* Payment Methods */}
+                  <div className="flex items-center justify-center gap-4 pt-4">
+                    <img 
+                      src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" 
+                      alt="PIX" 
+                      className="h-8 object-contain"
+                    />
+                    <span className="text-xs text-gray-500">Pagamento via PIX</span>
+                  </div>
                 </div>
-              </div>
-            </Card>
-            
-            {/* Status Card */}
-            <Card className="bg-blue-50 rounded-xl border border-blue-200 p-4">
-              <div className="flex items-center gap-3">
-                <div className="animate-pulse">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+              </Card>
+            ) : (
+              /* PIX Payment */
+              <Card className="overflow-hidden border-gray-200">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 text-white">
+                  <div className="flex items-center gap-3 mb-2">
+                    <CheckCircle className="h-8 w-8" />
+                    <div>
+                      <h2 className="text-xl font-bold">PIX Gerado com Sucesso!</h2>
+                      <p className="text-sm opacity-90">Escaneie o QR Code ou copie o código</p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    Aguardando pagamento
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Você será redirecionado automaticamente
-                  </p>
+                
+                <div className="p-6 space-y-6">
+                  {/* Amount */}
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-1">Valor a pagar</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      R$ {pixData.amount.toFixed(2)}
+                    </p>
+                  </div>
+                  
+                  {/* QR Code */}
+                  <div className="bg-white p-6 rounded-xl border-2 border-gray-200">
+                    <div className="flex justify-center mb-4">
+                      <div className="p-4 bg-white rounded-lg">
+                        <QRCodeSVG
+                          value={pixData.pixQrCode}
+                          size={200}
+                          level="H"
+                          includeMargin={true}
+                        />
+                      </div>
+                    </div>
+                    
+                    <p className="text-center text-sm text-gray-600 mb-4">
+                      Aponte a câmera do seu celular para o QR Code
+                    </p>
+                    
+                    {/* PIX Code Copy */}
+                    <div className="space-y-2">
+                      <Label className="text-sm text-gray-700">Ou copie o código PIX:</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={pixData.pixCode}
+                          readOnly
+                          className="flex-1 text-xs font-mono"
+                        />
+                        <Button
+                          onClick={handleCopyPixCode}
+                          variant="outline"
+                          className="px-4"
+                          data-testid="button-copy-pix"
+                        >
+                          {copied ? (
+                            <CheckCheck className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Instructions */}
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-blue-900 mb-2">
+                          Como pagar com PIX:
+                        </p>
+                        <ol className="text-sm text-blue-800 space-y-1">
+                          <li>1. Abra o app do seu banco</li>
+                          <li>2. Escolha pagar com PIX</li>
+                          <li>3. Escaneie o QR Code ou cole o código</li>
+                          <li>4. Confirme o pagamento</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Status */}
+                  <div className="text-center py-4">
+                    <div className="inline-flex items-center gap-2 text-amber-600">
+                      <Clock className="h-5 w-5 animate-pulse" />
+                      <span className="text-sm font-medium">
+                        Aguardando pagamento...
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      Após o pagamento, você será redirecionado automaticamente
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Card>
-            
-            {/* New PIX button */}
-            <Button
-              onClick={() => {
-                setPixData(null);
-                setTimeRemaining(600);
-              }}
-              variant="outline"
-              className="w-full h-11 rounded-lg border-gray-200"
-              data-testid="button-new-pix"
-            >
-              Gerar novo código PIX
-            </Button>
+              </Card>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
