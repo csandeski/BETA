@@ -537,15 +537,17 @@ export default function Payment() {
               {/* Security Badges */}
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <div className="text-center">
-                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <div className="flex items-center justify-center gap-1.5 mb-2">
                     <Lock className="h-3.5 w-3.5 text-gray-400" />
                     <p className="text-xs font-medium text-gray-700 uppercase tracking-wide">
                       Protegido por
                     </p>
                   </div>
-                  <p className="text-xs text-gray-600">
-                    BETA READER BRASIL
-                  </p>
+                  <img 
+                    src="/logo-beta-reader.png" 
+                    alt="Beta Reader Brasil" 
+                    className="h-6 w-auto object-contain mx-auto mb-1"
+                  />
                   <p className="text-[10px] text-gray-400 mt-1">
                     © 2025. Todos os direitos reservados
                   </p>
