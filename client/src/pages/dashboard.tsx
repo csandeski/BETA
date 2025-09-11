@@ -480,18 +480,29 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-3">
-            {books.map((book) => {
+            {books.map((book, index) => {
               const isCompleted = userDataManager.isBookCompleted(book.slug);
+              
+              // Determinar qual livro deve ter destaque
+              const completedBooksCount = books.filter(b => userDataManager.isBookCompleted(b.slug)).length;
+              const shouldHighlight = !isCompleted && index === completedBooksCount && completedBooksCount < 3;
+              
               return (
               <div
                 key={book.id}
-                className={`group bg-white border rounded-2xl p-4 transition-all overflow-hidden relative ${
+                className={`group bg-white border-2 rounded-2xl p-4 transition-all overflow-hidden relative ${
                   isCompleted
                     ? 'border-gray-200 bg-gray-50/50 cursor-not-allowed opacity-60'
-                    : 'border-gray-200 hover:border-green-300 cursor-pointer hover:shadow-md'
+                    : shouldHighlight 
+                      ? 'border-green-400 shadow-lg shadow-green-200/50 animate-pulse-border'
+                      : 'border-gray-200 hover:border-green-300 cursor-pointer hover:shadow-md'
                 }`}
                 data-testid={`card-book-${book.id}`}
               >
+                {/* Highlight glow effect */}
+                {shouldHighlight && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 via-emerald-400/10 to-green-400/10 animate-shimmer pointer-events-none" />
+                )}
                 {/* Subtle gradient overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-r ${book.color} ${isCompleted ? 'opacity-[0.01]' : 'opacity-[0.03] group-hover:opacity-[0.06]'} transition-opacity`}></div>
                 
