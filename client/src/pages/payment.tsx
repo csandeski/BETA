@@ -546,21 +546,24 @@ export default function Payment() {
                 </div>
               </div>
               
-              <Button
+              <button
                 onClick={handleGeneratePix}
-                disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold h-12 text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                disabled={isProcessing || !fullName || !email || !cpf}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_6px_0_0_rgb(22,101,52)] hover:shadow-[0_4px_0_0_rgb(22,101,52)] hover:translate-y-[2px] active:shadow-[0_2px_0_0_rgb(22,101,52)] active:translate-y-[4px] transform text-base"
                 data-testid="button-generate-pix"
               >
                 {isProcessing ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center justify-center gap-2">
                     <Loader2 className="h-5 w-5 animate-spin" />
                     Processando...
                   </span>
                 ) : (
-                  'Gerar PIX'
+                  <span className="flex items-center justify-center gap-2">
+                    <QrCode className="h-5 w-5" />
+                    Gerar PIX
+                  </span>
                 )}
-              </Button>
+              </button>
             </Card>
             
             {/* Security badges */}

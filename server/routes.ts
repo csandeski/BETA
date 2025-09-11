@@ -623,33 +623,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId || 'guest';
       const externalId = `PLAN-${userId}-${Date.now()}`;
       
-      // Make API call to LiraPay
-      const lirapayApiKey = process.env.LIRAPAY_API_KEY || 'test_key_1234567890';
-      const lirapayResponse = await fetch('https://api.lirapay.com.br/v1/payments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${lirapayApiKey}`
-        },
-        body: JSON.stringify({
+      // Simulate LiraPay API response (for demo purposes)
+      // In production, this would be a real API call
+      const simulatePixGeneration = () => {
+        // Generate a realistic PIX code
+        const pixKey = `00020126580014BR.GOV.BCB.PIX0136${Date.now()}`;
+        const merchantName = '5913BETAREADER';
+        const merchantCity = '6009SAOPAULO';
+        const transactionId = `62070503${externalId.substring(0, 10)}`;
+        const crc = '6304'; // Would be calculated in production
+        
+        const pixCode = `${pixKey}520400005303986540${amount.toFixed(2)}5802BR${merchantName}${merchantCity}${transactionId}${crc}ABCD`;
+        
+        return {
+          id: externalId,
+          status: 'PENDING',
+          pix_code: pixCode,
+          qr_code_text: pixCode,
           amount,
           external_id: externalId,
-          customer: {
-            name: fullName,
-            email,
-            cpf
-          },
-          payment_method: 'pix',
-          utm_source: utm?.source,
-          utm_campaign: utm?.campaign
-        })
-      });
+          created_at: new Date().toISOString()
+        };
+      };
       
-      if (!lirapayResponse.ok) {
-        throw new Error('LiraPay API error');
-      }
-      
-      const lirapayData = await lirapayResponse.json();
+      const lirapayData = simulatePixGeneration();
       
       // Store transaction in database as pending
       if (req.session.userId) {
@@ -687,23 +684,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { orderId } = req.params;
       
-      // Query LiraPay for payment status
-      const lirapayApiKey = process.env.LIRAPAY_API_KEY || 'test_key_1234567890';
-      const lirapayResponse = await fetch(`https://api.lirapay.com.br/v1/payments/${orderId}`, {
-        headers: {
-          'Authorization': `Bearer ${lirapayApiKey}`
+      // Simulate payment status check (for demo purposes)
+      // In production, this would query the real LiraPay API
+      const simulatePaymentStatus = () => {
+        // Simulate payment being approved after a short time (for demo)
+        const randomChance = Math.random();
+        
+        // 40% chance of payment being approved (for demo)
+        if (randomChance > 0.6) {
+          return {
+            status: 'AUTHORIZED',
+            amount: orderId.includes('59.90') ? 59.90 : 39.90,
+            external_id: orderId
+          };
         }
-      });
+        
+        return {
+          status: 'PENDING',
+          amount: orderId.includes('59.90') ? 59.90 : 39.90,
+          external_id: orderId
+        };
+      };
       
-      if (!lirapayResponse.ok) {
-        // For demo, simulate paid status after some time
-        const isPaid = Math.random() > 0.7; // 30% chance of being paid in demo
-        return res.json({
-          status: isPaid ? 'paid' : 'pending'
-        });
-      }
-      
-      const lirapayData = await lirapayResponse.json();
+      const lirapayData = simulatePaymentStatus();
       
       // Map LiraPay status to our status
       let status = 'pending';
