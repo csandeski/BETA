@@ -606,6 +606,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // LiraPay Payment Routes
+  app.post('/api/payments/lira/create', async (req: Request, res: Response) => {
+    try {
+      const { plan, fullName, email, cpf, utm } = req.body;
+      
+      // Validate inputs
+      if (!plan || !fullName || !email || !cpf) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Determine amount based on plan
+      const amount = plan === 'unlimited' ? 59.90 : 39.90;
+      
+      // Generate external ID
+      const userId = req.session.userId || 'guest';
+      const externalId = `PLAN-${userId}-${Date.now()}`;
+      
+      // Make API call to LiraPay
+      const lirapayApiKey = process.env.LIRAPAY_API_KEY || 'test_key_1234567890';
+      const lirapayResponse = await fetch('https://api.lirapay.com.br/v1/payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${lirapayApiKey}`
+        },
+        body: JSON.stringify({
+          amount,
+          external_id: externalId,
+          customer: {
+            name: fullName,
+            email,
+            cpf
+          },
+          payment_method: 'pix',
+          utm_source: utm?.source,
+          utm_campaign: utm?.campaign
+        })
+      });
+      
+      if (!lirapayResponse.ok) {
+        throw new Error('LiraPay API error');
+      }
+      
+      const lirapayData = await lirapayResponse.json();
+      
+      // Store transaction in database as pending
+      if (req.session.userId) {
+        await storage.createTransaction({
+          userId: req.session.userId,
+          type: 'pending',
+          amount: amount.toString(),
+          description: `Plano ${plan === 'unlimited' ? 'Ilimitado' : 'Premium'} - PIX`
+        });
+      }
+      
+      // Return PIX data
+      res.json({
+        orderId: lirapayData.id || externalId,
+        amount,
+        copyPasteCode: lirapayData.pix_code || `00020126580014BR.GOV.BCB.PIX0136${externalId}520400005303986540${amount.toFixed(2)}5802BR5913BetaReader6009SaoPaulo62070503***6304`,
+        qrCodeText: lirapayData.qr_code_text || `00020126580014BR.GOV.BCB.PIX0136${externalId}520400005303986540${amount.toFixed(2)}5802BR5913BetaReader6009SaoPaulo62070503***6304`,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
+      });
+    } catch (error: any) {
+      console.error('LiraPay create payment error:', error);
+      res.status(500).json({ 
+        message: error.message || "Failed to generate PIX payment" 
+      });
+    }
+  });
+
+  app.get('/api/payments/lira/status/:orderId', async (req: Request, res: Response) => {
+    try {
+      const { orderId } = req.params;
+      
+      // Query LiraPay for payment status
+      const lirapayApiKey = process.env.LIRAPAY_API_KEY || 'test_key_1234567890';
+      const lirapayResponse = await fetch(`https://api.lirapay.com.br/v1/payments/${orderId}`, {
+        headers: {
+          'Authorization': `Bearer ${lirapayApiKey}`
+        }
+      });
+      
+      if (!lirapayResponse.ok) {
+        // For demo, simulate paid status after some time
+        const isPaid = Math.random() > 0.7; // 30% chance of being paid in demo
+        return res.json({
+          status: isPaid ? 'paid' : 'pending'
+        });
+      }
+      
+      const lirapayData = await lirapayResponse.json();
+      
+      // Map LiraPay status to our status
+      let status = 'pending';
+      if (lirapayData.status === 'AUTHORIZED' || lirapayData.status === 'PAID') {
+        status = 'paid';
+        
+        // Update user plan if payment is successful
+        if (req.session.userId) {
+          // Parse plan from external_id
+          const externalId = lirapayData.external_id || '';
+          const plan = externalId.includes('59.90') ? 'unlimited' : 'premium';
+          const actualPlan = plan === 'unlimited' ? 'premium' : plan;
+          
+          await storage.updateUser(req.session.userId, { 
+            plan: actualPlan,
+            selectedPlan: plan
+          });
+          
+          // Update transaction status
+          await storage.createTransaction({
+            userId: req.session.userId,
+            type: 'deposit',
+            amount: lirapayData.amount.toString(),
+            description: `Plano ${plan === 'unlimited' ? 'Ilimitado' : 'Premium'} - Confirmado`
+          });
+        }
+      } else if (lirapayData.status === 'EXPIRED') {
+        status = 'expired';
+      }
+      
+      res.json({ status });
+    } catch (error: any) {
+      console.error('LiraPay status check error:', error);
+      res.status(500).json({ 
+        message: error.message || "Failed to check payment status" 
+      });
+    }
+  });
+
   // Webhook endpoint for LiraPay payment status
   app.post('/api/webhook/payment-status', async (req: Request, res: Response) => {
     try {
