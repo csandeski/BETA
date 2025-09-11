@@ -551,22 +551,34 @@ export default function Payment() {
 
               {/* Security Badges */}
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-center gap-8">
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Lock className="h-4 w-4 text-gray-500" />
-                      <span className="text-xs font-semibold text-gray-700">PROTEGIDO POR</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-start gap-2">
+                    <Lock className="h-4 w-4 text-gray-400 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-gray-700 uppercase tracking-wide">
+                        Protegido por
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        BETA READER BRASIL
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-1">
+                        © 2025. Todos os direitos reservados
+                      </p>
                     </div>
-                    <span className="text-xs text-gray-600">BETA READER BRASIL</span>
-                    <span className="text-xs text-gray-500">© 2025. Todos os direitos reservados</span>
                   </div>
                   
-                  <div className="flex flex-col items-center">
-                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1 rounded-full mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-blue-500 text-white px-3 py-1.5 rounded-lg">
                       <span className="text-xs font-bold">PCI</span>
                     </div>
-                    <span className="text-xs text-gray-600">Padrão</span>
-                    <span className="text-xs text-gray-500">Certificado Level 1</span>
+                    <div>
+                      <p className="text-xs text-gray-600">
+                        Padrão
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Certificado Level 1
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
