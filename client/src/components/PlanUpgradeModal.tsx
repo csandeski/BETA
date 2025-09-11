@@ -56,28 +56,17 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
     }
   }, [isOpen, totalEarned]);
 
-  // Track InitiateCheckout when arriving at payment form (step 5)
-  // This must be before the early return to avoid hooks order issues
+  // Track events when modal opens
   useEffect(() => {
-    if (isOpen && step === 5 && selectedPlan !== 'free') {
-      const planPrice = selectedPlan === 'unlimited' ? 
-        (isDiscounted ? 38.94 : 59.90) : 
-        (isDiscounted ? 29.93 : 39.90);
-      const planName = selectedPlan === 'premium' ? 'Beta Reader Oficial' : 'Beta Reader Ilimitado';
-      
-      fbPixel.trackInitiateCheckout({
-        value: planPrice,
-        currency: 'BRL',
-        content_name: planName,
-        content_category: 'subscription',
-        content_ids: [selectedPlan + '_plan'],
-        content_type: 'product',
-        num_items: 1,
-        plan: selectedPlan,
-        paymentMethod: 'pix'
+    if (isOpen && step === 1) {
+      // Track when modal opens on step 1
+      fbPixel.trackViewContent({
+        content_name: 'Plan Upgrade Modal',
+        content_category: 'modal',
+        content_type: 'upgrade_prompt'
       });
     }
-  }, [isOpen, step, selectedPlan, isDiscounted]);
+  }, [isOpen, step]);
 
   // Scroll to top when step changes
   useEffect(() => {
@@ -108,8 +97,9 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
       return;
     }
     
-    // Go to step 5 to confirm data and generate PIX
-    setStep(5);
+    // Navigate to payment page with selected plan
+    onClose();
+    setLocation(`/payment?plan=${selectedPlan}&discount=${isDiscounted}`);
   };
   
   const pollPaymentStatus = async (orderId: string) => {
@@ -338,35 +328,33 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
             </button>
           </div>
           
-          {/* Dynamic Step Title - clean design - hide for step >= 4 */}
-          {step < 4 && (
-            <>
-              <div className="space-y-2">
-                <h2 className="text-lg font-bold text-gray-900">
-                  {step === 1 && "Parabéns pelos 3 livros!"}
-                  {step === 2 && "Sobre a Beta Reader Brasil"}
-                  {step === 3 && "Análise do seu potencial"}
-                </h2>
-                <p className="text-sm text-gray-600">
-                  {step === 1 && "Você alcançou um marco importante"}
-                  {step === 2 && "Conheça nossa história de sucesso"}
-                  {step === 3 && "Veja quanto você está perdendo"}
-                </p>
-              </div>
+          {/* Dynamic Step Title - clean design */}
+          <div className="space-y-2">
+            <h2 className="text-lg font-bold text-gray-900">
+              {step === 1 && "Parabéns pelos 3 livros!"}
+              {step === 2 && "Sobre a Beta Reader Brasil"}
+              {step === 3 && "Análise do seu potencial"}
+              {step === 4 && "Escolha seu plano ideal"}
+            </h2>
+            <p className="text-sm text-gray-600">
+              {step === 1 && "Você alcançou um marco importante"}
+              {step === 2 && "Conheça nossa história de sucesso"}
+              {step === 3 && "Veja quanto você está perdendo"}
+              {step === 4 && "Desbloqueie todo o potencial"}
+            </p>
+          </div>
 
-              {/* Step Indicator - subtle green */}
-              <div className="flex gap-1.5 mt-4">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                      i <= step ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-200'
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
-          )}
+          {/* Step Indicator - subtle green */}
+          <div className="flex gap-1.5 mt-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
+                  i <= step ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-200'
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Scrollable Content - clean white background */}
