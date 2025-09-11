@@ -505,33 +505,38 @@ export default function Payment() {
                 </h3>
               </div>
               
-              <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-6">
+                {/* Header com PIX e Segurança */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
                     <img 
                       src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" 
                       alt="PIX" 
-                      className="h-8 object-contain"
+                      className="h-6 object-contain"
                     />
-                    <div>
-                      <p className="font-semibold text-gray-900">PIX</p>
-                    </div>
+                    <span className="text-sm font-semibold text-gray-900">PIX</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-green-600" />
+                  <div className="flex items-center gap-1.5">
+                    <Shield className="h-3.5 w-3.5 text-green-600" />
                     <span className="text-xs font-medium text-green-700">100% Seguro</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between pt-3 border-t border-green-200">
-                  <div className="text-sm text-gray-600">
-                    <span className="text-xs">De R$ {currentPlan.anchorPrice.toFixed(2)} por</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-2xl font-bold text-gray-900">R$ {planPrice.toFixed(2)}</span>
-                    <span className="text-xs text-green-700 font-semibold ml-2">
-                      Economize R$ {(currentPlan.anchorPrice - planPrice).toFixed(2)}
-                    </span>
+                {/* Valores organizados */}
+                <div className="space-y-3">
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">De R$ {currentPlan.anchorPrice.toFixed(2)} por</p>
+                      <p className="text-2xl font-bold text-gray-900">R$ {planPrice.toFixed(2)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-green-600 font-medium">
+                        Economize R$
+                      </p>
+                      <p className="text-lg font-bold text-green-600">
+                        {(currentPlan.anchorPrice - planPrice).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
