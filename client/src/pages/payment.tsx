@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Copy, CheckCheck, ChevronLeft, QrCode, Shield, Clock, CheckCircle, X } from "lucide-react";
+import { Copy, CheckCheck, ChevronLeft, QrCode, Shield, Clock, CheckCircle, X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -506,7 +506,6 @@ export default function Payment() {
                     />
                     <div>
                       <p className="font-semibold text-gray-900">PIX</p>
-                      <p className="text-xs text-gray-600">Aprovação instantânea</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -516,20 +515,54 @@ export default function Payment() {
                 </div>
                 
                 <div className="flex items-center justify-between pt-3 border-t border-green-200">
-                  <span className="text-sm text-gray-700">Total a pagar:</span>
-                  <span className="text-lg font-bold text-gray-900">R$ {planPrice.toFixed(2)}</span>
+                  <div className="text-sm text-gray-600">
+                    <span className="text-xs">De R$ {currentPlan.originalPrice.toFixed(2)} por</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold text-gray-900">R$ {planPrice.toFixed(2)}</span>
+                    {isDiscounted && (
+                      <span className="text-xs text-green-700 font-semibold ml-2">
+                        Economize R$ {(currentPlan.originalPrice - planPrice).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               
               <Button
                 onClick={handleGeneratePix}
                 disabled={isProcessing}
-                className="w-full h-14 text-base font-semibold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+                className="w-full h-14 text-base font-semibold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
+                style={{
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 6px 0 0 rgba(34, 197, 94, 0.7)',
+                }}
                 data-testid="button-generate-pix"
               >
                 <QrCode className="h-5 w-5 mr-2" />
                 Gerar Código PIX
               </Button>
+
+              {/* Security Badges */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-center gap-8">
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lock className="h-4 w-4 text-gray-500" />
+                      <span className="text-xs font-semibold text-gray-700">PROTEGIDO POR</span>
+                    </div>
+                    <span className="text-xs text-gray-600">BETA READER BRASIL</span>
+                    <span className="text-xs text-gray-500">© 2025. Todos os direitos reservados</span>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1 rounded-full mb-2">
+                      <span className="text-xs font-bold">PCI</span>
+                    </div>
+                    <span className="text-xs text-gray-600">Padrão</span>
+                    <span className="text-xs text-gray-500">Certificado Level 1</span>
+                  </div>
+                </div>
+              </div>
             </Card>
           </div>
         ) : (
