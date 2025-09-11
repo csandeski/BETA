@@ -340,13 +340,11 @@ export default function Payment() {
   const planDetails = {
     premium: {
       name: 'Beta Reader Oficial',
-      subtitle: 'Ganhe até R$ 240 por dia',
       originalPrice: 39.90,
       color: 'blue'
     },
     unlimited: {
       name: 'Beta Reader Ilimitado',
-      subtitle: 'Ganhe até R$ 450 por dia',
       originalPrice: 59.90,
       color: 'green'
     }
@@ -402,32 +400,34 @@ export default function Payment() {
         {!pixData ? (
           <div className="space-y-6">
             {/* Plan Banner */}
-            <Card className="overflow-hidden border-gray-200">
-              <div className={`p-6 ${
-                planFromUrl === 'unlimited' 
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
-                  : 'bg-gradient-to-r from-blue-500 to-indigo-500'
-              } text-white`}>
+            <Card className="overflow-hidden border border-gray-200 bg-white">
+              <div className="p-5">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold">{currentPlan.name}</h2>
-                    <p className="text-sm opacity-90 mt-1">{currentPlan.subtitle}</p>
-                  </div>
-                  <div className="text-right">
-                    {isDiscounted && (
-                      <p className="text-sm line-through opacity-75">
-                        R$ {currentPlan.originalPrice.toFixed(2)}
-                      </p>
-                    )}
-                    <p className="text-2xl font-bold">
-                      R$ {planPrice.toFixed(2)}
-                    </p>
-                    {isDiscounted && (
-                      <span className="inline-block px-2 py-1 bg-white/20 text-xs font-semibold rounded-full mt-1">
-                        {discount}% OFF
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">{currentPlan.name}</h2>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      {isDiscounted && (
+                        <span className="text-sm text-gray-400 line-through">
+                          R$ {currentPlan.originalPrice.toFixed(2)}
+                        </span>
+                      )}
+                      <span className="text-xl font-bold text-gray-900">
+                        R$ {planPrice.toFixed(2)}
                       </span>
-                    )}
+                      {isDiscounted && (
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                          {discount}% OFF
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  <img 
+                    src="/logo-beta-reader.png" 
+                    alt="Beta Reader Brasil" 
+                    className="h-10 w-auto object-contain opacity-60"
+                  />
                 </div>
               </div>
             </Card>
