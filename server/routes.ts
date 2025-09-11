@@ -623,30 +623,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId || 'guest';
       const externalId = `PLAN-${userId}-${Date.now()}`;
       
-      // Simulate LiraPay API response (for demo purposes)
-      // In production, this would be a real API call
-      const simulatePixGeneration = () => {
-        // Generate a realistic PIX code
-        const pixKey = `00020126580014BR.GOV.BCB.PIX0136${Date.now()}`;
-        const merchantName = '5913BETAREADER';
-        const merchantCity = '6009SAOPAULO';
-        const transactionId = `62070503${externalId.substring(0, 10)}`;
-        const crc = '6304'; // Would be calculated in production
-        
-        const pixCode = `${pixKey}520400005303986540${amount.toFixed(2)}5802BR${merchantName}${merchantCity}${transactionId}${crc}ABCD`;
-        
-        return {
-          id: externalId,
-          status: 'PENDING',
-          pix_code: pixCode,
-          qr_code_text: pixCode,
-          amount,
-          external_id: externalId,
-          created_at: new Date().toISOString()
-        };
-      };
+      // Make real API call to LiraPay
+      const lirapayApiKey = process.env.LIRAPAY_API_KEY;
+      if (!lirapayApiKey) {
+        throw new Error('LiraPay API key not configured');
+      }
       
-      const lirapayData = simulatePixGeneration();
+      const lirapayResponse = await fetch('https://api.lirapaybr.com/v1/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-secret': lirapayApiKey
+        },
+        body: JSON.stringify({
+          external_id: externalId,
+          total_amount: amount,
+          payment_method: 'PIX',
+          webhook_url: 'https://betareader.com/api/webhook/payment-status',
+          items: [{
+            id: plan,
+            title: plan === 'unlimited' ? 'Plano Ilimitado' : 'Plano Premium',
+            description: plan === 'unlimited' ? 'Acesso ilimitado ao Beta Reader' : 'Acesso premium ao Beta Reader',
+            price: amount,
+            quantity: 1,
+            is_physical: false
+          }],
+          ip: req.ip || '127.0.0.1',
+          customer: {
+            name: fullName,
+            email,
+            phone: '00000000000', // Default phone if not provided
+            document_type: 'CPF',
+            document: cpf.replace(/\D/g, ''),
+            utm_source: utm?.source || '',
+            utm_medium: utm?.medium || '',
+            utm_campaign: utm?.campaign || '',
+            utm_content: utm?.content || '',
+            utm_term: utm?.term || ''
+          }
+        })
+      });
+      
+      if (!lirapayResponse.ok) {
+        const error = await lirapayResponse.text();
+        console.error('LiraPay API error:', error);
+        throw new Error('Failed to create PIX payment');
+      }
+      
+      const lirapayData = await lirapayResponse.json();
       
       // Store transaction in database as pending
       if (req.session.userId) {
@@ -664,12 +688,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Return PIX data
+      // Return PIX data from real API response
       res.json({
-        orderId: lirapayData.id || externalId,
-        amount,
-        copyPasteCode: lirapayData.pix_code || `00020126580014BR.GOV.BCB.PIX0136${externalId}520400005303986540${amount.toFixed(2)}5802BR5913BetaReader6009SaoPaulo62070503***6304`,
-        qrCodeText: lirapayData.qr_code_text || `00020126580014BR.GOV.BCB.PIX0136${externalId}520400005303986540${amount.toFixed(2)}5802BR5913BetaReader6009SaoPaulo62070503***6304`,
+        orderId: lirapayData.id,
+        amount: lirapayData.total_value || amount,
+        copyPasteCode: lirapayData.pix?.payload || '',
+        qrCodeText: lirapayData.pix?.payload || '',
         expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
       });
     } catch (error: any) {
@@ -684,40 +708,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { orderId } = req.params;
       
-      // Simulate payment status check (for demo purposes)
-      // In production, this would query the real LiraPay API
-      const simulatePaymentStatus = () => {
-        // Simulate payment being approved after a short time (for demo)
-        const randomChance = Math.random();
-        
-        // 40% chance of payment being approved (for demo)
-        if (randomChance > 0.6) {
-          return {
-            status: 'AUTHORIZED',
-            amount: orderId.includes('59.90') ? 59.90 : 39.90,
-            external_id: orderId
-          };
-        }
-        
-        return {
-          status: 'PENDING',
-          amount: orderId.includes('59.90') ? 59.90 : 39.90,
-          external_id: orderId
-        };
-      };
+      // Query real LiraPay API for payment status
+      const lirapayApiKey = process.env.LIRAPAY_API_KEY;
+      if (!lirapayApiKey) {
+        throw new Error('LiraPay API key not configured');
+      }
       
-      const lirapayData = simulatePaymentStatus();
+      const lirapayResponse = await fetch(`https://api.lirapaybr.com/v1/transactions/${orderId}`, {
+        headers: {
+          'api-secret': lirapayApiKey
+        }
+      });
+      
+      if (!lirapayResponse.ok) {
+        // Transaction not found or error
+        return res.json({
+          status: 'pending'
+        });
+      }
+      
+      const lirapayData = await lirapayResponse.json();
       
       // Map LiraPay status to our status
       let status = 'pending';
-      if (lirapayData.status === 'AUTHORIZED' || lirapayData.status === 'PAID') {
+      if (lirapayData.status === 'AUTHORIZED') {
         status = 'paid';
         
         // Update user plan if payment is successful
         if (req.session.userId) {
           // Parse plan from external_id
           const externalId = lirapayData.external_id || '';
-          const plan = externalId.includes('59.90') ? 'unlimited' : 'premium';
+          // Determine plan based on amount
+          const amount = lirapayData.amount || lirapayData.total_amount;
+          const plan = amount === 59.90 ? 'unlimited' : 'premium';
           const actualPlan = plan === 'unlimited' ? 'premium' : plan;
           
           await storage.updateUser(req.session.userId, { 
@@ -732,14 +755,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await storage.createTransaction({
               userId: req.session.userId,
               type: 'deposit',
-              amount: lirapayData.amount.toString(),
+              amount: amount.toString(),
               description: `Plano ${plan === 'unlimited' ? 'Ilimitado' : 'Premium'} - Confirmado`,
               balanceBefore: currentBalance.toString(),
               balanceAfter: currentBalance.toString() // Balance doesn't change for plan purchase
             });
           }
         }
-      } else if (lirapayData.status === 'EXPIRED') {
+      } else if (lirapayData.status === 'FAILED' || lirapayData.status === 'CHARGEBACK') {
         status = 'expired';
       }
       
@@ -755,13 +778,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook endpoint for LiraPay payment status
   app.post('/api/webhook/payment-status', async (req: Request, res: Response) => {
     try {
-      const { id, external_id, status, total_amount, payment_method } = req.body;
+      const { id, external_id, total_amount, status, payment_method } = req.body;
       
-      console.log('LiraPay webhook received:', { id, external_id, status });
+      console.log('LiraPay webhook received:', { id, external_id, status, total_amount });
       
       // Parse external_id to get user ID and plan
       // Format: PLAN-{userId}-{timestamp}
-      const [, userId] = external_id.split('-');
+      const parts = external_id?.split('-');
+      if (!parts || parts.length < 2) {
+        console.error('Invalid external_id format:', external_id);
+        return res.status(200).json({ received: true });
+      }
+      
+      const userId = parts[1];
       
       if (status === 'AUTHORIZED') {
         // Payment successful - upgrade user plan
@@ -776,8 +805,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             selectedPlan: plan
           });
           
-          console.log(`User ${userId} upgraded to ${plan} plan`);
+          // Create transaction record
+          const currentBalance = Number(user.balance);
+          await storage.createTransaction({
+            userId,
+            type: 'deposit',
+            amount: total_amount.toString(),
+            description: `Plano ${plan === 'unlimited' ? 'Ilimitado' : 'Premium'} - Confirmado via Webhook`,
+            balanceBefore: currentBalance.toString(),
+            balanceAfter: currentBalance.toString()
+          });
+          
+          console.log(`User ${userId} upgraded to ${plan} plan via webhook`);
         }
+      } else if (status === 'FAILED' || status === 'CHARGEBACK') {
+        console.log(`Payment ${id} failed or charged back for user ${userId}`);
       }
       
       // Always return 200 to acknowledge receipt
