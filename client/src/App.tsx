@@ -16,7 +16,6 @@ import CelebrationFlow from "@/pages/celebration";
 import Confirm from "@/pages/confirm";
 import AdminPanel from "@/pages/admin";
 import NotFound from "@/pages/not-found";
-import Payment from "@/pages/payment";
 import { useEffect, useState } from "react";
 import { fbPixel } from "@/utils/facebookPixel";
 
@@ -33,7 +32,7 @@ function Router() {
   }, [location]);
   
   // Only show nav if user is logged in and on appropriate pages
-  const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin';
+  const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/admin';
   const showInstallBanner = isLoggedIn && location !== '/'; // Não mostrar na tela inicial ou quando não logado
   
   // Inicializa Facebook Pixel apenas uma vez
@@ -60,7 +59,6 @@ function Router() {
       '/perfil': 'Profile',
       '/celebration': 'Celebration',
       '/confirm': 'Payment Confirmation',
-      '/payment': 'Payment Page',
       '/admin': 'Admin Panel'
     };
     
@@ -88,7 +86,6 @@ function Router() {
         <Route path="/perfil" component={Profile}/>
         <Route path="/celebration" component={CelebrationFlow}/>
         <Route path="/confirm" component={Confirm}/>
-        <Route path="/payment" component={Payment}/>
         <Route path="/admin" component={AdminPanel}/>
         {/* Fallback to 404 */}
         <Route component={NotFound} />
