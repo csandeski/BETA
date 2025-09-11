@@ -494,9 +494,14 @@ export default function Payment() {
 
             {/* Payment Method */}
             <Card className="p-6 border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Método de pagamento
-              </h3>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                  2
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                  MÉTODO DE PAGAMENTO
+                </h3>
+              </div>
               
               <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-6">
                 <div className="flex items-center justify-between mb-3">
