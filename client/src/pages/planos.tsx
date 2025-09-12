@@ -26,6 +26,12 @@ export default function Planos() {
     phone: '',
     cpf: ''
   });
+  const [fieldErrors, setFieldErrors] = useState<{
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    cpf?: string;
+  }>({});
 
   // PIX data
   const [pixData, setPixData] = useState<{
@@ -131,11 +137,46 @@ export default function Planos() {
   };
 
   const handleGeneratePix = async () => {
+    // Clear previous errors
+    setFieldErrors({});
+    
     // Validate fields
-    if (!userData.fullName || !userData.email || !userData.cpf) {
+    const errors: typeof fieldErrors = {};
+    let hasError = false;
+    
+    if (!userData.fullName || userData.fullName.trim().length < 3) {
+      errors.fullName = 'Nome completo é obrigatório (mínimo 3 caracteres)';
+      hasError = true;
+    }
+    
+    if (!userData.email || !userData.email.includes('@')) {
+      errors.email = 'E-mail válido é obrigatório';
+      hasError = true;
+    }
+    
+    if (!userData.cpf || userData.cpf.replace(/\D/g, '').length !== 11) {
+      errors.cpf = 'CPF válido é obrigatório (11 dígitos)';
+      hasError = true;
+    }
+    
+    if (hasError) {
+      setFieldErrors(errors);
+      setIsEditing(true); // Enable editing automatically
+      
+      // Focus on first error field
+      setTimeout(() => {
+        if (errors.fullName) {
+          document.getElementById('input-fullname')?.focus();
+        } else if (errors.email) {
+          document.getElementById('input-email')?.focus();
+        } else if (errors.cpf) {
+          document.getElementById('input-cpf')?.focus();
+        }
+      }, 100);
+      
       toast({
         title: "Dados incompletos",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        description: "Por favor, corrija os campos destacados em vermelho.",
         variant: "destructive",
       });
       return;
@@ -527,64 +568,134 @@ export default function Planos() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">Nome Completo</label>
                 <input
+                  id="input-fullname"
                   type="text"
                   value={userData.fullName}
-                  onChange={(e) => setUserData({ ...userData, fullName: e.target.value })}
+                  onChange={(e) => {
+                    setUserData({ ...userData, fullName: e.target.value });
+                    if (fieldErrors.fullName) {
+                      setFieldErrors({ ...fieldErrors, fullName: undefined });
+                    }
+                  }}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:text-gray-500 ${
+                    fieldErrors.fullName 
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:ring-green-500 focus:border-transparent'
+                  }`}
                   placeholder="Digite seu nome completo"
                 />
+                {fieldErrors.fullName && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {fieldErrors.fullName}
+                  </p>
+                )}
               </div>
               
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">E-mail</label>
                 <input
+                  id="input-email"
                   type="email"
                   value={userData.email}
-                  onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+                  onChange={(e) => {
+                    setUserData({ ...userData, email: e.target.value });
+                    if (fieldErrors.email) {
+                      setFieldErrors({ ...fieldErrors, email: undefined });
+                    }
+                  }}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:text-gray-500 ${
+                    fieldErrors.email 
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:ring-green-500 focus:border-transparent'
+                  }`}
                   placeholder="seu@email.com"
                 />
+                {fieldErrors.email && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
               
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">Telefone</label>
                 <input
+                  id="input-phone"
                   type="tel"
                   value={userData.phone}
-                  onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
+                  onChange={(e) => {
+                    setUserData({ ...userData, phone: e.target.value });
+                    if (fieldErrors.phone) {
+                      setFieldErrors({ ...fieldErrors, phone: undefined });
+                    }
+                  }}
                   disabled={!isEditing}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:text-gray-500 ${
+                    fieldErrors.phone 
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:ring-green-500 focus:border-transparent'
+                  }`}
                   placeholder="(11) 98765-4321"
                 />
+                {fieldErrors.phone && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {fieldErrors.phone}
+                  </p>
+                )}
               </div>
               
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">CPF</label>
                 <input
+                  id="input-cpf"
                   type="text"
                   value={userData.cpf}
-                  onChange={(e) => setUserData({ ...userData, cpf: formatCPF(e.target.value) })}
+                  onChange={(e) => {
+                    setUserData({ ...userData, cpf: formatCPF(e.target.value) });
+                    if (fieldErrors.cpf) {
+                      setFieldErrors({ ...fieldErrors, cpf: undefined });
+                    }
+                  }}
                   disabled={!isEditing}
                   maxLength={14}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:text-gray-500 ${
+                    fieldErrors.cpf 
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-200 focus:ring-green-500 focus:border-transparent'
+                  }`}
                   placeholder="000.000.000-00"
                 />
+                {fieldErrors.cpf && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {fieldErrors.cpf}
+                  </p>
+                )}
               </div>
 
               {/* Action Buttons */}
               <div className="space-y-3 pt-2">
                 {!isEditing ? (
                   <button
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => {
+                      setIsEditing(true);
+                      setFieldErrors({});
+                    }}
                     className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors text-sm"
                   >
                     Editar Dados
                   </button>
                 ) : (
                   <button
-                    onClick={() => setIsEditing(false)}
+                    onClick={() => {
+                      setIsEditing(false);
+                      setFieldErrors({});
+                    }}
                     className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors text-sm"
                   >
                     Salvar Alterações
