@@ -324,150 +324,158 @@ export default function Planos() {
       </div>
 
       {/* Plans Section */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-6">
           {/* Plano Inicial */}
           <div 
-            className={`relative rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
+            className={`relative rounded-2xl border-2 transition-all duration-300 hover:shadow-lg ${
               selectedPlan === 'inicial' 
-                ? 'border-blue-500 shadow-xl transform scale-[1.02]' 
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-green-500 shadow-xl' 
+                : 'border-gray-200'
             }`}
-            onClick={() => handleSelectPlan('inicial')}
           >
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
+            <div className="p-4 sm:p-6">
+              <div className="mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Plano Inicial</h3>
-                  <p className="text-sm text-gray-600 mt-1">Para começar a ganhar</p>
-                </div>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                  selectedPlan === 'inicial' 
-                    ? 'bg-blue-500 border-blue-500' 
-                    : 'border-gray-300'
-                }`}>
-                  {selectedPlan === 'inicial' && <Check className="h-4 w-4 text-white" />}
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">Plano Inicial</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Para começar a ganhar</p>
                 </div>
               </div>
 
-              <div className="mb-6">
-                <p className="text-3xl font-bold text-gray-900">
+              <div className="mb-4 sm:mb-6">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                   R$ 29,90
                 </p>
-                <p className="text-sm text-gray-600">Pagamento único</p>
+                <p className="text-xs sm:text-sm text-gray-600">Pagamento único</p>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-700">
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700">
                     <span className="font-semibold">Até 2 saques por mês</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-700">
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700">
                     <span className="font-semibold">Saque mínimo de R$ 50,00</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-700">
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700">
                     <span className="font-semibold">Até 5 atividades diárias</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <X className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-500 line-through">
+                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-500 line-through">
                     Processamento rápido
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <X className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-500 line-through">
+                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-500 line-through">
                     Suporte prioritário
                   </p>
                 </div>
               </div>
+              
+              {/* CTA Button inside card */}
+              <button
+                onClick={() => {
+                  setSelectedPlan('inicial');
+                  handleContinue();
+                }}
+                className="w-full mt-6 py-3.5 px-4 bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl shadow-[0_4px_0_0_rgb(34,197,94,0.5)] hover:shadow-[0_2px_0_0_rgb(34,197,94,0.5)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-[0_0_0_0_rgb(34,197,94,0.5)] transition-all duration-150 text-sm sm:text-base"
+                data-testid="button-select-inicial"
+              >
+                Ativar Plano Inicial
+              </button>
             </div>
           </div>
 
           {/* Beta Reader Oficial */}
           <div 
-            className={`relative rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
+            className={`relative rounded-2xl border-2 transition-all duration-300 hover:shadow-lg ${
               selectedPlan === 'oficial' 
-                ? 'border-green-500 shadow-xl transform scale-[1.02]' 
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-green-500 shadow-xl' 
+                : 'border-gray-200'
             }`}
-            onClick={() => handleSelectPlan('oficial')}
           >
             {/* Recommended Badge */}
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+              <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-lg">
                 RECOMENDADO
               </span>
             </div>
 
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
+            <div className="p-4 sm:p-6">
+              <div className="mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Beta Reader Oficial</h3>
-                  <p className="text-sm text-gray-600 mt-1">Máximo potencial de ganhos</p>
-                </div>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                  selectedPlan === 'oficial' 
-                    ? 'bg-green-500 border-green-500' 
-                    : 'border-gray-300'
-                }`}>
-                  {selectedPlan === 'oficial' && <Check className="h-4 w-4 text-white" />}
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">Beta Reader Oficial</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">Máximo potencial de ganhos</p>
                 </div>
               </div>
 
-              <div className="mb-6">
-                <p className="text-3xl font-bold text-gray-900">
+              <div className="mb-4 sm:mb-6">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                   R$ 37,00
                 </p>
-                <p className="text-sm text-gray-600">Pagamento único</p>
+                <p className="text-xs sm:text-sm text-gray-600">Pagamento único</p>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-start gap-3">
-                  <Zap className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-700">
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700">
                     <span className="font-semibold">Até 50 atividades diárias</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Award className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-700">
+                  <Award className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700">
                     <span className="font-semibold">Sem valor mínimo de saque</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Clock className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-700">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700">
                     <span className="font-semibold">Saques em até 15 minutos</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-700">
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700">
                     <span className="font-semibold">Saques ilimitados</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-gray-700">
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700">
                     <span className="font-semibold">Suporte prioritário 24/7</span>
                   </p>
                 </div>
               </div>
+              
+              {/* CTA Button inside card */}
+              <button
+                onClick={() => {
+                  setSelectedPlan('oficial');
+                  handleContinue();
+                }}
+                className="w-full mt-6 py-3.5 px-4 bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl shadow-[0_4px_0_0_rgb(34,197,94,0.5)] hover:shadow-[0_2px_0_0_rgb(34,197,94,0.5)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-[0_0_0_0_rgb(34,197,94,0.5)] transition-all duration-150 text-sm sm:text-base"
+                data-testid="button-select-oficial"
+              >
+                Ativar Beta Reader Oficial
+              </button>
             </div>
           </div>
         </div>
 
         {/* Guarantee Card */}
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-200 mb-8">
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-4 sm:p-6 border border-amber-200 mb-6">
           <div className="flex items-start gap-4">
             <Shield className="h-8 w-8 text-amber-600 flex-shrink-0" />
             <div>
@@ -482,16 +490,6 @@ export default function Planos() {
             </div>
           </div>
         </div>
-
-        {/* CTA Button */}
-        <Button
-          onClick={handleContinue}
-          className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
-          disabled={!selectedPlan}
-        >
-          CONTINUAR COM {selectedPlan === 'inicial' ? 'PLANO INICIAL' : 'BETA READER OFICIAL'}
-          <ChevronRight className="h-5 w-5 ml-2" />
-        </Button>
       </div>
 
       {/* Confirmation Modal */}
