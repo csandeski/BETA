@@ -39,6 +39,16 @@ export default function Planos() {
       content_category: 'page',
       content_type: 'plans_selection'
     });
+    
+    // Track Add to Cart when viewing the plan
+    fbPixel.trackAddToCart({
+      value: 37.90,
+      currency: 'BRL',
+      content_name: 'Beta Reader Premium',
+      content_ids: ['premium'],
+      content_type: 'product',
+      plan: 'premium'
+    });
   }, []);
 
   // Timer for PIX
@@ -135,14 +145,19 @@ export default function Planos() {
     }
 
     setIsProcessing(true);
+    
+    // Track Initiate Checkout when user clicks to activate
     fbPixel.trackInitiateCheckout({
       value: 37.90,
       currency: 'BRL',
       content_name: 'Beta Reader Premium',
       content_category: 'plan_upgrade',
-      content_ids: ['premium']
+      content_ids: ['premium'],
+      content_type: 'product',
+      num_items: 1,
+      plan: 'premium',
+      paymentMethod: 'pix'
     });
-    // Track plan selection
 
     // Generate PIX directly
     await handleGeneratePix();
