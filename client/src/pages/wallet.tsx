@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Wallet, ArrowUpRight, TrendingUp, Eye, EyeOff, Calendar, Download, DollarSign, Target, Activity, BarChart3, ChevronRight, Clock, BookOpen, Trophy, Star, Settings } from "lucide-react";
+import { Wallet, ArrowUpRight, TrendingUp, Eye, EyeOff, Calendar, Download, DollarSign, Target, Activity, BarChart3, ChevronRight, Clock, BookOpen, Trophy, Star, Settings, X, CreditCard, Send, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { useSound } from "@/hooks/useSound";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
@@ -22,6 +22,9 @@ export default function WalletPage() {
   const [tempGoal, setTempGoal] = useState(500);
   const [isLoading, setIsLoading] = useState(true);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
+  const [showBankWithdrawModal, setShowBankWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [pixCpf, setPixCpf] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,24 +70,28 @@ export default function WalletPage() {
 
   const handleWithdraw = () => {
     playSound('click');
-    
-    // Show upgrade modal for free users
-    if (!userData?.selectedPlan || userData.selectedPlan === 'free') {
-      // Check if user has read 3 books before showing upgrade modal
-      const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-      if (totalBooksRead >= 3) {
-        // Modal removed
-      } else {
-        setShowCompleteBooksModal(true);
-      }
-      return;
+    setShowBankWithdrawModal(true);
+  };
+
+  const handleBankTransfer = () => {
+    playSound('click');
+    setShowBankWithdrawModal(false);
+    // Redirect to plans page
+    setLocation('/planos');
+  };
+
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     }
-    
-    if (!canWithdraw) {
-      alert(`Você precisa ler ${3 - totalBooksRead} livro(s) antes de fazer um saque`);
-      return;
-    }
-    setIsWithdrawModalOpen(true);
+    return value;
+  };
+
+  const formatCurrency = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    const amount = (parseInt(numbers) / 100).toFixed(2);
+    return `R$ ${amount.replace('.', ',')}`;
   };
 
   const handleWithdrawConfirm = () => {
@@ -619,6 +626,117 @@ export default function WalletPage() {
         onClose={() => setShowCompleteBooksModal(false)}
         booksRead={userData?.stats?.totalBooksRead || 0}
       />
+
+      {/* Bank Transfer Modal */}
+      {showBankWithdrawModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowBankWithdrawModal(false)}
+          />
+          
+          {/* Modal Content */}
+          <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl">
+            {/* Header */}
+            <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 px-6 py-5 rounded-t-2xl border-b border-green-100">
+              <button
+                onClick={() => setShowBankWithdrawModal(false)}
+                className="absolute right-4 top-4 p-2 hover:bg-white/50 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-6 w-6 text-green-600" />
+                <h2 className="text-lg font-bold text-gray-900">Transferência PIX</h2>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">Realize seu saque de forma segura</p>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              {/* Current Balance Display */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
+                <p className="text-xs text-gray-500 mb-1">Saldo disponível</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {showBalance ? `R$ ${balance.toFixed(2)}` : '••••••'}
+                </p>
+              </div>
+
+              {/* Withdrawal Amount */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Valor do saque
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                    R$
+                  </span>
+                  <input
+                    type="text"
+                    value={withdrawAmount}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value) {
+                        const amount = (parseInt(value) / 100).toFixed(2);
+                        setWithdrawAmount(`${amount.replace('.', ',')}`);
+                      } else {
+                        setWithdrawAmount('');
+                      }
+                    }}
+                    className="w-full pl-12 pr-4 py-3 text-lg border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="0,00"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Digite o valor que deseja sacar
+                </p>
+              </div>
+
+              {/* PIX CPF */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Chave PIX (CPF)
+                </label>
+                <input
+                  type="text"
+                  value={pixCpf}
+                  onChange={(e) => setPixCpf(formatCPF(e.target.value))}
+                  maxLength={14}
+                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="000.000.000-00"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Informe o CPF cadastrado como chave PIX
+                </p>
+              </div>
+
+              {/* Security Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <Shield className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-medium text-blue-900">Transferência segura</p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      Sua transferência será processada com total segurança através do sistema PIX do Banco Central.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transfer Button */}
+              <button
+                onClick={handleBankTransfer}
+                className="w-full py-4 px-6 bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-2xl shadow-[0_4px_0_0_rgb(34,197,94,0.5)] hover:shadow-[0_2px_0_0_rgb(34,197,94,0.5)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-[0_0_0_0_rgb(34,197,94,0.5)] transition-all duration-150 flex items-center justify-center gap-2"
+                data-testid="button-transfer"
+              >
+                <Send className="h-5 w-5" />
+                Transferir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
