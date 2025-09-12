@@ -4,13 +4,13 @@ import { useLocation } from "wouter";
 import { useSound } from "@/hooks/useSound";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 import MobileNav from "@/components/MobileNav";
-import { PlanUpgradeModal } from "@/components/PlanUpgradeModal";
+import { PlanLimitationsModal } from "@/components/PlanLimitationsModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 
 export default function Livros() {
   const [, setLocation] = useLocation();
   const { playSound } = useSound();
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showLimitationsModal, setShowLimitationsModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showActivityWarning, setShowActivityWarning] = useState(false);
   const [showLimitWarning, setShowLimitWarning] = useState(false);
@@ -212,7 +212,7 @@ export default function Livros() {
                   // Check if user has read 3 books before showing upgrade modal
                   const totalBooksRead = userData?.stats?.totalBooksRead || 0;
                   if (totalBooksRead >= 3) {
-                    setShowUpgradeModal(true);
+                    setShowLimitationsModal(true);
                   } else {
                     setShowCompleteBooksModal(true);
                   }
@@ -393,7 +393,7 @@ export default function Livros() {
                   // Check if user has read 3 books before showing upgrade modal
                   const totalBooksRead = userData?.stats?.totalBooksRead || 0;
                   if (totalBooksRead >= 3) {
-                    setShowUpgradeModal(true);
+                    setShowLimitationsModal(true);
                   } else {
                     setShowCompleteBooksModal(true);
                   }
@@ -408,15 +408,9 @@ export default function Livros() {
       )}
 
       {/* Plan Upgrade Modal */}
-      <PlanUpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        totalEarned={userData?.balance || 0}
-        onUpgrade={async (plan: 'premium' | 'unlimited') => {
-          await userDataManager.selectPlan(plan);
-          setShowUpgradeModal(false);
-          window.location.reload();
-        }}
+      <PlanLimitationsModal
+        isOpen={showLimitationsModal}
+        onClose={() => setShowLimitationsModal(false)}
       />
       
       {/* Complete Books Modal */}

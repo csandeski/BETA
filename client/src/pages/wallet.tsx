@@ -5,7 +5,7 @@ import { useSound } from "@/hooks/useSound";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 import WithdrawModal from "@/components/WithdrawModal";
 import PlanModal from "@/components/PlanModal";
-import { PlanUpgradeModal } from "@/components/PlanUpgradeModal";
+import { PlanLimitationsModal } from "@/components/PlanLimitationsModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +22,7 @@ export default function WalletPage() {
   const [monthlyGoal, setMonthlyGoal] = useState(500);
   const [tempGoal, setTempGoal] = useState(500);
   const [isLoading, setIsLoading] = useState(true);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showLimitationsModal, setShowLimitationsModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const { toast } = useToast();
 
@@ -75,7 +75,7 @@ export default function WalletPage() {
       // Check if user has read 3 books before showing upgrade modal
       const totalBooksRead = userData?.stats?.totalBooksRead || 0;
       if (totalBooksRead >= 3) {
-        setShowUpgradeModal(true);
+        setShowLimitationsModal(true);
       } else {
         setShowCompleteBooksModal(true);
       }
@@ -615,20 +615,9 @@ export default function WalletPage() {
         onSelectPlan={handlePlanSelect}
       />
       
-      <PlanUpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        totalEarned={userData?.balance || 0}
-        onUpgrade={async (plan: 'premium' | 'unlimited') => {
-          await userDataManager.loadUserData();
-          const updatedData = userDataManager.getUserData();
-          setUserData(updatedData);
-          setShowUpgradeModal(false);
-          toast({
-            title: "Plano atualizado!",
-            description: `Você agora tem o plano ${plan === 'premium' ? 'Beta Reader Oficial' : 'Beta Reader Ilimitado'}`,
-          });
-        }}
+      <PlanLimitationsModal
+        isOpen={showLimitationsModal}
+        onClose={() => setShowLimitationsModal(false)}
       />
       
       <CompleteBooksModal

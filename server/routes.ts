@@ -505,8 +505,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get plan price - FIXED PRICES
-      const planPrice = plan === 'unlimited' ? 5990 : 3990; // in cents
-      const planTitle = plan === 'unlimited' ? 'Beta Reader Ilimitado' : 'Beta Reader Oficial';
+      let planPrice: number;
+      let planTitle: string;
+      
+      if (plan === 'unlimited') {
+        planPrice = 5990; // R$ 59,90 in cents
+        planTitle = 'Beta Reader Ilimitado';
+      } else if (plan === 'inicial') {
+        planPrice = 2990; // R$ 29,90 in cents
+        planTitle = 'Plano Inicial';
+      } else {
+        // Default to premium (Beta Reader Oficial)
+        planPrice = 3700; // R$ 37,00 in cents
+        planTitle = 'Beta Reader Oficial';
+      }
       
       // Generate unique reference
       const reference = `PLAN-${user.id}-${Date.now()}`;

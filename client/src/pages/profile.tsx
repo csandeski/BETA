@@ -5,7 +5,7 @@ import { useSound } from "@/hooks/useSound";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 import { apiClient } from "@/lib/api";
 import PlanModal from "@/components/PlanModal";
-import { PlanUpgradeModal } from "@/components/PlanUpgradeModal";
+import { PlanLimitationsModal } from "@/components/PlanLimitationsModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 import FriendsSection from "@/components/FriendsSection";
 import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const [tempPhone, setTempPhone] = useState("");
   const [tempPassword, setTempPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showLimitationsModal, setShowLimitationsModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [friendsData, setFriendsData] = useState<{friends: any[], onlineFriends: any[]}>({ friends: [], onlineFriends: [] });
@@ -602,7 +602,7 @@ export default function ProfilePage() {
               // Check if user has read 3 books before showing upgrade modal
               const totalBooksRead = userData?.stats?.totalBooksRead || 0;
               if (totalBooksRead >= 3) {
-                setShowUpgradeModal(true);
+                setShowLimitationsModal(true);
               } else {
                 setShowCompleteBooksModal(true);
               }
@@ -741,20 +741,9 @@ export default function ProfilePage() {
         onSelectPlan={handlePlanSelect}
       />
       
-      <PlanUpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        totalEarned={userData?.balance || 0}
-        onUpgrade={async (plan: 'premium' | 'unlimited') => {
-          await userDataManager.loadUserData();
-          const updatedData = userDataManager.getUserData();
-          setUserData(updatedData);
-          setShowUpgradeModal(false);
-          toast({
-            title: "Plano atualizado!",
-            description: `Você agora tem o plano ${plan === 'premium' ? 'Beta Reader Oficial' : 'Beta Reader Ilimitado'}`,
-          });
-        }}
+      <PlanLimitationsModal
+        isOpen={showLimitationsModal}
+        onClose={() => setShowLimitationsModal(false)}
       />
       
       <CompleteBooksModal

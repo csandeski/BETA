@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Gift, Clock, DollarSign, Zap, TrendingUp, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { PlanUpgradeModal } from './PlanUpgradeModal';
+import { PlanLimitationsModal } from './PlanLimitationsModal';
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/scrollLock';
 import { fbPixel } from '@/utils/facebookPixel';
 
@@ -29,13 +29,12 @@ export default function FreeChoiceModal({ isOpen, onClose }: FreeChoiceModalProp
 
   if (showDiscountedPlans) {
     return (
-      <PlanUpgradeModal 
+      <PlanLimitationsModal 
         isOpen={true} 
         onClose={() => {
           setShowDiscountedPlans(false);
           onClose();
         }}
-        isDiscounted={true}
       />
     );
   }
