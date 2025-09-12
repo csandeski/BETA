@@ -283,21 +283,8 @@ export default function Dashboard() {
   
   const handleWithdraw = () => {
     playSound('click');
-    // Show upgrade modal for free users
-    if (!userData?.selectedPlan || userData.selectedPlan === 'free') {
-      // Check if user has read 3 books before showing upgrade modal
-      const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-      if (totalBooksRead >= 3) {
-        // Clear the celebration flag (modal removed)
-        localStorage.removeItem('hasSeenThreeBooksCelebration');
-      } else {
-        setShowCompleteBooksModal(true);
-      }
-    } else if (!userData?.canWithdraw || userData.stats.totalBooksRead < 3) {
-      setShowWithdrawModal(true);
-    } else {
-      setShowPlanModal(true);
-    }
+    // Redirect to wallet page for withdrawal
+    setLocation('/wallet');
   };
   
   const handleSelectPlan = async (plan: 'free' | 'premium') => {
