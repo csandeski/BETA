@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, X, Shield, Clock, Zap, Award, DollarSign, AlertCircle, ChevronRight, Copy, CheckCheck, Loader, Server, Headphones, ShieldCheck, TrendingUp } from "lucide-react";
+import { Check, X, Shield, Clock, Zap, Award, DollarSign, AlertCircle, ChevronRight, Copy, CheckCheck, Loader, Server, Headphones, ShieldCheck, TrendingUp, Calculator, Sparkles, Edit2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,6 +16,8 @@ export default function Planos() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
+  const [sessionTimeLeft, setSessionTimeLeft] = useState(900); // 15 minutes session timer
+  const [commitmentChecked, setCommitmentChecked] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -50,6 +52,14 @@ export default function Planos() {
       content_type: 'plans_selection'
     });
   }, []);
+
+  // Session timer for price lock
+  useEffect(() => {
+    if (sessionTimeLeft > 0) {
+      const timer = setTimeout(() => setSessionTimeLeft(sessionTimeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [sessionTimeLeft]);
 
   // Timer for PIX
   useEffect(() => {
@@ -623,7 +633,7 @@ export default function Planos() {
           
           {/* Modal Content */}
           <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl">
-            {/* Header */}
+            {/* Header with Welcome Message */}
             <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 px-6 py-5 rounded-t-2xl border-b border-green-100">
               <button
                 onClick={() => setShowConfirmModal(false)}
@@ -631,12 +641,77 @@ export default function Planos() {
               >
                 <X className="h-5 w-5 text-gray-600" />
               </button>
-              <h2 className="text-lg font-bold text-gray-900">Confirme seus dados</h2>
-              <p className="text-xs text-gray-600 mt-0.5">Verifique se suas informações estão corretas</p>
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+                <h2 className="text-lg font-bold text-gray-900">Próximo Passo para Seu Sucesso!</h2>
+              </div>
+              <p className="text-xs text-gray-600">Você já conhece nosso app e tem uma conta ativa. Agora é hora de maximizar seus ganhos!</p>
             </div>
             
             {/* Body */}
-            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
+              {/* ROI Calculator Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                <div className="flex items-start gap-3">
+                  <Calculator className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-2 flex-1">
+                    <h3 className="text-sm font-bold text-gray-900">Seu Retorno do Investimento</h3>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Com 10 atividades/dia:</span>
+                        <span className="text-xs font-bold text-green-600">R$ 125/dia</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600">Investimento se paga em:</span>
+                        <span className="text-xs font-bold text-blue-600">
+                          {selectedPlan === 'inicial' ? '~3 atividades' : '~4 atividades'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pt-1 border-t border-blue-100">
+                        <span className="text-xs text-gray-600">Ganho semanal estimado:</span>
+                        <span className="text-xs font-bold text-green-600">R$ 875</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Price Reframing */}
+              <div className="bg-amber-50 rounded-xl p-3 border border-amber-200">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-600" />
+                  <p className="text-xs text-gray-700">
+                    <span className="font-bold text-gray-900">
+                      {selectedPlan === 'inicial' ? 'Menos de R$ 1,00' : 'Apenas R$ 1,25'}
+                    </span>
+                    {' '}por dia • Equivale a{' '}
+                    <span className="font-bold text-gray-900">
+                      {selectedPlan === 'inicial' ? '2 leituras' : '3 leituras'}
+                    </span>
+                    {' '}• Menos que um café!
+                  </p>
+                </div>
+              </div>
+
+              {/* Urgency Timer */}
+              <div className="bg-red-50 rounded-xl p-3 border border-red-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-red-600" />
+                    <p className="text-xs font-medium text-gray-700">
+                      Preço especial travado por:
+                    </p>
+                  </div>
+                  <span className="text-sm font-bold text-red-600 animate-pulse">
+                    {formatTime(sessionTimeLeft)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Form Fields Title */}
+              <div className="pt-2">
+                <h3 className="text-sm font-bold text-gray-900 mb-3">Confirme seus dados para ativação</h3>
+              </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">Nome Completo</label>
                 <input
@@ -750,6 +825,27 @@ export default function Planos() {
                 )}
               </div>
 
+              {/* Micro-commitment Checkbox */}
+              <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={commitmentChecked}
+                    onChange={(e) => setCommitmentChecked(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                  />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-900">
+                      Comprometo-me a completar pelo menos{' '}
+                      <span className="font-bold text-green-600">
+                        {selectedPlan === 'inicial' ? '5 leituras' : '10 leituras'}
+                      </span>
+                      {' '}hoje para recuperar meu investimento rapidamente
+                    </p>
+                  </div>
+                </label>
+              </div>
+
               {/* Action Buttons */}
               <div className="space-y-3 pt-2">
                 {!isEditing ? (
@@ -760,6 +856,7 @@ export default function Planos() {
                     }}
                     className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors text-sm"
                   >
+                    <Edit2 className="inline-block h-4 w-4 mr-2" />
                     Editar Dados
                   </button>
                 ) : (
@@ -770,13 +867,14 @@ export default function Planos() {
                     }}
                     className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors text-sm"
                   >
+                    <Check className="inline-block h-4 w-4 mr-2" />
                     Salvar Alterações
                   </button>
                 )}
 
                 <button
                   onClick={handleGeneratePix}
-                  disabled={isProcessing}
+                  disabled={isProcessing || !commitmentChecked}
                   className="w-full py-3.5 px-4 bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl shadow-[0_4px_0_0_rgb(34,197,94,0.5)] hover:shadow-[0_2px_0_0_rgb(34,197,94,0.5)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-[0_0_0_0_rgb(34,197,94,0.5)] disabled:shadow-none disabled:translate-y-0 transition-all duration-150 text-sm"
                 >
                   {isProcessing ? (
@@ -786,11 +884,16 @@ export default function Planos() {
                     </>
                   ) : (
                     <>
-                      Ativar meu Plano Agora
-                      <ChevronRight className="inline-block h-4 w-4 ml-2" />
+                      Liberar Meus Ganhos Agora
+                      <TrendingUp className="inline-block h-4 w-4 ml-2" />
                     </>
                   )}
                 </button>
+                {!commitmentChecked && (
+                  <p className="text-xs text-center text-gray-500 mt-2">
+                    ✓ Marque a caixa acima para continuar
+                  </p>
+                )}
               </div>
             </div>
           </div>
