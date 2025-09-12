@@ -74,7 +74,7 @@ export function PlanLimitationsModal({ isOpen, onClose }: PlanLimitationsModalPr
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Saque mínimo de R$ 1.800</span> - valor muito alto para retirar seus ganhos
+                  <span className="font-semibold">Saque mínimo de R$ 1.800</span> - Valor mínimo de saque para o plano gratuito.
                 </p>
               </div>
               <div className="flex items-start gap-3">
