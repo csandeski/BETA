@@ -284,7 +284,7 @@ export default function Dashboard() {
   const handleWithdraw = () => {
     playSound('click');
     // Redirect to wallet page for withdrawal
-    setLocation('/wallet');
+    setLocation('/carteira');
   };
   
   const handleSelectPlan = async (plan: 'free' | 'premium') => {
