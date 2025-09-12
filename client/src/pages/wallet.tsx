@@ -25,6 +25,7 @@ export default function WalletPage() {
   const [showBankWithdrawModal, setShowBankWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [pixCpf, setPixCpf] = useState('');
+  const [showPlanRequiredModal, setShowPlanRequiredModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -76,6 +77,12 @@ export default function WalletPage() {
   const handleBankTransfer = () => {
     playSound('click');
     setShowBankWithdrawModal(false);
+    setShowPlanRequiredModal(true);
+  };
+
+  const handlePlanRequiredContinue = () => {
+    playSound('click');
+    setShowPlanRequiredModal(false);
     // Redirect to plans page
     setLocation('/planos');
   };
@@ -626,6 +633,53 @@ export default function WalletPage() {
         onClose={() => setShowCompleteBooksModal(false)}
         booksRead={userData?.stats?.totalBooksRead || 0}
       />
+
+      {/* Plan Required Modal */}
+      {showPlanRequiredModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowPlanRequiredModal(false)}
+          />
+          
+          {/* Modal Content */}
+          <div className="relative w-full max-w-sm mx-4 bg-white rounded-2xl shadow-2xl p-6">
+            <div className="text-center space-y-4">
+              {/* Icon */}
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-amber-100 rounded-full flex items-center justify-center mx-auto">
+                <CreditCard className="h-8 w-8 text-amber-600" />
+              </div>
+              
+              {/* Message */}
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-gray-900">Plano Necessário</h3>
+                <p className="text-sm text-gray-600">
+                  Você precisa de um plano para realizar Saques em sua conta.
+                </p>
+              </div>
+              
+              {/* Buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowPlanRequiredModal(false)}
+                  className="flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+                  data-testid="button-cancel-plan-required"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handlePlanRequiredContinue}
+                  className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all"
+                  data-testid="button-continue-plan-required"
+                >
+                  Ver Planos
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bank Transfer Modal */}
       {showBankWithdrawModal && (
