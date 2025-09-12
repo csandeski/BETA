@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 import WithdrawModal from "@/components/WithdrawModal";
 import PlanModal from "@/components/PlanModal";
 import RegistrationModal from "@/components/RegistrationModal";
-import { PlanUpgradeModal } from "@/components/PlanUpgradeModal";
+import { PlanLimitationsModal } from "@/components/PlanLimitationsModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 import FreeChoiceModal from "@/components/FreeChoiceModal";
 import WelcomeModal from "@/components/WelcomeModal";
@@ -21,7 +21,7 @@ export default function Dashboard() {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showLimitationsModal, setShowLimitationsModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showFreeChoiceModal, setShowFreeChoiceModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -35,7 +35,7 @@ export default function Dashboard() {
   
   // Lock/unlock body scroll when modals open
   useEffect(() => {
-    if (showWithdrawModal || showPlanModal || showRegistration || showFirstRewardPopup || showUpgradeModal || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
+    if (showWithdrawModal || showPlanModal || showRegistration || showFirstRewardPopup || showLimitationsModal || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -45,7 +45,7 @@ export default function Dashboard() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [showWithdrawModal, showPlanModal, showRegistration, showFirstRewardPopup, showUpgradeModal, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
+  }, [showWithdrawModal, showPlanModal, showRegistration, showFirstRewardPopup, showLimitationsModal, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
   const [, setLocation] = useLocation();
   const { playSound } = useSound();
   const { toast } = useToast();
@@ -97,7 +97,7 @@ export default function Dashboard() {
         if (data.stats.totalBooksRead >= 3 && !hasSeenCelebrationBefore) {
           // Mark as seen and show upgrade modal with celebration
           localStorage.setItem(celebrationKey, 'true');
-          setShowUpgradeModal(true);
+          setShowLimitationsModal(true);
         }
       } else {
         // Try to reload data if we should be logged in
@@ -293,7 +293,7 @@ export default function Dashboard() {
       if (totalBooksRead >= 3) {
         // Clear the celebration flag to allow showing the modal again
         localStorage.removeItem('hasSeenThreeBooksCelebration');
-        setShowUpgradeModal(true);
+        setShowLimitationsModal(true);
       } else {
         setShowCompleteBooksModal(true);
       }
@@ -747,20 +747,9 @@ export default function Dashboard() {
         onSelectPlan={handleSelectPlan}
       />
       
-      <PlanUpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        totalEarned={userData?.balance || 0}
-        onUpgrade={async (plan: 'premium' | 'unlimited') => {
-          await userDataManager.loadUserData();
-          const updatedData = userDataManager.getUserData();
-          setUserData(updatedData);
-          setShowUpgradeModal(false);
-          toast({
-            title: "Plano atualizado!",
-            description: `Você agora tem o plano ${plan === 'premium' ? 'Beta Reader Oficial' : 'Beta Reader Ilimitado'}`,
-          });
-        }}
+      <PlanLimitationsModal
+        isOpen={showLimitationsModal}
+        onClose={() => setShowLimitationsModal(false)}
       />
       
       <CompleteBooksModal
