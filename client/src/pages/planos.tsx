@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, X, Shield, Clock, Zap, Award, DollarSign, AlertCircle, ChevronRight, Copy, CheckCheck, Loader } from "lucide-react";
+import { Check, X, Shield, Clock, Zap, Award, DollarSign, AlertCircle, ChevronRight, Copy, CheckCheck, Loader, Server, Headphones, ShieldCheck, TrendingUp } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -124,7 +124,7 @@ export default function Planos() {
   const handleContinue = () => {
     setShowConfirmModal(true);
     fbPixel.trackInitiateCheckout({
-      value: selectedPlan === 'inicial' ? 29.90 : 37.00,
+      value: selectedPlan === 'inicial' ? 29.90 : 37.70,
       currency: 'BRL',
       content_name: selectedPlan === 'inicial' ? 'Plano Inicial' : 'Beta Reader Oficial',
       content_category: 'subscription',
@@ -224,7 +224,7 @@ export default function Planos() {
       const data = await response.json();
 
       // Track Facebook Pixel events
-      const planPrice = selectedPlan === 'inicial' ? 29.90 : 37.00;
+      const planPrice = selectedPlan === 'inicial' ? 29.90 : 37.70;
       const planName = selectedPlan === 'inicial' ? 'Plano Inicial' : 'Beta Reader Oficial';
 
       fbPixel.trackAddPaymentInfo({
@@ -290,7 +290,7 @@ export default function Planos() {
         
         if (data.status === 'paid' || data.status === 'approved') {
           // Track purchase
-          const planPrice = selectedPlan === 'inicial' ? 29.90 : 37.00;
+          const planPrice = selectedPlan === 'inicial' ? 29.90 : 37.70;
           const planName = selectedPlan === 'inicial' ? 'Plano Inicial' : 'Beta Reader Oficial';
           
           fbPixel.trackPurchase({
@@ -371,18 +371,75 @@ export default function Planos() {
         </div>
       </div>
 
-      {/* Plans Section */}
+      {/* Why We Charge Section */}
       <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 border border-blue-200 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-blue-600" />
+            Por que cobramos esse valor?
+          </h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="flex items-start gap-3">
+              <Server className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">Servidores Premium</h4>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  Mantemos servidores de alta performance para garantir que você consiga acessar o app 24/7 sem travamentos.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">Segurança Total</h4>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  Investimos em segurança de ponta para proteger seus dados e garantir pagamentos seguros.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Headphones className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">Suporte Ativo</h4>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  Equipe de suporte dedicada e competente para resolver qualquer dúvida ou problema rapidamente.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900">Melhorias Constantes</h4>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  Atualizações frequentes com novos recursos e correções para melhorar sua experiência.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-white/50 rounded-lg">
+            <p className="text-xs text-gray-700 text-center">
+              <span className="font-semibold">💡 Importante:</span> Este valor único garante acesso vitalício ao plano escolhido, 
+              sem mensalidades ou taxas ocultas. É um investimento único no seu sucesso!
+            </p>
+          </div>
+        </div>
+
+        {/* Plans Section */}
         <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-6">
           {/* Plano Inicial */}
-          <div 
-            className={`relative rounded-2xl border-2 transition-all duration-300 hover:shadow-lg ${
-              selectedPlan === 'inicial' 
-                ? 'border-green-500 shadow-xl' 
-                : 'border-gray-200'
-            }`}
-          >
-            <div className="p-4 sm:p-6">
+          <div className="relative">
+            <div 
+              className={`relative rounded-2xl transition-all duration-300 hover:shadow-2xl ${
+                selectedPlan === 'inicial' 
+                  ? 'shadow-2xl ring-2 ring-green-500 ring-offset-2' 
+                  : 'shadow-lg'
+              }`}
+              style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
+                border: '1px solid rgba(34, 197, 94, 0.15)'
+              }}
+            >
+              <div className="p-4 sm:p-6">
               <div className="mb-4">
                 <div>
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900">Plano Inicial</h3>
@@ -391,6 +448,10 @@ export default function Planos() {
               </div>
 
               <div className="mb-4 sm:mb-6">
+                <div className="flex items-center gap-2">
+                  <p className="text-lg text-gray-400 line-through">R$ 49,90</p>
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-40%</span>
+                </div>
                 <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                   R$ 29,90
                 </p>
@@ -413,7 +474,7 @@ export default function Planos() {
                 <div className="flex items-start gap-3">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <p className="text-xs sm:text-sm text-gray-700">
-                    <span className="font-semibold">Até 5 atividades diárias</span>
+                    <span className="font-semibold">Até 10 atividades diárias</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
@@ -441,25 +502,31 @@ export default function Planos() {
               >
                 Ativar Plano Inicial
               </button>
+              </div>
             </div>
           </div>
 
           {/* Beta Reader Oficial */}
-          <div 
-            className={`relative rounded-2xl border-2 transition-all duration-300 hover:shadow-lg ${
-              selectedPlan === 'oficial' 
-                ? 'border-green-500 shadow-xl' 
-                : 'border-gray-200'
-            }`}
-          >
+          <div className="relative">
             {/* Recommended Badge */}
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-              <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-lg">
-                RECOMENDADO
+              <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-lg animate-pulse">
+                🏆 MAIS ESCOLHIDO
               </span>
             </div>
-
-            <div className="p-4 sm:p-6">
+            
+            <div 
+              className={`relative rounded-2xl transition-all duration-300 hover:shadow-2xl ${
+                selectedPlan === 'oficial' 
+                  ? 'shadow-2xl ring-2 ring-green-500 ring-offset-2' 
+                  : 'shadow-lg'
+              }`}
+              style={{
+                background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                border: '2px solid rgba(34, 197, 94, 0.3)'
+              }}
+            >
+              <div className="p-4 sm:p-6">
               <div className="mb-4">
                 <div>
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900">Beta Reader Oficial</h3>
@@ -468,8 +535,12 @@ export default function Planos() {
               </div>
 
               <div className="mb-4 sm:mb-6">
+                <div className="flex items-center gap-2">
+                  <p className="text-lg text-gray-400 line-through">R$ 89,90</p>
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-58%</span>
+                </div>
                 <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  R$ 37,00
+                  R$ 37,70
                 </p>
                 <p className="text-xs sm:text-sm text-gray-600">Pagamento único</p>
               </div>
@@ -518,6 +589,7 @@ export default function Planos() {
               >
                 Ativar Beta Reader Oficial
               </button>
+              </div>
             </div>
           </div>
         </div>
