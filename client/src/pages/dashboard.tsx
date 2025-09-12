@@ -6,7 +6,6 @@ import { useLocation } from "wouter";
 import WithdrawModal from "@/components/WithdrawModal";
 import PlanModal from "@/components/PlanModal";
 import RegistrationModal from "@/components/RegistrationModal";
-import { PlanLimitationsModal } from "@/components/PlanLimitationsModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 import FreeChoiceModal from "@/components/FreeChoiceModal";
 import WelcomeModal from "@/components/WelcomeModal";
@@ -21,7 +20,6 @@ export default function Dashboard() {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
-  const [showLimitationsModal, setShowLimitationsModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showFreeChoiceModal, setShowFreeChoiceModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -35,7 +33,7 @@ export default function Dashboard() {
   
   // Lock/unlock body scroll when modals open
   useEffect(() => {
-    if (showWithdrawModal || showPlanModal || showRegistration || showFirstRewardPopup || showLimitationsModal || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
+    if (showWithdrawModal || showPlanModal || showRegistration || showFirstRewardPopup || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -45,7 +43,7 @@ export default function Dashboard() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [showWithdrawModal, showPlanModal, showRegistration, showFirstRewardPopup, showLimitationsModal, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
+  }, [showWithdrawModal, showPlanModal, showRegistration, showFirstRewardPopup, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
   const [, setLocation] = useLocation();
   const { playSound } = useSound();
   const { toast } = useToast();
@@ -95,9 +93,8 @@ export default function Dashboard() {
         const hasSeenCelebrationBefore = localStorage.getItem(celebrationKey) === 'true';
         
         if (data.stats.totalBooksRead >= 3 && !hasSeenCelebrationBefore) {
-          // Mark as seen and show upgrade modal with celebration
+          // Mark as seen (modal removed)
           localStorage.setItem(celebrationKey, 'true');
-          setShowLimitationsModal(true);
         }
       } else {
         // Try to reload data if we should be logged in
@@ -291,9 +288,8 @@ export default function Dashboard() {
       // Check if user has read 3 books before showing upgrade modal
       const totalBooksRead = userData?.stats?.totalBooksRead || 0;
       if (totalBooksRead >= 3) {
-        // Clear the celebration flag to allow showing the modal again
+        // Clear the celebration flag (modal removed)
         localStorage.removeItem('hasSeenThreeBooksCelebration');
-        setShowLimitationsModal(true);
       } else {
         setShowCompleteBooksModal(true);
       }
@@ -745,11 +741,6 @@ export default function Dashboard() {
         isOpen={showPlanModal}
         onClose={() => setShowPlanModal(false)}
         onSelectPlan={handleSelectPlan}
-      />
-      
-      <PlanLimitationsModal
-        isOpen={showLimitationsModal}
-        onClose={() => setShowLimitationsModal(false)}
       />
       
       <CompleteBooksModal

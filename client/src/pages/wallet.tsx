@@ -5,7 +5,6 @@ import { useSound } from "@/hooks/useSound";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 import WithdrawModal from "@/components/WithdrawModal";
 import PlanModal from "@/components/PlanModal";
-import { PlanLimitationsModal } from "@/components/PlanLimitationsModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +21,6 @@ export default function WalletPage() {
   const [monthlyGoal, setMonthlyGoal] = useState(500);
   const [tempGoal, setTempGoal] = useState(500);
   const [isLoading, setIsLoading] = useState(true);
-  const [showLimitationsModal, setShowLimitationsModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const { toast } = useToast();
 
@@ -75,7 +73,7 @@ export default function WalletPage() {
       // Check if user has read 3 books before showing upgrade modal
       const totalBooksRead = userData?.stats?.totalBooksRead || 0;
       if (totalBooksRead >= 3) {
-        setShowLimitationsModal(true);
+        // Modal removed
       } else {
         setShowCompleteBooksModal(true);
       }
@@ -615,10 +613,6 @@ export default function WalletPage() {
         onSelectPlan={handlePlanSelect}
       />
       
-      <PlanLimitationsModal
-        isOpen={showLimitationsModal}
-        onClose={() => setShowLimitationsModal(false)}
-      />
       
       <CompleteBooksModal
         isOpen={showCompleteBooksModal}

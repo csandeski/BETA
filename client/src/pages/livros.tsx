@@ -4,13 +4,11 @@ import { useLocation } from "wouter";
 import { useSound } from "@/hooks/useSound";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 import MobileNav from "@/components/MobileNav";
-import { PlanLimitationsModal } from "@/components/PlanLimitationsModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 
 export default function Livros() {
   const [, setLocation] = useLocation();
   const { playSound } = useSound();
-  const [showLimitationsModal, setShowLimitationsModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showActivityWarning, setShowActivityWarning] = useState(false);
   const [showLimitWarning, setShowLimitWarning] = useState(false);
@@ -212,7 +210,7 @@ export default function Livros() {
                   // Check if user has read 3 books before showing upgrade modal
                   const totalBooksRead = userData?.stats?.totalBooksRead || 0;
                   if (totalBooksRead >= 3) {
-                    setShowLimitationsModal(true);
+                    // Modal removed
                   } else {
                     setShowCompleteBooksModal(true);
                   }
@@ -393,7 +391,7 @@ export default function Livros() {
                   // Check if user has read 3 books before showing upgrade modal
                   const totalBooksRead = userData?.stats?.totalBooksRead || 0;
                   if (totalBooksRead >= 3) {
-                    setShowLimitationsModal(true);
+                    // Modal removed
                   } else {
                     setShowCompleteBooksModal(true);
                   }
@@ -407,11 +405,6 @@ export default function Livros() {
         </div>
       )}
 
-      {/* Plan Upgrade Modal */}
-      <PlanLimitationsModal
-        isOpen={showLimitationsModal}
-        onClose={() => setShowLimitationsModal(false)}
-      />
       
       {/* Complete Books Modal */}
       <CompleteBooksModal

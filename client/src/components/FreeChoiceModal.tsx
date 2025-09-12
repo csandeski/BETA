@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Gift, Clock, DollarSign, Zap, TrendingUp, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { PlanLimitationsModal } from './PlanLimitationsModal';
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/scrollLock';
 import { fbPixel } from '@/utils/facebookPixel';
 
@@ -12,7 +11,6 @@ interface FreeChoiceModalProps {
 
 export default function FreeChoiceModal({ isOpen, onClose }: FreeChoiceModalProps) {
   const { toast } = useToast();
-  const [showDiscountedPlans, setShowDiscountedPlans] = useState(false);
   
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -27,17 +25,6 @@ export default function FreeChoiceModal({ isOpen, onClose }: FreeChoiceModalProp
   
   if (!isOpen) return null;
 
-  if (showDiscountedPlans) {
-    return (
-      <PlanLimitationsModal 
-        isOpen={true} 
-        onClose={() => {
-          setShowDiscountedPlans(false);
-          onClose();
-        }}
-      />
-    );
-  }
   
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -151,7 +138,8 @@ export default function FreeChoiceModal({ isOpen, onClose }: FreeChoiceModalProp
                   content_name: 'Special Offer Interest',
                   content_category: 'discount_offer'
                 });
-                setShowDiscountedPlans(true);
+                // Modal removed - just close the modal
+                onClose();
               }}
               className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-amber-600 transition-all duration-300 flex items-center justify-center gap-2 animate-pulse"
               data-testid="button-surprise"

@@ -5,7 +5,6 @@ import { useSound } from "@/hooks/useSound";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 import { apiClient } from "@/lib/api";
 import PlanModal from "@/components/PlanModal";
-import { PlanLimitationsModal } from "@/components/PlanLimitationsModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 import FriendsSection from "@/components/FriendsSection";
 import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
@@ -22,7 +21,6 @@ export default function ProfilePage() {
   const [tempPhone, setTempPhone] = useState("");
   const [tempPassword, setTempPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showLimitationsModal, setShowLimitationsModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [friendsData, setFriendsData] = useState<{friends: any[], onlineFriends: any[]}>({ friends: [], onlineFriends: [] });
@@ -602,7 +600,7 @@ export default function ProfilePage() {
               // Check if user has read 3 books before showing upgrade modal
               const totalBooksRead = userData?.stats?.totalBooksRead || 0;
               if (totalBooksRead >= 3) {
-                setShowLimitationsModal(true);
+                // Modal removed
               } else {
                 setShowCompleteBooksModal(true);
               }
@@ -741,10 +739,6 @@ export default function ProfilePage() {
         onSelectPlan={handlePlanSelect}
       />
       
-      <PlanLimitationsModal
-        isOpen={showLimitationsModal}
-        onClose={() => setShowLimitationsModal(false)}
-      />
       
       <CompleteBooksModal
         isOpen={showCompleteBooksModal}
