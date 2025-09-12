@@ -786,7 +786,7 @@ export default function Planos() {
                     </>
                   ) : (
                     <>
-                      Gerar PIX e Ativar Plano
+                      Ativar meu Plano Agora
                       <ChevronRight className="inline-block h-4 w-4 ml-2" />
                     </>
                   )}
