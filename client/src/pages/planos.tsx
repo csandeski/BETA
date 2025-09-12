@@ -3,8 +3,6 @@ import { Check, X, Shield, Clock, Zap, Award, DollarSign, AlertCircle, ChevronRi
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { QRCodeSVG } from 'qrcode.react';
 import { UtmTracker } from '@/utils/utmTracker';
 import { fbPixel } from '@/utils/facebookPixel';
@@ -66,14 +64,23 @@ export default function Planos() {
 
   const loadUserData = async () => {
     try {
-      const response = await fetch('/api/users/me');
-      if (response.ok) {
-        const user = await response.json();
+      // Get user ID from auth status
+      const authResponse = await fetch('/api/auth/status');
+      const authData = await authResponse.json();
+      if (!authData.userId) {
+        console.error('User not authenticated');
+        return;
+      }
+      
+      // Load user data from API
+      const userResponse = await fetch(`/api/users/${authData.userId}/data`);
+      if (userResponse.ok) {
+        const data = await userResponse.json();
         setUserData({
-          fullName: user.name || '',
-          email: user.email || '',
-          phone: user.phone || '',
-          cpf: user.cpf || ''
+          fullName: data.fullName || data.name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          cpf: data.cpf || ''
         });
       }
     } catch (error) {
@@ -492,172 +499,212 @@ export default function Planos() {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
-      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirme seus dados</DialogTitle>
-          </DialogHeader>
+      {/* Confirmation Modal - Custom Mobile-First Design */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowConfirmModal(false)}
+          />
           
-          <div className="space-y-4 mt-4">
-            <div>
-              <Label htmlFor="name">Nome Completo</Label>
-              <Input
-                id="name"
-                value={userData.fullName}
-                onChange={(e) => setUserData({ ...userData, fullName: e.target.value })}
-                disabled={!isEditing}
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                value={userData.email}
-                onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-                disabled={!isEditing}
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="phone">Telefone</Label>
-              <Input
-                id="phone"
-                value={userData.phone}
-                onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
-                disabled={!isEditing}
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="cpf">CPF</Label>
-              <Input
-                id="cpf"
-                value={userData.cpf}
-                onChange={(e) => setUserData({ ...userData, cpf: formatCPF(e.target.value) })}
-                disabled={!isEditing}
-                maxLength={14}
-                className="mt-1"
-              />
-            </div>
-
-            {!isEditing ? (
-              <Button
-                variant="outline"
-                onClick={() => setIsEditing(true)}
-                className="w-full"
+          {/* Modal Content */}
+          <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl">
+            {/* Header */}
+            <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 px-6 py-5 rounded-t-2xl border-b border-green-100">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="absolute right-4 top-4 p-2 hover:bg-white/50 rounded-lg transition-colors"
               >
-                Editar Dados
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={() => setIsEditing(false)}
-                className="w-full"
-              >
-                Salvar Alterações
-              </Button>
-            )}
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+              <h2 className="text-lg font-bold text-gray-900">Confirme seus dados</h2>
+              <p className="text-xs text-gray-600 mt-0.5">Verifique se suas informações estão corretas</p>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Nome Completo</label>
+                <input
+                  type="text"
+                  value={userData.fullName}
+                  onChange={(e) => setUserData({ ...userData, fullName: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  placeholder="Digite seu nome completo"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">E-mail</label>
+                <input
+                  type="email"
+                  value={userData.email}
+                  onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  placeholder="seu@email.com"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Telefone</label>
+                <input
+                  type="tel"
+                  value={userData.phone}
+                  onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  placeholder="(11) 98765-4321"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">CPF</label>
+                <input
+                  type="text"
+                  value={userData.cpf}
+                  onChange={(e) => setUserData({ ...userData, cpf: formatCPF(e.target.value) })}
+                  disabled={!isEditing}
+                  maxLength={14}
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  placeholder="000.000.000-00"
+                />
+              </div>
 
-            <Button
-              onClick={handleGeneratePix}
-              disabled={isProcessing}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader className="h-4 w-4 mr-2 animate-spin" />
-                  Gerando PIX...
-                </>
-              ) : (
-                <>
-                  Gerar PIX e Ativar Plano
-                  <ChevronRight className="h-4 w-4 ml-2" />
-                </>
-              )}
-            </Button>
+              {/* Action Buttons */}
+              <div className="space-y-3 pt-2">
+                {!isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors text-sm"
+                  >
+                    Editar Dados
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors text-sm"
+                  >
+                    Salvar Alterações
+                  </button>
+                )}
+
+                <button
+                  onClick={handleGeneratePix}
+                  disabled={isProcessing}
+                  className="w-full py-3.5 px-4 bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl shadow-[0_4px_0_0_rgb(34,197,94,0.5)] hover:shadow-[0_2px_0_0_rgb(34,197,94,0.5)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-[0_0_0_0_rgb(34,197,94,0.5)] disabled:shadow-none disabled:translate-y-0 transition-all duration-150 text-sm"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader className="inline-block h-4 w-4 mr-2 animate-spin" />
+                      Gerando PIX...
+                    </>
+                  ) : (
+                    <>
+                      Gerar PIX e Ativar Plano
+                      <ChevronRight className="inline-block h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
-      {/* PIX Modal */}
-      <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>PIX Gerado!</span>
-              <span className={`text-sm px-3 py-1 rounded-full ${
-                timeLeft > 60 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-              }`}>
-                {formatTime(timeLeft)}
-              </span>
-            </DialogTitle>
-          </DialogHeader>
+      {/* PIX Modal - Custom Mobile-First Design */}
+      {showPixModal && pixData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowPixModal(false)}
+          />
           
-          {pixData && (
-            <div className="space-y-4 mt-4">
+          {/* Modal Content */}
+          <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl">
+            {/* Header with Timer */}
+            <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 px-6 py-5 rounded-t-2xl border-b border-green-100">
+              <button
+                onClick={() => setShowPixModal(false)}
+                className="absolute right-4 top-4 p-2 hover:bg-white/50 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+              <div className="flex items-center justify-between pr-8">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">PIX Gerado!</h2>
+                  <p className="text-xs text-gray-600 mt-0.5">Escaneie o QR Code ou copie o código</p>
+                </div>
+                <span className={`text-sm font-medium px-3 py-1.5 rounded-full ${
+                  timeLeft > 60 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {formatTime(timeLeft)}
+                </span>
+              </div>
+            </div>
+            
+            {/* Body */}
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
               {/* QR Code */}
-              <div className="flex justify-center p-4 bg-white border-2 border-gray-200 rounded-xl">
+              <div className="flex justify-center p-4 bg-gray-50 border-2 border-gray-200 rounded-xl">
                 <QRCodeSVG
                   value={pixData.pixQrCode}
-                  size={200}
+                  size={180}
                   level="H"
                   includeMargin={false}
                 />
               </div>
 
               {/* Amount */}
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Valor</p>
-                <p className="text-2xl font-bold text-gray-900">
+              <div className="text-center py-2">
+                <p className="text-xs text-gray-600">Valor a pagar</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
                   R$ {pixData.amount.toFixed(2).replace('.', ',')}
                 </p>
               </div>
 
               {/* PIX Code */}
               <div>
-                <Label className="text-xs">Código PIX</Label>
-                <div className="mt-1 p-3 bg-gray-50 rounded-lg break-all">
-                  <p className="text-xs text-gray-600 font-mono">
+                <label className="block text-xs font-medium text-gray-700 mb-2">Código PIX</label>
+                <div className="p-3 bg-gray-50 rounded-lg break-all">
+                  <p className="text-xs text-gray-600 font-mono leading-relaxed">
                     {pixData.pixCode}
                   </p>
                 </div>
               </div>
 
               {/* Copy Button */}
-              <Button
+              <button
                 onClick={handleCopyPixCode}
-                className="w-full bg-green-500 hover:bg-green-600 text-white"
+                className="w-full py-3.5 px-4 bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-xl shadow-[0_4px_0_0_rgb(34,197,94,0.5)] hover:shadow-[0_2px_0_0_rgb(34,197,94,0.5)] hover:translate-y-[2px] active:translate-y-[4px] active:shadow-[0_0_0_0_rgb(34,197,94,0.5)] transition-all duration-150 text-sm"
               >
                 {copied ? (
                   <>
-                    <CheckCheck className="h-4 w-4 mr-2" />
+                    <CheckCheck className="inline-block h-4 w-4 mr-2" />
                     Código Copiado!
                   </>
                 ) : (
                   <>
-                    <Copy className="h-4 w-4 mr-2" />
+                    <Copy className="inline-block h-4 w-4 mr-2" />
                     Copiar Código PIX
                   </>
                 )}
-              </Button>
+              </button>
 
-              {/* Info */}
-              <div className="bg-blue-50 rounded-lg p-3">
+              {/* Info Alert */}
+              <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
                 <p className="text-xs text-blue-700 flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
                   Quando o pagamento for confirmado, você será automaticamente redirecionado.
                 </p>
               </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
