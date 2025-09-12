@@ -151,9 +151,9 @@ export default function Payment() {
             description: "Seu plano foi ativado com sucesso. Redirecionando...",
           });
           
-          // Redirect to dashboard after 3 seconds
+          // Redirect to acelerador after 3 seconds
           setTimeout(() => {
-            setLocation('/dashboard');
+            setLocation('/acelerador');
           }, 3000);
         } else if (data.status === 'pending' || data.status === 'processing') {
           attempts++;
