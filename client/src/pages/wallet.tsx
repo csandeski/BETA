@@ -109,7 +109,8 @@ export default function WalletPage() {
     }
     
     setShowBankWithdrawModal(false);
-    setShowPlanRequiredModal(true);
+    // Redirect directly to onboarding-complete (new PIX flow)
+    setLocation('/onboarding-complete');
   };
 
   const handlePlanRequiredContinue = () => {
