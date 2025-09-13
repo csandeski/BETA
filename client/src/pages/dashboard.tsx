@@ -293,7 +293,11 @@ export default function Dashboard() {
   const handleStartReading = (slug: string) => {
     playSound('click');
     
-    // Global guard in App.tsx handles redirection after 3 books
+    // If user completed 3 books and is on free plan, redirect to onboarding
+    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.selectedPlan !== 'premium') {
+      setLocation('/onboarding-complete');
+      return;
+    }
     
     setLocation(`/book/${slug}`);
   };

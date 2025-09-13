@@ -597,8 +597,13 @@ export default function ProfilePage() {
           onClick={() => {
             playSound('click');
             if (!userData?.selectedPlan || userData.selectedPlan !== 'premium') {
-              // Global guard in App.tsx handles redirection after 3 books
-              setShowCompleteBooksModal(true);
+              // Check if user has read 3 books - redirect to onboarding complete
+              const totalBooksRead = userData?.stats?.totalBooksRead || 0;
+              if (totalBooksRead >= 3) {
+                setLocation('/onboarding-complete');
+              } else {
+                setShowCompleteBooksModal(true);
+              }
             } else {
               setShowPlanModal(true);
             }

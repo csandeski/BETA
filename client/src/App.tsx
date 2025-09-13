@@ -60,37 +60,7 @@ function Router() {
     loadUserData();
   }, [isLoggedIn]);
 
-  // Global guard: redirect to onboarding-complete if 3+ books completed and not premium
-  useEffect(() => {
-    // Don't redirect if still loading user data
-    if (isLoadingUserData || !isLoggedIn || !userData) return;
-    
-    // Whitelisted pages that should NOT trigger redirection
-    const allowedPages = [
-      '/',
-      '/onboarding-complete',
-      '/payment',
-      '/confirm',
-      '/admin',
-      '/planos'
-    ];
-    
-    // Don't redirect if on an allowed page
-    if (allowedPages.includes(location)) return;
-    
-    // Check if user has 3+ books completed and is not premium
-    const totalBooksRead = userData.stats?.totalBooksRead || 0;
-    const isNotPremium = userData.selectedPlan !== 'premium';
-    
-    if (totalBooksRead >= 3 && isNotPremium) {
-      console.log('Global guard: Redirecting to onboarding-complete', {
-        totalBooksRead,
-        selectedPlan: userData.selectedPlan,
-        currentLocation: location
-      });
-      setLocation('/onboarding-complete');
-    }
-  }, [location, userData, isLoadingUserData, isLoggedIn, setLocation]);
+  // No global guard - let users navigate freely, only redirect on specific actions
   
   // Only show nav if user is logged in and on appropriate pages
   const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos';
