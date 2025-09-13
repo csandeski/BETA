@@ -76,6 +76,38 @@ export default function WalletPage() {
 
   const handleBankTransfer = () => {
     playSound('click');
+    
+    // Validate withdrawal amount
+    const amountStr = withdrawAmount.replace(',', '.');
+    const amount = parseFloat(amountStr);
+    
+    if (!amount || amount <= 0) {
+      toast({
+        title: "Valor inválido",
+        description: "Por favor, insira um valor válido para o saque.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (amount > balance) {
+      toast({
+        title: "Saldo insuficiente",
+        description: `Você não pode sacar mais do que seu saldo disponível de R$ ${balance.toFixed(2).replace('.', ',')}.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!pixCpf || pixCpf.replace(/\D/g, '').length !== 11) {
+      toast({
+        title: "CPF inválido",
+        description: "Por favor, insira um CPF válido para a chave PIX.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setShowBankWithdrawModal(false);
     setShowPlanRequiredModal(true);
   };
@@ -733,6 +765,12 @@ export default function WalletPage() {
                       const value = e.target.value.replace(/\D/g, '');
                       if (value) {
                         const amount = (parseInt(value) / 100).toFixed(2);
+                        const numericAmount = parseFloat(amount);
+                        // Check if amount exceeds balance while typing
+                        if (numericAmount > balance) {
+                          // Don't update if it exceeds balance
+                          return;
+                        }
                         setWithdrawAmount(`${amount.replace('.', ',')}`);
                       } else {
                         setWithdrawAmount('');
@@ -742,9 +780,16 @@ export default function WalletPage() {
                     placeholder="0,00"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Digite o valor que deseja sacar
-                </p>
+                {withdrawAmount && parseFloat(withdrawAmount.replace(',', '.')) > balance && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Valor maior que o saldo disponível
+                  </p>
+                )}
+                {(!withdrawAmount || parseFloat(withdrawAmount.replace(',', '.')) <= balance) && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Digite o valor que deseja sacar
+                  </p>
+                )}
               </div>
 
               {/* PIX CPF */}
