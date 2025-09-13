@@ -6,6 +6,7 @@ import { useLocation } from "wouter";
 import WithdrawModal from "@/components/WithdrawModal";
 import PlanModal from "@/components/PlanModal";
 import RegistrationModal from "@/components/RegistrationModal";
+import LoginModal from "@/components/LoginModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 import FreeChoiceModal from "@/components/FreeChoiceModal";
 import WelcomeModal from "@/components/WelcomeModal";
@@ -20,6 +21,7 @@ export default function Dashboard() {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showFreeChoiceModal, setShowFreeChoiceModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -33,7 +35,7 @@ export default function Dashboard() {
   
   // Lock/unlock body scroll when modals open
   useEffect(() => {
-    if (showWithdrawModal || showPlanModal || showRegistration || showFirstRewardPopup || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
+    if (showWithdrawModal || showPlanModal || showRegistration || showLoginModal || showFirstRewardPopup || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -43,7 +45,7 @@ export default function Dashboard() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [showWithdrawModal, showPlanModal, showRegistration, showFirstRewardPopup, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
+  }, [showWithdrawModal, showPlanModal, showRegistration, showLoginModal, showFirstRewardPopup, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
   const [, setLocation] = useLocation();
   const { playSound } = useSound();
   const { toast } = useToast();
@@ -129,6 +131,24 @@ export default function Dashboard() {
     setTimeout(() => {
       setShowWelcomeModal(true);
     }, 100);
+  };
+
+  const handleLoginComplete = async (user: any) => {
+    await userDataManager.registerUser(user);
+    await userDataManager.loadUserData();
+    const updatedData = userDataManager.getUserData();
+    setUserData(updatedData);
+    setShowLoginModal(false);
+  };
+
+  const handleSwitchToLogin = () => {
+    setShowRegistration(false);
+    setShowLoginModal(true);
+  };
+
+  const handleSwitchToRegister = () => {
+    setShowLoginModal(false);
+    setShowRegistration(true);
   };
   
   const getUserFirstName = () => {
@@ -798,6 +818,13 @@ export default function Dashboard() {
       <RegistrationModal
         isOpen={showRegistration}
         onComplete={handleRegistrationComplete}
+        onSwitchToLogin={handleSwitchToLogin}
+      />
+      
+      <LoginModal
+        isOpen={showLoginModal}
+        onComplete={handleLoginComplete}
+        onSwitchToRegister={handleSwitchToRegister}
       />
       
       {/* Friend Notifications - shows after first book completed */}
