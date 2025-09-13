@@ -584,40 +584,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use LiraPay API to generate real PIX
       if (apiKey) {
         try {
-          // Prepare request body for LiraPay API
+          // Prepare request body for LiraPay API according to documentation
           const liraPayRequest = {
-            amount: planPrice,
-            description: planTitle,
             external_id: reference,
+            total_amount: planPrice / 100, // Convert from cents to reais
+            payment_method: "PIX",
+            webhook_url: `https://${req.get('host')}/api/webhook/payment-status`,
+            items: [
+              {
+                id: "premium-plan",
+                title: planTitle,
+                description: "Plano Premium Beta Reader Brasil",
+                price: planPrice / 100,
+                quantity: 1,
+                is_physical: false
+              }
+            ],
+            ip: req.ip || '0.0.0.0',
             customer: {
               name: fullName,
               email: email,
-              cpf: cpf.replace(/\D/g, '')
-            },
-            payment_method: "PIX"
+              phone: "00000000000", // Default phone if not provided
+              document_type: "CPF",
+              document: cpf.replace(/\D/g, '')
+            }
           };
           
-          console.log('Calling LiraPay API...');
+          console.log('Calling LiraPay API at https://api.lirapaybr.com/v1/transactions');
+          console.log('Request body:', {
+            ...liraPayRequest,
+            customer: { ...liraPayRequest.customer, document: '***' }
+          });
           
-          const liraPayResponse = await fetch('https://api.lirapay.com.br/v1/order', {
+          const liraPayResponse = await fetch('https://api.lirapaybr.com/v1/transactions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
+              'api-secret': apiKey // Use api-secret header as per documentation
             },
             body: JSON.stringify(liraPayRequest)
           });
           
-          if (liraPayResponse.ok) {
-            const responseData = await liraPayResponse.json();
+          const responseData = await liraPayResponse.json();
+          console.log('LiraPay Response:', responseData);
+          
+          if (liraPayResponse.ok && !responseData.hasError) {
             orderId = responseData.id;
-            pixCode = responseData.pix_copy_paste || responseData.pix_qr_code;
+            pixCode = responseData.pix?.payload || '';
+            console.log('PIX generated successfully:', { orderId, pixCodeLength: pixCode.length });
           } else {
-            throw new Error('LiraPay API error');
+            console.error('LiraPay API error:', responseData);
+            throw new Error(responseData.message || 'LiraPay API error');
           }
         } catch (error: any) {
-          console.error('LiraPay API error:', error.message);
-          throw new Error('Erro ao conectar com LiraPay. Verifique a configuração da API.');
+          console.error('LiraPay API error:', error.message || error);
+          throw new Error(`Erro ao gerar PIX: ${error.message || 'Falha na comunicação com LiraPay'}`);
         }
       } else {
         throw new Error('API da LiraPay não configurada. Por favor, configure LIRAPAY_API_KEY.');
@@ -660,12 +681,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Checking payment status for order:', orderId);
       
-      // Call LiraPay API to check order status
-      const liraPayResponse = await fetch(`https://api.lirapay.com.br/v1/order/${orderId}`, {
+      // Call LiraPay API to check transaction status
+      const liraPayResponse = await fetch(`https://api.lirapaybr.com/v1/transactions/${orderId}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'api-secret': apiKey
         }
       });
       
@@ -699,7 +719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Map LiraPay status to frontend expected status
       let mappedStatus = 'pending';
-      if (responseData.status === 'AUTHORIZED' || responseData.status === 'PAID') {
+      if (responseData.status === 'AUTHORIZED') {
         mappedStatus = 'paid';
         
         // Parse external_id to get user ID and upgrade plan
@@ -712,10 +732,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Check if we need to upgrade the user's plan
             const user = await storage.getUser(userId);
             if (user && user.plan === 'free') {
-              // Determine plan from amount (LiraPay returns in cents)
-              const amount = responseData.total_amount || responseData.amount;
-              const plan = amount === 5990 ? 'unlimited' : 'premium';
-              const actualPlan = plan === 'unlimited' ? 'premium' : plan;
+              // Fixed price for premium plan
+              const plan = 'premium';
+              const actualPlan = 'premium';
               
               await storage.updateUser(userId, { 
                 plan: actualPlan,
@@ -726,8 +745,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         }
-      } else if (responseData.status === 'CANCELLED' || responseData.status === 'EXPIRED') {
-        mappedStatus = 'cancelled';
+      } else if (responseData.status === 'FAILED' || responseData.status === 'CHARGEBACK' || responseData.status === 'IN_DISPUTE') {
+        mappedStatus = 'failed';
       }
       
       // Return status to frontend
@@ -778,26 +797,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id, external_id, status, total_amount, payment_method } = req.body;
       
-      console.log('LiraPay webhook received:', { id, external_id, status });
+      console.log('LiraPay webhook received:', { id, external_id, status, total_amount });
       
-      // Parse external_id to get user ID and plan
+      // Parse external_id to get user ID
       // Format: PLAN-{userId}-{timestamp}
-      const [, userId] = external_id.split('-');
-      
-      if (status === 'AUTHORIZED') {
-        // Payment successful - upgrade user plan
-        const user = await storage.getUser(userId);
-        if (user) {
-          // Determine plan from amount
-          const plan = total_amount === 59.90 ? 'unlimited' : 'premium';
-          const actualPlan = plan === 'unlimited' ? 'premium' : plan;
+      if (external_id && external_id.startsWith('PLAN-')) {
+        const parts = external_id.split('-');
+        if (parts.length >= 2) {
+          const userId = parts[1];
           
-          await storage.updateUser(userId, { 
-            plan: actualPlan,
-            selectedPlan: plan
-          });
-          
-          console.log(`User ${userId} upgraded to ${plan} plan`);
+          if (status === 'AUTHORIZED') {
+            // Payment successful - upgrade user plan
+            const user = await storage.getUser(userId);
+            if (user) {
+              // Fixed premium plan
+              await storage.updateUser(userId, { 
+                plan: 'premium',
+                selectedPlan: 'premium'
+              });
+              
+              console.log(`User ${userId} upgraded to premium plan via webhook`);
+            }
+          }
         }
       }
       
