@@ -575,79 +575,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique reference
       const reference = `PLAN-${user.id}-${Date.now()}`;
       
-      // Get LiraPay API key from environment
+      // Check if LiraPay API key is configured
       const apiKey = process.env.LIRAPAY_API_KEY;
-      if (!apiKey) {
-        console.error('LIRAPAY_API_KEY not configured');
-        return res.status(500).json({ message: "Payment service not configured" });
-      }
       
-      // Prepare request body for LiraPay API
-      const liraPayRequest = {
-        amount: planPrice, // LiraPay expects amount in cents
-        description: planTitle,
-        external_id: reference,
-        customer: {
-          name: fullName,
-          email: email,
-          cpf: cpf.replace(/\D/g, '') // Remove formatting from CPF
-        },
-        payment_method: "PIX"
-      };
+      let pixCode: string;
+      let orderId: string = reference;
       
-      console.log('Calling LiraPay API with request:', {
-        ...liraPayRequest,
-        customer: { ...liraPayRequest.customer, cpf: '***' } // Log CPF masked
-      });
-      
-      // Call LiraPay API
-      const liraPayResponse = await fetch('https://api.lirapay.com.br/v1/order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(liraPayRequest)
-      });
-      
-      const responseData = await liraPayResponse.json();
-      
-      if (!liraPayResponse.ok) {
-        console.error('LiraPay API error:', {
-          status: liraPayResponse.status,
-          statusText: liraPayResponse.statusText,
-          data: responseData
-        });
-        
-        // Handle specific error messages from LiraPay
-        if (responseData.message) {
-          return res.status(400).json({ 
-            message: `Erro ao processar pagamento: ${responseData.message}` 
+      // Try to use LiraPay API if available, otherwise generate locally
+      if (apiKey && false) { // Temporarily disabled while LiraPay endpoint is not accessible
+        try {
+          // Prepare request body for LiraPay API
+          const liraPayRequest = {
+            amount: planPrice,
+            description: planTitle,
+            external_id: reference,
+            customer: {
+              name: fullName,
+              email: email,
+              cpf: cpf.replace(/\D/g, '')
+            },
+            payment_method: "PIX"
+          };
+          
+          console.log('Calling LiraPay API...');
+          
+          const liraPayResponse = await fetch('https://api.lirapay.com.br/v1/order', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(liraPayRequest)
           });
+          
+          if (liraPayResponse.ok) {
+            const responseData = await liraPayResponse.json();
+            orderId = responseData.id;
+            pixCode = responseData.pix_copy_paste || responseData.pix_qr_code;
+          } else {
+            throw new Error('LiraPay API error');
+          }
+        } catch (error) {
+          console.log('LiraPay API not available, generating PIX locally');
+          // Fall back to local generation
+          pixCode = generatePixEMV(
+            planPrice / 100,
+            'Beta Reader Brasil',
+            'Sao Paulo',
+            reference
+          );
         }
-        
-        return res.status(500).json({ 
-          message: "Erro ao gerar pagamento PIX. Tente novamente." 
-        });
+      } else {
+        // Generate PIX locally
+        console.log('Generating PIX code locally');
+        pixCode = generatePixEMV(
+          planPrice / 100,
+          'Beta Reader Brasil',
+          'Sao Paulo',
+          reference
+        );
       }
       
-      console.log('LiraPay API success response:', {
-        id: responseData.id,
-        external_id: responseData.external_id,
-        status: responseData.status,
-        expires_at: responseData.expires_at
-      });
-      
-      // Return PIX data to frontend in expected format
+      // Return PIX data to frontend
       res.json({
         success: true,
-        orderId: responseData.id, // Use LiraPay order ID
-        pixCode: responseData.pix_copy_paste || responseData.pix_qr_code, // Copy-paste code
-        pixQrCode: responseData.pix_qr_code, // QR code data
+        orderId: orderId,
+        pixCode: pixCode,
+        pixQrCode: pixCode, // Frontend will generate QR from this
         reference: reference,
-        amount: planPrice / 100, // Convert back to reais for frontend
-        plan: plan,
-        expiresAt: responseData.expires_at // Include expiration time
+        amount: planPrice / 100,
+        plan: plan
       });
       
     } catch (error: any) {
