@@ -481,21 +481,27 @@ export default function Planos() {
               {/* PIX Code */}
               <div className="space-y-2">
                 <label className="block text-xs font-medium text-gray-700">Código PIX (copia e cola)</label>
-                <div className="relative">
+                <div className="space-y-3">
                   <textarea
                     readOnly
                     value={pixData.pixCode}
-                    className="w-full p-3 pr-12 text-xs font-mono bg-gray-50 border border-gray-200 rounded-lg resize-none"
+                    className="w-full p-3 text-xs font-mono bg-gray-50 border border-gray-200 rounded-lg resize-none"
                     rows={4}
                   />
                   <button
                     onClick={copyToClipboard}
-                    className="absolute right-2 top-2 p-2 bg-white hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02]"
                   >
                     {copied ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <>
+                        <CheckCircle2 className="h-5 w-5" />
+                        Código Copiado!
+                      </>
                     ) : (
-                      <Copy className="h-4 w-4 text-gray-600" />
+                      <>
+                        <Copy className="h-5 w-5" />
+                        Copiar Código PIX
+                      </>
                     )}
                   </button>
                 </div>

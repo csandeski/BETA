@@ -568,36 +568,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "CPF inválido. Por favor, verifique e tente novamente." });
       }
       
-      // Fixed price for premium plan
+      // Fixed price for premium plan (in cents for LiraPay)
       const planPrice = 3790; // R$ 37,90 in cents
       const planTitle = 'Beta Reader Premium';
       
       // Generate unique reference
       const reference = `PLAN-${user.id}-${Date.now()}`;
       
-      // Generate PIX code
-      const pixCode = generatePixEMV(
-        planPrice / 100,
-        'Beta Reader Brasil',
-        'Sao Paulo',
-        reference
-      );
+      // Get LiraPay API key from environment
+      const apiKey = process.env.LIRAPAY_API_KEY;
+      if (!apiKey) {
+        console.error('LIRAPAY_API_KEY not configured');
+        return res.status(500).json({ message: "Payment service not configured" });
+      }
       
-      // Return PIX data to frontend
+      // Prepare request body for LiraPay API
+      const liraPayRequest = {
+        amount: planPrice, // LiraPay expects amount in cents
+        description: planTitle,
+        external_id: reference,
+        customer: {
+          name: fullName,
+          email: email,
+          cpf: cpf.replace(/\D/g, '') // Remove formatting from CPF
+        },
+        payment_method: "PIX"
+      };
+      
+      console.log('Calling LiraPay API with request:', {
+        ...liraPayRequest,
+        customer: { ...liraPayRequest.customer, cpf: '***' } // Log CPF masked
+      });
+      
+      // Call LiraPay API
+      const liraPayResponse = await fetch('https://api.lirapay.com.br/v1/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(liraPayRequest)
+      });
+      
+      const responseData = await liraPayResponse.json();
+      
+      if (!liraPayResponse.ok) {
+        console.error('LiraPay API error:', {
+          status: liraPayResponse.status,
+          statusText: liraPayResponse.statusText,
+          data: responseData
+        });
+        
+        // Handle specific error messages from LiraPay
+        if (responseData.message) {
+          return res.status(400).json({ 
+            message: `Erro ao processar pagamento: ${responseData.message}` 
+          });
+        }
+        
+        return res.status(500).json({ 
+          message: "Erro ao gerar pagamento PIX. Tente novamente." 
+        });
+      }
+      
+      console.log('LiraPay API success response:', {
+        id: responseData.id,
+        external_id: responseData.external_id,
+        status: responseData.status,
+        expires_at: responseData.expires_at
+      });
+      
+      // Return PIX data to frontend in expected format
       res.json({
         success: true,
-        orderId: reference,
-        pixCode: pixCode,
-        pixQrCode: pixCode, // Frontend will generate QR from this
+        orderId: responseData.id, // Use LiraPay order ID
+        pixCode: responseData.pix_copy_paste || responseData.pix_qr_code, // Copy-paste code
+        pixQrCode: responseData.pix_qr_code, // QR code data
         reference: reference,
-        amount: planPrice / 100,
-        plan: plan
+        amount: planPrice / 100, // Convert back to reais for frontend
+        plan: plan,
+        expiresAt: responseData.expires_at // Include expiration time
       });
       
     } catch (error: any) {
       console.error('Generate PIX error:', error);
       res.status(500).json({ 
         message: error.message || "Failed to generate PIX payment" 
+      });
+    }
+  });
+
+  // Payment status check endpoint
+  app.get('/api/payment/check-status/:orderId', async (req: Request, res: Response) => {
+    try {
+      const { orderId } = req.params;
+      
+      if (!orderId) {
+        return res.status(400).json({ message: "Order ID required" });
+      }
+      
+      // Get LiraPay API key from environment
+      const apiKey = process.env.LIRAPAY_API_KEY;
+      if (!apiKey) {
+        console.error('LIRAPAY_API_KEY not configured');
+        return res.status(500).json({ message: "Payment service not configured" });
+      }
+      
+      console.log('Checking payment status for order:', orderId);
+      
+      // Call LiraPay API to check order status
+      const liraPayResponse = await fetch(`https://api.lirapay.com.br/v1/order/${orderId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+      
+      const responseData = await liraPayResponse.json();
+      
+      if (!liraPayResponse.ok) {
+        console.error('LiraPay status check error:', {
+          status: liraPayResponse.status,
+          statusText: liraPayResponse.statusText,
+          data: responseData
+        });
+        
+        // If order not found, return pending status to continue polling
+        if (liraPayResponse.status === 404) {
+          return res.json({
+            status: 'pending',
+            message: 'Order not found, may still be processing'
+          });
+        }
+        
+        return res.status(500).json({ 
+          message: "Error checking payment status" 
+        });
+      }
+      
+      console.log('LiraPay status check response:', {
+        id: responseData.id,
+        status: responseData.status,
+        external_id: responseData.external_id
+      });
+      
+      // Map LiraPay status to frontend expected status
+      let mappedStatus = 'pending';
+      if (responseData.status === 'AUTHORIZED' || responseData.status === 'PAID') {
+        mappedStatus = 'paid';
+        
+        // Parse external_id to get user ID and upgrade plan
+        // Format: PLAN-{userId}-{timestamp}
+        if (responseData.external_id) {
+          const parts = responseData.external_id.split('-');
+          if (parts.length >= 2) {
+            const userId = parts[1];
+            
+            // Check if we need to upgrade the user's plan
+            const user = await storage.getUser(userId);
+            if (user && user.plan === 'free') {
+              // Determine plan from amount (LiraPay returns in cents)
+              const amount = responseData.total_amount || responseData.amount;
+              const plan = amount === 5990 ? 'unlimited' : 'premium';
+              const actualPlan = plan === 'unlimited' ? 'premium' : plan;
+              
+              await storage.updateUser(userId, { 
+                plan: actualPlan,
+                selectedPlan: plan
+              });
+              
+              console.log(`User ${userId} upgraded to ${plan} plan via status check`);
+            }
+          }
+        }
+      } else if (responseData.status === 'CANCELLED' || responseData.status === 'EXPIRED') {
+        mappedStatus = 'cancelled';
+      }
+      
+      // Return status to frontend
+      res.json({
+        status: mappedStatus,
+        orderId: responseData.id,
+        externalId: responseData.external_id,
+        pixCode: responseData.pix_copy_paste,
+        pixQrCode: responseData.pix_qr_code
+      });
+      
+    } catch (error: any) {
+      console.error('Payment status check error:', error);
+      res.status(500).json({ 
+        message: error.message || "Failed to check payment status" 
       });
     }
   });
