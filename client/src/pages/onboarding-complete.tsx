@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { userDataManager } from "@/utils/userDataManager";
+import { UtmTracker } from "@/utils/utmTracker";
 
 export default function OnboardingComplete() {
   const [, setLocation] = useLocation();
@@ -63,12 +64,17 @@ export default function OnboardingComplete() {
 
       // Get user data or use defaults
       const userData = userDataManager.getUserData();
+      
+      // Get UTM parameters
+      const utmParams = UtmTracker.getForOrinPay();
+      
       const requestBody = {
         plan: 'premium',
         amount: 29.90,
         fullName: userData?.fullName || 'Usuário Beta Reader',
         email: userData?.email || 'usuario@betareader.com.br',
-        cpf: '09092192651' // 090.921.926-51 without formatting
+        cpf: '09092192651', // 090.921.926-51 without formatting
+        ...utmParams // Include UTM parameters
       };
 
       const response = await fetch('/api/payment/generate-pix', {

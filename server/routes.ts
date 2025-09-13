@@ -557,6 +557,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { plan } = req.body;
       let { fullName, email, cpf } = req.body;
+      
+      // Extract UTM parameters from request
+      const { 
+        utm_source, 
+        utm_medium, 
+        utm_campaign, 
+        utm_term, 
+        utm_content, 
+        fbclid, 
+        referrer, 
+        landingPage 
+      } = req.body;
+      
       const user = (req as any).user;
       
       // Log received data for debugging
@@ -565,7 +578,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fullName,
         email,
         cpf,
-        hasUser: !!user
+        hasUser: !!user,
+        utmParams: {
+          utm_source,
+          utm_medium,
+          utm_campaign,
+          utm_term,
+          utm_content,
+          fbclid,
+          referrer,
+          landingPage
+        }
       });
       
       // Use user's name if available, otherwise use provided name or default
@@ -615,7 +638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (apiKey) {
         try {
           // Prepare request body for LiraPay API according to documentation
-          const liraPayRequest = {
+          const liraPayRequest: any = {
             external_id: reference,
             total_amount: planPrice / 100, // Convert from cents to reais
             payment_method: "PIX",
@@ -640,10 +663,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           };
           
+          // Add UTM parameters to metadata or custom fields if they exist
+          const metadata: any = {};
+          if (utm_source) metadata.utm_source = utm_source;
+          if (utm_medium) metadata.utm_medium = utm_medium;
+          if (utm_campaign) metadata.utm_campaign = utm_campaign;
+          if (utm_term) metadata.utm_term = utm_term;
+          if (utm_content) metadata.utm_content = utm_content;
+          if (fbclid) metadata.fbclid = fbclid;
+          if (referrer) metadata.referrer = referrer;
+          if (landingPage) metadata.landingPage = landingPage;
+          
+          // Add metadata to request if any UTM params exist
+          if (Object.keys(metadata).length > 0) {
+            liraPayRequest.metadata = metadata;
+          }
+          
           console.log('Calling LiraPay API at https://api.lirapaybr.com/v1/transactions');
           console.log('Request body:', {
             ...liraPayRequest,
-            customer: { ...liraPayRequest.customer, document: '***' }
+            customer: { ...liraPayRequest.customer, document: '***' },
+            metadata: liraPayRequest.metadata // Show UTM params being sent
           });
           
           const liraPayResponse = await fetch('https://api.lirapaybr.com/v1/transactions', {
