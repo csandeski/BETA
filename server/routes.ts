@@ -581,8 +581,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let pixCode: string;
       let orderId: string = reference;
       
-      // Try to use LiraPay API if available, otherwise generate locally
-      if (apiKey && false) { // Temporarily disabled while LiraPay endpoint is not accessible
+      // Use LiraPay API to generate real PIX
+      if (apiKey) {
         try {
           // Prepare request body for LiraPay API
           const liraPayRequest = {
@@ -615,25 +615,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else {
             throw new Error('LiraPay API error');
           }
-        } catch (error) {
-          console.log('LiraPay API not available, generating PIX locally');
-          // Fall back to local generation
-          pixCode = generatePixEMV(
-            planPrice / 100,
-            'Beta Reader Brasil',
-            'Sao Paulo',
-            reference
-          );
+        } catch (error: any) {
+          console.error('LiraPay API error:', error.message);
+          throw new Error('Erro ao conectar com LiraPay. Verifique a configuração da API.');
         }
       } else {
-        // Generate PIX locally
-        console.log('Generating PIX code locally');
-        pixCode = generatePixEMV(
-          planPrice / 100,
-          'Beta Reader Brasil',
-          'Sao Paulo',
-          reference
-        );
+        throw new Error('API da LiraPay não configurada. Por favor, configure LIRAPAY_API_KEY.');
       }
       
       // Return PIX data to frontend
