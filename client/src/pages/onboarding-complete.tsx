@@ -3,9 +3,9 @@ import { useLocation } from "wouter";
 import { Trophy, Shield, Check, Clock, Users, Calendar, ArrowLeft, AlertCircle, Star, TrendingUp, Lock, ChevronRight, X, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSound } from "@/hooks/useSound";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
-import * as fbPixel from "@/utils/facebookPixel";
+import { fbPixel } from "@/utils/facebookPixel";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -47,10 +47,20 @@ export default function OnboardingComplete() {
         amount: 29.90,
       };
 
-      return apiRequest('/api/payment/generate-pix', {
+      const response = await fetch('/api/payment/generate-pix', {
         method: 'POST',
-        body: JSON.stringify(requestBody)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+        credentials: 'include'
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PIX');
+      }
+
+      return response.json();
     },
     onSuccess: (data) => {
       if (data.pixCode && data.qrCodeUrl && data.paymentId) {
@@ -117,9 +127,12 @@ export default function OnboardingComplete() {
 
       try {
         setIsCheckingPayment(true);
-        const response = await apiRequest(`/api/payment/check-status?paymentId=${paymentId}`);
+        const response = await fetch(`/api/payment/check-status?paymentId=${paymentId}`, {
+          credentials: 'include'
+        });
+        const data = await response.json();
         
-        if (response.status === 'paid') {
+        if (data.status === 'paid') {
           clearInterval(pollInterval);
           setIsCheckingPayment(false);
           
@@ -250,20 +263,23 @@ export default function OnboardingComplete() {
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                Ativação 100% Segura
+                Verificação de Segurança
               </h3>
               <p className="text-xs text-gray-600 mb-3">
-                Pagamento via PIX com proteção total dos seus dados
+                Para proteger todos os usuários contra fraudes e bots
               </p>
               
-              {/* Guarantee Box */}
-              <div className="bg-green-100/50 rounded-xl p-3 border border-green-200">
+              {/* Refund Notice Box */}
+              <div className="bg-yellow-100 rounded-xl p-3 border border-yellow-300">
                 <div className="flex items-center gap-2 mb-1">
-                  <AlertCircle className="h-4 w-4 text-green-700" />
-                  <span className="text-xs font-semibold text-green-900">Garantia Total</span>
+                  <AlertCircle className="h-4 w-4 text-yellow-700" />
+                  <span className="text-xs font-bold text-yellow-900">IMPORTANTE</span>
                 </div>
-                <p className="text-xs text-green-800">
-                  Valor reembolsado em até 1 hora se não gostar, sem perguntas.
+                <p className="text-xs text-yellow-800 font-semibold">
+                  💰 Este valor é uma verificação de segurança
+                </p>
+                <p className="text-xs text-yellow-700 mt-1">
+                  <strong>VALOR REEMBOLSADO EM ATÉ 1 HORA</strong> após a confirmação do pagamento para verificar que você é um usuário real.
                 </p>
               </div>
             </div>
@@ -291,7 +307,7 @@ export default function OnboardingComplete() {
               <span className="text-lg text-gray-400 line-through">R$ 59,90</span>
               <div>
                 <span className="text-3xl font-bold text-gray-900" data-testid="text-price-2990">R$ 29,90</span>
-                <p className="text-xs text-green-600 font-semibold mt-1">Reembolsável</p>
+                <p className="text-xs text-yellow-600 font-bold mt-1">Reembolsado em 1h</p>
               </div>
             </div>
           </div>
@@ -314,7 +330,7 @@ export default function OnboardingComplete() {
               </div>
               <div className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Garantia de 30 dias ou dinheiro de volta</span>
+                <span className="text-sm text-gray-700">Valor de verificação reembolsado em 1 hora</span>
               </div>
             </div>
           </div>
@@ -354,34 +370,54 @@ export default function OnboardingComplete() {
       {/* PIX Payment Modal */}
       <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
         <DialogContent className="max-w-md mx-auto p-0 overflow-hidden">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 px-6 py-4 border-b border-green-100">
+          {/* Header with Timer */}
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-gray-900">Pagamento PIX</h2>
-                <p className="text-xs text-gray-600 mt-0.5">Escaneie ou copie o código</p>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Shield className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-white">Pagamento Seguro via PIX</h2>
+                  <p className="text-xs text-green-100">Transação protegida e verificada</p>
+                </div>
               </div>
               <button
                 onClick={() => setShowPixModal(false)}
-                className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                 data-testid="button-close-pix"
               >
-                <X className="h-5 w-5 text-gray-600" />
+                <X className="h-5 w-5 text-white" />
               </button>
+            </div>
+            
+            {/* Timer Bar */}
+            <div className="mt-3 bg-white/20 rounded-lg px-3 py-2">
+              <div className="flex items-center justify-center gap-2">
+                <Clock className="h-4 w-4 text-white" />
+                <span className="text-white text-sm font-medium">
+                  Tempo restante: <span className="font-bold text-lg">{formatTime(pixCountdown)}</span>
+                </span>
+              </div>
             </div>
           </div>
           
           <div className="p-6">
-            {/* Countdown Timer */}
-            <div className="flex items-center justify-center gap-2 mb-4 text-sm">
-              <Clock className="h-4 w-4 text-gray-500" />
-              <span className="text-gray-700">
-                Código expira em: <span className="font-bold text-green-600">{formatTime(pixCountdown)}</span>
-              </span>
+            
+            {/* Amount Display */}
+            <div className="text-center mb-4">
+              <p className="text-xs text-gray-500 uppercase font-semibold">Valor a pagar</p>
+              <p className="text-3xl font-bold text-gray-900 mt-1">R$ 29,90</p>
+              <div className="inline-flex items-center gap-1 mt-2 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
+                <AlertCircle className="h-3 w-3" />
+                Valor reembolsado em 1h
+              </div>
             </div>
             
             {/* QR Code */}
             {qrCodeUrl && (
-              <div className="bg-white rounded-xl p-4 mb-4 border border-gray-200">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-4 border-2 border-gray-200">
+                <p className="text-xs text-gray-600 text-center mb-3 font-semibold">Escaneie o QR Code</p>
                 <img 
                   src={qrCodeUrl} 
                   alt="QR Code PIX" 
@@ -392,26 +428,26 @@ export default function OnboardingComplete() {
             )}
             
             {/* PIX Code */}
-            <div className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-200">
-              <p className="text-xs text-gray-600 mb-2 text-center">Ou copie o código PIX:</p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
+            <div className="bg-white rounded-xl p-4 mb-4 border-2 border-green-200">
+              <p className="text-xs text-gray-600 mb-3 text-center font-semibold">Ou use o código PIX copia e cola:</p>
+              <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                <textarea
                   value={pixCode}
                   readOnly
-                  className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs font-mono text-gray-700"
+                  className="w-full bg-transparent text-xs font-mono text-gray-700 resize-none border-0 outline-none"
+                  rows={3}
                   data-testid="input-pix-code"
                 />
-                <Button
-                  onClick={copyPixCode}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
-                  size="sm"
-                  data-testid="button-copy-pix"
-                >
-                  <Copy className="h-4 w-4 mr-1" />
-                  Copiar
-                </Button>
               </div>
+              <Button
+                onClick={copyPixCode}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3"
+                size="lg"
+                data-testid="button-copy-pix"
+              >
+                <Copy className="h-5 w-5 mr-2" />
+                Copiar Código PIX
+              </Button>
             </div>
             
             {/* Status */}
@@ -423,11 +459,23 @@ export default function OnboardingComplete() {
             )}
             
             {/* Instructions */}
-            <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
-              <p className="text-xs text-blue-800">
-                <strong>Como pagar:</strong> Abra o app do seu banco, escolha pagar com PIX, 
-                escaneie o QR Code ou cole o código copiado.
-              </p>
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+              <h4 className="text-xs font-bold text-blue-900 mb-2 flex items-center gap-1">
+                <AlertCircle className="h-4 w-4" />
+                Como fazer o pagamento:
+              </h4>
+              <ol className="text-xs text-blue-800 space-y-1 list-decimal list-inside">
+                <li>Abra o app do seu banco</li>
+                <li>Escolha a opção PIX</li>
+                <li>Escaneie o QR Code ou use "Pix Copia e Cola"</li>
+                <li>Confirme o pagamento de R$ 29,90</li>
+              </ol>
+            </div>
+            
+            {/* Security Badge */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
+              <Shield className="h-4 w-4 text-green-600" />
+              <span>Pagamento 100% seguro e criptografado</span>
             </div>
           </div>
         </DialogContent>
