@@ -407,20 +407,26 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* New Call to Action - Redirect to plans after 3 books */}
-          {userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free' && (
-            <button
-              onClick={() => {
-                playSound('click');
+          {/* Withdraw Button with gradient */}
+          <button
+            onClick={() => {
+              playSound('click');
+              // If user completed 3 books and is on free plan, redirect to onboarding
+              if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free') {
                 setLocation('/onboarding-complete');
-              }}
-              className="w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 animate-pulse ring-2 ring-green-400 ring-offset-2"
-              data-testid="button-upgrade-plan"
-            >
-              Liberar Ganhos Ilimitados
-              <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
-            </button>
-          )}
+              } else {
+                // Otherwise go to wallet page
+                setLocation('/carteira');
+              }
+            }}
+            className={`w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${
+              userData?.canWithdraw ? 'animate-pulse ring-2 ring-green-400 ring-offset-2' : ''
+            }`}
+            data-testid="button-withdraw"
+          >
+            Sacar saldo
+            <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+          </button>
         </section>
 
         {/* Welcome Message with color accent */}
