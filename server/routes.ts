@@ -553,18 +553,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Payment/PIX routes
-  app.post('/api/payment/generate-pix', requireUser, async (req: Request, res: Response) => {
+  app.post('/api/payment/generate-pix', async (req: Request, res: Response) => {
     try {
-      const { plan, fullName, email, cpf } = req.body;
+      const { plan } = req.body;
+      let { fullName, email, cpf } = req.body;
       const user = (req as any).user;
       
-      // Validate required fields
-      if (!plan || !fullName || !email || !cpf) {
-        return res.status(400).json({ message: "Missing required fields" });
+      // Use user's name if available, otherwise use provided name or default
+      if (user && user.name) {
+        fullName = user.name;
+      } else if (!fullName) {
+        fullName = "Cliente Beta Reader";
       }
       
-      // Validate CPF
-      if (!validateCPF(cpf)) {
+      // Generate random data if not provided
+      if (!email) {
+        // Generate random email
+        const randomId = Math.random().toString(36).substring(2, 11);
+        email = `user${randomId}@betareader.com.br`;
+      }
+      
+      if (!cpf) {
+        // Generate valid random CPF
+        const randomDigit = () => Math.floor(Math.random() * 10);
+        let cpfArray = Array.from({length: 9}, randomDigit);
+        
+        // Calculate first verifier digit
+        let sum = 0;
+        for (let i = 0; i < 9; i++) {
+          sum += cpfArray[i] * (10 - i);
+        }
+        let firstVerifier = 11 - (sum % 11);
+        if (firstVerifier >= 10) firstVerifier = 0;
+        cpfArray.push(firstVerifier);
+        
+        // Calculate second verifier digit
+        sum = 0;
+        for (let i = 0; i < 10; i++) {
+          sum += cpfArray[i] * (11 - i);
+        }
+        let secondVerifier = 11 - (sum % 11);
+        if (secondVerifier >= 10) secondVerifier = 0;
+        cpfArray.push(secondVerifier);
+        
+        cpf = cpfArray.join('');
+      }
+      
+      // Validate required fields
+      if (!plan) {
+        return res.status(400).json({ message: "Plan selection required" });
+      }
+      
+      // Validate CPF if provided
+      if (cpf && !validateCPF(cpf)) {
         return res.status(400).json({ message: "CPF inválido. Por favor, verifique e tente novamente." });
       }
       
@@ -573,7 +614,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const planTitle = 'Beta Reader Premium';
       
       // Generate unique reference
-      const reference = `PLAN-${user.id}-${Date.now()}`;
+      const userId = user?.id || `GUEST-${Date.now()}`;
+      const reference = `PLAN-${userId}-${Date.now()}`;
       
       // Check if LiraPay API key is configured
       const apiKey = process.env.LIRAPAY_API_KEY;
@@ -604,7 +646,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             customer: {
               name: fullName,
               email: email,
-              phone: "00000000000", // Default phone if not provided
+              phone: "11" + Math.random().toString().slice(2, 11), // Generate random phone number
               document_type: "CPF",
               document: cpf.replace(/\D/g, '')
             }
