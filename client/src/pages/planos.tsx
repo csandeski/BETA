@@ -115,19 +115,25 @@ export default function Planos() {
   };
 
   const generateRandomValidCPF = () => {
-    const randomDigits = () => Math.floor(Math.random() * 10);
-    let cpf = Array.from({ length: 9 }, randomDigits);
+    const randomDigit = () => Math.floor(Math.random() * 10);
+    let cpf = Array.from({ length: 9 }, randomDigit);
     
-    // Calculate first verification digit
-    let sum = cpf.reduce((acc, digit, index) => acc + digit * (10 - index), 0);
-    let firstVerifier = (sum * 10) % 11;
-    if (firstVerifier === 10) firstVerifier = 0;
+    // Calculate first verification digit using the same logic as backend
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += cpf[i] * (10 - i);
+    }
+    let firstVerifier = 11 - (sum % 11);
+    if (firstVerifier > 9) firstVerifier = 0;
     cpf.push(firstVerifier);
     
     // Calculate second verification digit
-    sum = cpf.reduce((acc, digit, index) => acc + digit * (11 - index), 0);
-    let secondVerifier = (sum * 10) % 11;
-    if (secondVerifier === 10) secondVerifier = 0;
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += cpf[i] * (11 - i);
+    }
+    let secondVerifier = 11 - (sum % 11);
+    if (secondVerifier > 9) secondVerifier = 0;
     cpf.push(secondVerifier);
     
     return cpf.join('');
