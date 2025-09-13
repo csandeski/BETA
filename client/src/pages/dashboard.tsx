@@ -5,8 +5,6 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import WithdrawModal from "@/components/WithdrawModal";
 import PlanModal from "@/components/PlanModal";
-import RegistrationModal from "@/components/RegistrationModal";
-import LoginModal from "@/components/LoginModal";
 import { CompleteBooksModal } from "@/components/CompleteBooksModal";
 import FreeChoiceModal from "@/components/FreeChoiceModal";
 import WelcomeModal from "@/components/WelcomeModal";
@@ -20,8 +18,6 @@ export default function Dashboard() {
   const [showBalance, setShowBalance] = useState(true);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
-  const [showRegistration, setShowRegistration] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showCompleteBooksModal, setShowCompleteBooksModal] = useState(false);
   const [showFreeChoiceModal, setShowFreeChoiceModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -35,7 +31,7 @@ export default function Dashboard() {
   
   // Lock/unlock body scroll when modals open
   useEffect(() => {
-    if (showWithdrawModal || showPlanModal || showRegistration || showLoginModal || showFirstRewardPopup || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
+    if (showWithdrawModal || showPlanModal || showFirstRewardPopup || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -45,7 +41,7 @@ export default function Dashboard() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [showWithdrawModal, showPlanModal, showRegistration, showLoginModal, showFirstRewardPopup, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
+  }, [showWithdrawModal, showPlanModal, showFirstRewardPopup, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
   const [, setLocation] = useLocation();
   const { playSound } = useSound();
   const { toast } = useToast();
@@ -61,7 +57,8 @@ export default function Dashboard() {
       const authData = await authResponse.json();
       
       if (!authData.isLoggedIn || !authData.userId) {
-        setShowRegistration(true);
+        // Redirect to home page if not logged in
+        setLocation('/');
         return;
       }
       
@@ -120,36 +117,6 @@ export default function Dashboard() {
     };
   }, [setLocation, playSound]);
   
-  const handleRegistrationComplete = async (user: any) => {
-    await userDataManager.registerUser(user);
-    await userDataManager.loadUserData();
-    const updatedData = userDataManager.getUserData();
-    setUserData(updatedData);
-    setShowRegistration(false);
-    
-    // Show welcome modal for new users immediately
-    setTimeout(() => {
-      setShowWelcomeModal(true);
-    }, 100);
-  };
-
-  const handleLoginComplete = async (user: any) => {
-    await userDataManager.registerUser(user);
-    await userDataManager.loadUserData();
-    const updatedData = userDataManager.getUserData();
-    setUserData(updatedData);
-    setShowLoginModal(false);
-  };
-
-  const handleSwitchToLogin = () => {
-    setShowRegistration(false);
-    setShowLoginModal(true);
-  };
-
-  const handleSwitchToRegister = () => {
-    setShowLoginModal(false);
-    setShowRegistration(true);
-  };
   
   const getUserFirstName = () => {
     if (!userData) return "Leitor";
@@ -814,17 +781,6 @@ export default function Dashboard() {
         userName={userData?.fullName}
       />
       
-      <RegistrationModal
-        isOpen={showRegistration}
-        onComplete={handleRegistrationComplete}
-        onSwitchToLogin={handleSwitchToLogin}
-      />
-      
-      <LoginModal
-        isOpen={showLoginModal}
-        onComplete={handleLoginComplete}
-        onSwitchToRegister={handleSwitchToRegister}
-      />
       
       {/* Friend Notifications - shows after first book completed */}
       {/* Temporariamente desativado para evitar sons sem notificações visuais
