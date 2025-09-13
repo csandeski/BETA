@@ -418,8 +418,12 @@ export default function Dashboard() {
           <button
             onClick={() => {
               playSound('click');
-              // Global guard in App.tsx handles redirection after 3 books
-              setLocation('/carteira');
+              // If user completed 3 books and is on free plan, redirect to onboarding
+              if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.selectedPlan !== 'premium') {
+                setLocation('/onboarding-complete');
+              } else {
+                setLocation('/carteira');
+              }
             }}
             className={`w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${
               userData?.canWithdraw ? 'animate-pulse ring-2 ring-green-400 ring-offset-2' : ''
