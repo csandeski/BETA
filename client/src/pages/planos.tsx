@@ -433,7 +433,7 @@ export default function Planos() {
 
       {/* PIX Modal */}
       {showPixModal && pixData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div 
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
@@ -441,7 +441,7 @@ export default function Planos() {
           />
           
           {/* Modal Content */}
-          <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl">
+          <div className="relative w-full max-w-md max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             {/* Header with Timer */}
             <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 px-6 py-5 rounded-t-2xl border-b border-green-100">
               <button
@@ -464,22 +464,25 @@ export default function Planos() {
             </div>
             
             {/* Body */}
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
               {/* QR Code */}
-              <div className="flex justify-center p-4 bg-gray-50 border-2 border-gray-200 rounded-xl">
+              <div className="flex justify-center p-3 sm:p-4 bg-gray-50 border-2 border-gray-200 rounded-xl">
                 {pixData.pixQrCode.startsWith('http') ? (
                   <img 
                     src={pixData.pixQrCode}
                     alt="QR Code PIX"
-                    className="w-[180px] h-[180px]"
+                    className="w-[150px] h-[150px] sm:w-[180px] sm:h-[180px]"
                   />
                 ) : (
-                  <QRCodeSVG
-                    value={pixData.pixQrCode}
-                    size={180}
-                    level="H"
-                    includeMargin={false}
-                  />
+                  <div className="w-[150px] h-[150px] sm:w-[180px] sm:h-[180px]">
+                    <QRCodeSVG
+                      value={pixData.pixQrCode}
+                      size={180}
+                      level="H"
+                      includeMargin={false}
+                      className="w-full h-full"
+                    />
+                  </div>
                 )}
               </div>
               
@@ -492,16 +495,16 @@ export default function Planos() {
               {/* PIX Code */}
               <div className="space-y-2">
                 <label className="block text-xs font-medium text-gray-700">Código PIX (copia e cola)</label>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <textarea
                     readOnly
                     value={pixData.pixCode}
-                    className="w-full p-3 text-xs font-mono bg-gray-50 border border-gray-200 rounded-lg resize-none"
-                    rows={4}
+                    className="w-full p-2 sm:p-3 text-[10px] sm:text-xs font-mono bg-gray-50 border border-gray-200 rounded-lg resize-none"
+                    rows={3}
                   />
                   <button
                     onClick={copyToClipboard}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02]"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-sm sm:text-base font-medium rounded-lg transition-all transform hover:scale-[1.02]"
                   >
                     {copied ? (
                       <>
@@ -529,15 +532,7 @@ export default function Planos() {
                 </ol>
               </div>
               
-              {/* Status */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-yellow-600 animate-pulse" />
-                  <p className="text-xs text-yellow-800">
-                    Aguardando pagamento... Assim que identificarmos, você será redirecionado automaticamente.
-                  </p>
-                </div>
-              </div>
+              {/* Removed annoying status message */}
             </div>
           </div>
         </div>

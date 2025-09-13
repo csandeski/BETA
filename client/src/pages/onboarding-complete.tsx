@@ -374,7 +374,7 @@ export default function OnboardingComplete() {
 
       {/* PIX Payment Modal */}
       <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
-        <DialogContent className="max-w-md mx-auto p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-md w-[95vw] max-w-[95vw] sm:w-auto mx-auto p-0 overflow-hidden max-h-[95vh] flex flex-col">
           {/* Header with Timer */}
           <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
             <div className="flex items-center justify-between">
@@ -407,7 +407,7 @@ export default function OnboardingComplete() {
             </div>
           </div>
           
-          <div className="p-6">
+          <div className="p-4 sm:p-6 overflow-y-auto flex-1">
             
             {/* Amount Display */}
             <div className="text-center mb-4">
@@ -426,21 +426,21 @@ export default function OnboardingComplete() {
                 <img 
                   src={qrCodeUrl} 
                   alt="QR Code PIX" 
-                  className="w-full max-w-[200px] mx-auto"
+                  className="w-full max-w-[180px] sm:max-w-[200px] mx-auto"
                   data-testid="img-qrcode"
                 />
               </div>
             )}
             
             {/* PIX Code */}
-            <div className="bg-white rounded-xl p-4 mb-4 border-2 border-green-200">
-              <p className="text-xs text-gray-600 mb-3 text-center font-semibold">Ou use o código PIX copia e cola:</p>
-              <div className="bg-gray-50 rounded-lg p-3 mb-3">
+            <div className="bg-white rounded-xl p-3 sm:p-4 mb-4 border-2 border-green-200">
+              <p className="text-xs text-gray-600 mb-2 sm:mb-3 text-center font-semibold">Ou use o código PIX copia e cola:</p>
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3 mb-2 sm:mb-3">
                 <textarea
                   value={pixCode}
                   readOnly
-                  className="w-full bg-transparent text-xs font-mono text-gray-700 resize-none border-0 outline-none"
-                  rows={3}
+                  className="w-full bg-transparent text-[10px] sm:text-xs font-mono text-gray-700 resize-none border-0 outline-none"
+                  rows={2}
                   data-testid="input-pix-code"
                 />
               </div>
@@ -455,16 +455,10 @@ export default function OnboardingComplete() {
               </Button>
             </div>
             
-            {/* Status */}
-            {isCheckingPayment && (
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-500 border-t-transparent" />
-                Verificando pagamento...
-              </div>
-            )}
+            {/* Status - removed annoying checking payment message */}
             
             {/* Instructions */}
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div className="bg-blue-50 rounded-xl p-3 sm:p-4 border border-blue-200">
               <h4 className="text-xs font-bold text-blue-900 mb-2 flex items-center gap-1">
                 <AlertCircle className="h-4 w-4" />
                 Como fazer o pagamento:
