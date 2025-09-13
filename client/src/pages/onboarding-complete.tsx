@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Trophy, Shield, Check, Clock, Users, Calendar, ArrowLeft, AlertCircle, Star, TrendingUp, Lock, ChevronRight, X, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,25 @@ export default function OnboardingComplete() {
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [pixCountdown, setPixCountdown] = useState(300);
   const [isPixExpired, setIsPixExpired] = useState(false);
+  
+  // Check if user has completed 3 activities
+  useEffect(() => {
+    const checkAccess = async () => {
+      const userData = userDataManager.getUserData();
+      
+      // If no user data or less than 3 books completed, redirect to dashboard
+      if (!userData || !userData.stats?.totalBooksRead || userData.stats.totalBooksRead < 3) {
+        setLocation('/dashboard');
+        toast({
+          title: "Acesso negado",
+          description: "Você precisa completar 3 atividades antes de acessar esta página.",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    checkAccess();
+  }, [setLocation, toast]);
 
   const generatePixMutation = useMutation({
     mutationFn: async () => {
