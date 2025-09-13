@@ -115,8 +115,8 @@ export default function WalletPage() {
   const handlePlanRequiredContinue = () => {
     playSound('click');
     setShowPlanRequiredModal(false);
-    // Redirect to plans page
-    setLocation('/planos');
+    // Redirect to new onboarding complete flow
+    setLocation('/onboarding-complete');
   };
 
   const formatCPF = (value: string) => {
@@ -249,7 +249,15 @@ export default function WalletPage() {
                 Sacar
               </button>
               <button
-                onClick={() => setLocation('/livros')}
+                onClick={() => {
+                  playSound('click');
+                  // If user completed 3 books and is on free plan, redirect to onboarding
+                  if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free') {
+                    setLocation('/onboarding-complete');
+                  } else {
+                    setLocation('/livros');
+                  }
+                }}
                 className="py-3 bg-white/20 text-white font-semibold rounded-2xl hover:bg-white/30 transition-all flex items-center justify-center gap-2"
               >
                 <BookOpen className="h-4 w-4" />

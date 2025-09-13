@@ -292,6 +292,13 @@ export default function Dashboard() {
   
   const handleStartReading = (slug: string) => {
     playSound('click');
+    
+    // If user completed 3 books and is on free plan, redirect to onboarding
+    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free') {
+      setLocation('/onboarding-complete');
+      return;
+    }
+    
     setLocation(`/book/${slug}`);
   };
   
@@ -433,16 +440,44 @@ export default function Dashboard() {
         <section className="px-5 py-4 border-b border-green-100 bg-gradient-to-r from-transparent via-green-100/30 to-transparent">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-semibold text-gray-900">
-                <span className="text-green-500 font-semibold">3 novas</span> atividades disponíveis
-              </h2>
-              <p className="text-xs text-gray-600 mt-0.5">
-                Continue lendo para aumentar seus ganhos
-              </p>
+              {userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 ? (
+                // Show completion message for users who finished 3 books
+                <>
+                  <h2 className="text-base font-semibold text-gray-900">
+                    <span className="text-green-500 font-semibold">Você completou</span> todas suas atividades
+                  </h2>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    Confirme sua conta para continuar trabalhando e sacar seus ganhos!
+                  </p>
+                </>
+              ) : (
+                // Show default message for new users
+                <>
+                  <h2 className="text-base font-semibold text-gray-900">
+                    <span className="text-green-500 font-semibold">3 novas</span> atividades disponíveis
+                  </h2>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    Continue lendo para aumentar seus ganhos
+                  </p>
+                </>
+              )}
             </div>
-            <div className="p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+            <button
+              onClick={() => {
+                playSound('click');
+                // If user completed 3 books, redirect to onboarding-complete
+                if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3) {
+                  setLocation('/onboarding-complete');
+                }
+              }}
+              className={`p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg transition-all ${
+                userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 
+                  ? 'hover:from-green-200 hover:to-emerald-200 cursor-pointer'
+                  : 'cursor-default'
+              }`}
+            >
               <TrendingUp className="h-4 w-4 text-green-600" strokeWidth={1.5} />
-            </div>
+            </button>
           </div>
         </section>
 

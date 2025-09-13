@@ -124,6 +124,12 @@ export default function Livros() {
       return;
     }
     
+    // If user completed 3 books and is on free plan, redirect to onboarding
+    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free') {
+      setLocation('/onboarding-complete');
+      return;
+    }
+    
     // Verifica se completou as 3 atividades
     if (!hasCompletedActivities) {
       setShowActivityWarning(true);

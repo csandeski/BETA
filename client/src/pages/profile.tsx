@@ -597,10 +597,10 @@ export default function ProfilePage() {
           onClick={() => {
             playSound('click');
             if (!userData?.selectedPlan || userData.selectedPlan === 'free') {
-              // Check if user has read 3 books before showing upgrade modal
+              // Check if user has read 3 books - redirect to onboarding complete
               const totalBooksRead = userData?.stats?.totalBooksRead || 0;
               if (totalBooksRead >= 3) {
-                // Modal removed
+                setLocation('/onboarding-complete');
               } else {
                 setShowCompleteBooksModal(true);
               }
