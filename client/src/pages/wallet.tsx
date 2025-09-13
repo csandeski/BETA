@@ -71,6 +71,17 @@ export default function WalletPage() {
 
   const handleWithdraw = () => {
     playSound('click');
+    
+    // Check if user has completed minimum activities
+    if (totalBooksRead < 3) {
+      toast({
+        title: "Complete as atividades primeiro",
+        description: "Você precisa completar 3 livros antes de poder sacar.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setShowBankWithdrawModal(true);
   };
 
@@ -243,11 +254,16 @@ export default function WalletPage() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleWithdraw}
-                className="py-3 bg-white text-green-600 font-semibold rounded-2xl hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2"
+                disabled={totalBooksRead < 3}
+                className={`py-3 font-semibold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 ${
+                  totalBooksRead < 3
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+                    : 'bg-white text-green-600 hover:bg-gray-100'
+                }`}
                 data-testid="button-withdraw-wallet"
               >
                 <ArrowUpRight className="h-4 w-4" />
-                Sacar
+                {totalBooksRead < 3 ? `Sacar (${3 - totalBooksRead} livros)` : 'Sacar'}
               </button>
               <button
                 onClick={() => {

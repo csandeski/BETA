@@ -405,20 +405,42 @@ export default function Dashboard() {
           <button
             onClick={() => {
               playSound('click');
+              // Check if user has completed minimum activities
+              if (!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3) {
+                toast({
+                  title: "Complete as atividades primeiro",
+                  description: "Você precisa completar 3 livros antes de poder sacar.",
+                  variant: "destructive"
+                });
+                return;
+              }
               // If user completed 3 books and is on free plan, redirect to onboarding
-              if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.selectedPlan !== 'premium') {
+              if (userData?.selectedPlan !== 'premium') {
                 setLocation('/onboarding-complete');
               } else {
                 setLocation('/carteira');
               }
             }}
-            className={`w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${
-              userData?.canWithdraw ? 'animate-pulse ring-2 ring-green-400 ring-offset-2' : ''
+            disabled={!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3}
+            className={`w-full py-3.5 text-white text-sm font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
+              !userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3
+                ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                : `bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 hover:shadow-lg ${
+                    userData?.canWithdraw ? 'animate-pulse ring-2 ring-green-400 ring-offset-2' : ''
+                  }`
             }`}
             data-testid="button-withdraw"
           >
-            Sacar saldo
-            <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+            {!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3 ? (
+              <>
+                Sacar saldo (Complete {3 - (userData?.stats?.totalBooksRead || 0)} livros)
+              </>
+            ) : (
+              <>
+                Sacar saldo
+                <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+              </>
+            )}
           </button>
         </section>
 
