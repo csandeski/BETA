@@ -42,7 +42,7 @@ export default function Planos() {
     
     // Track Add to Cart when viewing the plan
     fbPixel.trackAddToCart({
-      value: 37.90,
+      value: 29.90,
       currency: 'BRL',
       content_name: 'Beta Reader Premium',
       content_ids: ['premium'],
@@ -138,7 +138,7 @@ export default function Planos() {
     
     // Track Initiate Checkout when user clicks to activate
     fbPixel.trackInitiateCheckout({
-      value: 37.90,
+      value: 29.90,
       currency: 'BRL',
       content_name: 'Beta Reader Premium',
       content_category: 'plan_upgrade',
@@ -159,7 +159,7 @@ export default function Planos() {
       
       const requestBody = {
         plan: 'premium',
-        amount: 37.90,
+        amount: 29.90,
         email: userData.email || 'user@example.com',
         cpf: cleanedCpf,
         fullName: userData.fullName || 'Usuário Beta Reader',
@@ -191,7 +191,7 @@ export default function Planos() {
 
       // Track PIX generation
       fbPixel.trackAddPaymentInfo({
-        value: 37.90,
+        value: 29.90,
         currency: 'BRL',
         content_name: 'Beta Reader Premium',
         content_category: 'plan_upgrade'
@@ -224,7 +224,7 @@ export default function Planos() {
           
           // Track successful payment
           fbPixel.trackPurchase({
-            value: 37.90,
+            value: 29.90,
             currency: 'BRL',
             content_name: 'Beta Reader Premium',
             content_category: 'plan_upgrade',
@@ -368,7 +368,7 @@ export default function Planos() {
                 <div className="text-center">
                   <p className="text-sm text-gray-500 mb-1">Pagamento único</p>
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-3xl font-bold text-gray-900">R$ 37,90</span>
+                    <span className="text-3xl font-bold text-gray-900">R$ 29,90</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Sem mensalidades</p>
                 </div>

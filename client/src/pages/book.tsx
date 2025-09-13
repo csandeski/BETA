@@ -2062,12 +2062,18 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
           const totalBooks = userData.stats?.totalBooksRead || 0;
           const totalEarned = userData.totalEarnings || 0;
           
-          // Show plan modal if completed exactly 3 books and on free plan
+          // Redirect to onboarding complete page after 3 books if on free plan
           if (totalBooks === 3 && userData.plan === 'free') {
+            // Redirect to onboarding complete page
+            setTimeout(() => {
+              setLocation('/onboarding-complete');
+            }, 3000); // Wait 3 seconds to show reward animation
+          } else if (totalBooks > 3 && userData.plan === 'free') {
+            // For users who already completed more than 3 books, still show plan modal
             setUserTotalEarned(totalEarned);
             setTimeout(() => {
               setShowPlanModal(true);
-            }, 2000); // Show after reward screen
+            }, 2000);
           }
         }
       } catch (error) {

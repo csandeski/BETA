@@ -569,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Fixed price for premium plan (in cents for LiraPay)
-      const planPrice = 3790; // R$ 37,90 in cents
+      const planPrice = 2990; // R$ 29,90 in cents
       const planTitle = 'Beta Reader Premium';
       
       // Generate unique reference
