@@ -438,7 +438,7 @@ export default function Dashboard() {
         {/* Welcome Message with color accent */}
         <section className="px-5 py-4 border-b border-green-100 bg-gradient-to-r from-transparent via-green-100/30 to-transparent">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1">
               {userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 ? (
                 // Show completion message for users who finished 3 books
                 <>
@@ -461,19 +461,31 @@ export default function Dashboard() {
                 </>
               )}
             </div>
-            <button
-              onClick={() => {
-                playSound('click');
-                // Global guard in App.tsx handles redirection after 3 books
-              }}
-              className={`p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg transition-all ${
-                userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 
-                  ? 'hover:from-green-200 hover:to-emerald-200 cursor-pointer'
-                  : 'cursor-default'
-              }`}
-            >
-              <TrendingUp className="h-4 w-4 text-green-600" strokeWidth={1.5} />
-            </button>
+            {userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.selectedPlan !== 'premium' ? (
+              <button
+                onClick={() => {
+                  playSound('click');
+                  setLocation('/onboarding-complete');
+                }}
+                className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg"
+                data-testid="button-confirm-account"
+              >
+                Confirmar conta
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  playSound('click');
+                }}
+                className={`p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg transition-all ${
+                  userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 
+                    ? 'hover:from-green-200 hover:to-emerald-200 cursor-pointer'
+                    : 'cursor-default'
+                }`}
+              >
+                <TrendingUp className="h-4 w-4 text-green-600" strokeWidth={1.5} />
+              </button>
+            )}
           </div>
         </section>
 
