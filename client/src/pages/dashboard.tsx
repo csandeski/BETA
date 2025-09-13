@@ -293,11 +293,7 @@ export default function Dashboard() {
   const handleStartReading = (slug: string) => {
     playSound('click');
     
-    // If user completed 3 books and is on free plan, redirect to onboarding
-    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free') {
-      setLocation('/onboarding-complete');
-      return;
-    }
+    // Global guard in App.tsx handles redirection after 3 books
     
     setLocation(`/book/${slug}`);
   };
@@ -307,7 +303,7 @@ export default function Dashboard() {
     setIsLoadingBooks(true);
     
     // Check user's plan and book completion status
-    const hasPremiumPlan = userData?.plan === 'premium';
+    const hasPremiumPlan = userData?.selectedPlan === 'premium';
     const hasCompletedThreeBooks = (userData?.stats.totalBooksRead || 0) >= 3;
     
     // Simulate loading
@@ -418,13 +414,8 @@ export default function Dashboard() {
           <button
             onClick={() => {
               playSound('click');
-              // If user completed 3 books and is on free plan, redirect to onboarding
-              if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free') {
-                setLocation('/onboarding-complete');
-              } else {
-                // Otherwise go to wallet page
-                setLocation('/carteira');
-              }
+              // Global guard in App.tsx handles redirection after 3 books
+              setLocation('/carteira');
             }}
             className={`w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${
               userData?.canWithdraw ? 'animate-pulse ring-2 ring-green-400 ring-offset-2' : ''
@@ -465,10 +456,7 @@ export default function Dashboard() {
             <button
               onClick={() => {
                 playSound('click');
-                // If user completed 3 books, redirect to onboarding-complete
-                if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3) {
-                  setLocation('/onboarding-complete');
-                }
+                // Global guard in App.tsx handles redirection after 3 books
               }}
               className={`p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg transition-all ${
                 userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 

@@ -21,10 +21,13 @@ import OnboardingComplete from "@/pages/onboarding-complete";
 import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
 import { fbPixel } from "@/utils/facebookPixel";
+import { userDataManager, type UserData } from "@/utils/userDataManager";
 
 function Router() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(true);
   
   // Check if user is logged in via API
   useEffect(() => {
@@ -33,6 +36,61 @@ function Router() {
       .then(data => setIsLoggedIn(data.isLoggedIn))
       .catch(() => setIsLoggedIn(false));
   }, [location]);
+
+  // Load user data when logged in
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (isLoggedIn) {
+        setIsLoadingUserData(true);
+        try {
+          await userDataManager.loadUserData();
+          const data = userDataManager.getUserData();
+          setUserData(data);
+        } catch (error) {
+          console.error('Failed to load user data:', error);
+        } finally {
+          setIsLoadingUserData(false);
+        }
+      } else {
+        setUserData(null);
+        setIsLoadingUserData(false);
+      }
+    };
+    
+    loadUserData();
+  }, [isLoggedIn]);
+
+  // Global guard: redirect to onboarding-complete if 3+ books completed and not premium
+  useEffect(() => {
+    // Don't redirect if still loading user data
+    if (isLoadingUserData || !isLoggedIn || !userData) return;
+    
+    // Whitelisted pages that should NOT trigger redirection
+    const allowedPages = [
+      '/',
+      '/onboarding-complete',
+      '/payment',
+      '/confirm',
+      '/admin',
+      '/planos'
+    ];
+    
+    // Don't redirect if on an allowed page
+    if (allowedPages.includes(location)) return;
+    
+    // Check if user has 3+ books completed and is not premium
+    const totalBooksRead = userData.stats?.totalBooksRead || 0;
+    const isNotPremium = userData.selectedPlan !== 'premium';
+    
+    if (totalBooksRead >= 3 && isNotPremium) {
+      console.log('Global guard: Redirecting to onboarding-complete', {
+        totalBooksRead,
+        selectedPlan: userData.selectedPlan,
+        currentLocation: location
+      });
+      setLocation('/onboarding-complete');
+    }
+  }, [location, userData, isLoadingUserData, isLoggedIn, setLocation]);
   
   // Only show nav if user is logged in and on appropriate pages
   const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos';

@@ -581,7 +581,7 @@ export default function ProfilePage() {
               <div className="text-left">
                 <p className="text-sm font-medium text-gray-900">Plano atual</p>
                 <p className="text-xs text-gray-600">
-                  {userData?.plan === 'premium' ? 'Premium' : 'Gratuito'}
+                  {userData?.selectedPlan === 'premium' ? 'Premium' : 'Gratuito'}
                 </p>
               </div>
             </div>
@@ -596,14 +596,9 @@ export default function ProfilePage() {
         <button 
           onClick={() => {
             playSound('click');
-            if (!userData?.selectedPlan || userData.selectedPlan === 'free') {
-              // Check if user has read 3 books - redirect to onboarding complete
-              const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-              if (totalBooksRead >= 3) {
-                setLocation('/onboarding-complete');
-              } else {
-                setShowCompleteBooksModal(true);
-              }
+            if (!userData?.selectedPlan || userData.selectedPlan !== 'premium') {
+              // Global guard in App.tsx handles redirection after 3 books
+              setShowCompleteBooksModal(true);
             } else {
               setShowPlanModal(true);
             }
@@ -611,7 +606,7 @@ export default function ProfilePage() {
           className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-2xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg flex items-center justify-center gap-2 mb-3"
         >
           <Crown className="h-5 w-5" />
-          {userData?.plan === 'premium' ? 'Gerenciar Plano' : 'Fazer Upgrade'}
+          {userData?.selectedPlan === 'premium' ? 'Gerenciar Plano' : 'Fazer Upgrade'}
         </button>
 
         <button 

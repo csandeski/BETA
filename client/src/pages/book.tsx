@@ -2056,26 +2056,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
         // This will update local data with the latest from server
         await userDataManager.loadUserData();
         
-        // Check if user completed 3 books and should see plan modal
-        const userData = userDataManager.getUserData();
-        if (userData) {
-          const totalBooks = userData.stats?.totalBooksRead || 0;
-          const totalEarned = userData.totalEarnings || 0;
-          
-          // Redirect to onboarding complete page after 3 books if on free plan
-          if (totalBooks === 3 && userData.plan === 'free') {
-            // Redirect to onboarding complete page
-            setTimeout(() => {
-              setLocation('/onboarding-complete');
-            }, 3000); // Wait 3 seconds to show reward animation
-          } else if (totalBooks > 3 && userData.plan === 'free') {
-            // For users who already completed more than 3 books, still show plan modal
-            setUserTotalEarned(totalEarned);
-            setTimeout(() => {
-              setShowPlanModal(true);
-            }, 2000);
-          }
-        }
+        // Data reloaded - global guard in App.tsx will handle redirection if needed
       } catch (error) {
         console.error("Failed to save book completion:", error);
       }

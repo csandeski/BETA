@@ -251,12 +251,8 @@ export default function WalletPage() {
               <button
                 onClick={() => {
                   playSound('click');
-                  // If user completed 3 books and is on free plan, redirect to onboarding
-                  if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free') {
-                    setLocation('/onboarding-complete');
-                  } else {
-                    setLocation('/livros');
-                  }
+                  // Global guard in App.tsx handles redirection after 3 books
+                  setLocation('/livros');
                 }}
                 className="py-3 bg-white/20 text-white font-semibold rounded-2xl hover:bg-white/30 transition-all flex items-center justify-center gap-2"
               >
