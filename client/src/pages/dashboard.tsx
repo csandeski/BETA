@@ -281,11 +281,7 @@ export default function Dashboard() {
   
   const books = bookSets[currentBookSet];
   
-  const handleWithdraw = () => {
-    playSound('click');
-    // Redirect to wallet page for withdrawal
-    setLocation('/carteira');
-  };
+  // Removed withdraw function - replaced with automatic redirect after 3 books
   
   const handleSelectPlan = async (plan: 'free' | 'premium') => {
     await userDataManager.selectPlan(plan);
@@ -411,17 +407,20 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Withdraw Button with gradient */}
-          <button
-            onClick={handleWithdraw}
-            className={`w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${
-              userData?.canWithdraw ? 'animate-pulse ring-2 ring-green-400 ring-offset-2' : ''
-            }`}
-            data-testid="button-withdraw"
-          >
-            Sacar saldo
-            <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
-          </button>
+          {/* New Call to Action - Redirect to plans after 3 books */}
+          {userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.plan === 'free' && (
+            <button
+              onClick={() => {
+                playSound('click');
+                setLocation('/onboarding-complete');
+              }}
+              className="w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 animate-pulse ring-2 ring-green-400 ring-offset-2"
+              data-testid="button-upgrade-plan"
+            >
+              Liberar Ganhos Ilimitados
+              <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+            </button>
+          )}
         </section>
 
         {/* Welcome Message with color accent */}
