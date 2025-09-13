@@ -488,10 +488,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return true;
   }
 
+  // Function to generate PIX EMV code (for testing)
+  function generatePixEMV(amount: number, merchantName: string, merchantCity: string, txId: string): string {
+    // PIX payload format version
+    const payloadFormatIndicator = '000201';
+    
+    // Merchant account information (test key)
+    const pixKey = '123e4567-e89b-12d3-a456-426614174000'; // Test UUID key
+    const merchantAccountInfo = `0014BR.GOV.BCB.PIX0136${pixKey}`;
+    const merchantAccountInfoFull = `26${merchantAccountInfo.length.toString().padStart(2, '0')}${merchantAccountInfo}`;
+    
+    // Merchant category code
+    const merchantCategoryCode = '52040000';
+    
+    // Transaction currency (986 = BRL)
+    const transactionCurrency = '5303986';
+    
+    // Transaction amount
+    const transactionAmount = `54${amount.toFixed(2).length.toString().padStart(2, '0')}${amount.toFixed(2)}`;
+    
+    // Country code
+    const countryCode = '5802BR';
+    
+    // Merchant name
+    const merchantNameClean = merchantName.substring(0, 25);
+    const merchantNameFull = `59${merchantNameClean.length.toString().padStart(2, '0')}${merchantNameClean}`;
+    
+    // Merchant city
+    const merchantCityClean = merchantCity.substring(0, 15);
+    const merchantCityFull = `60${merchantCityClean.length.toString().padStart(2, '0')}${merchantCityClean}`;
+    
+    // Additional data field template
+    const txIdClean = txId.substring(0, 25);
+    const additionalData = `05${txIdClean.length.toString().padStart(2, '0')}${txIdClean}`;
+    const additionalDataFull = `62${additionalData.length.toString().padStart(2, '0')}${additionalData}`;
+    
+    // Build payload without CRC
+    const payloadWithoutCrc = `${payloadFormatIndicator}${merchantAccountInfoFull}${merchantCategoryCode}${transactionCurrency}${transactionAmount}${countryCode}${merchantNameFull}${merchantCityFull}${additionalDataFull}6304`;
+    
+    // Calculate CRC16-CCITT
+    function crc16(str: string): string {
+      let crc = 0xFFFF;
+      const polynomial = 0x1021;
+      
+      for (let i = 0; i < str.length; i++) {
+        crc ^= str.charCodeAt(i) << 8;
+        
+        for (let j = 0; j < 8; j++) {
+          if ((crc & 0x8000) !== 0) {
+            crc = (crc << 1) ^ polynomial;
+          } else {
+            crc = crc << 1;
+          }
+        }
+      }
+      
+      return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+    }
+    
+    const crcValue = crc16(payloadWithoutCrc);
+    
+    // Final PIX code
+    return `${payloadWithoutCrc}${crcValue}`;
+  }
+
   // Payment/PIX routes
   app.post('/api/payment/generate-pix', requireUser, async (req: Request, res: Response) => {
     try {
-      const { plan, fullName, email, cpf, utmParams } = req.body;
+      const { plan, fullName, email, cpf } = req.body;
       const user = (req as any).user;
       
       // Validate required fields
@@ -504,116 +568,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "CPF inválido. Por favor, verifique e tente novamente." });
       }
       
-      // Get plan price - FIXED PRICES
-      let planPrice: number;
-      let planTitle: string;
-      
-      if (plan === 'unlimited') {
-        planPrice = 5990; // R$ 59,90 in cents
-        planTitle = 'Beta Reader Ilimitado';
-      } else if (plan === 'inicial') {
-        planPrice = 2990; // R$ 29,90 in cents
-        planTitle = 'Plano Inicial';
-      } else {
-        // Default to premium (Beta Reader Oficial)
-        planPrice = 3700; // R$ 37,00 in cents
-        planTitle = 'Beta Reader Oficial';
-      }
+      // Fixed price for premium plan
+      const planPrice = 3790; // R$ 37,90 in cents
+      const planTitle = 'Beta Reader Premium';
       
       // Generate unique reference
       const reference = `PLAN-${user.id}-${Date.now()}`;
       
-      // Build LiraPay payload with UTM tracking
-      // ALWAYS use a random CPF for privacy - regardless of what the user entered
-      const randomCpf = generateRandomCPF();
-      const cleanCpf = randomCpf.replace(/\D/g, '');
-      const cleanPhone = user.phone ? user.phone.replace(/\D/g, '') : '11999999999';
+      // Generate PIX code
+      const pixCode = generatePixEMV(
+        planPrice / 100,
+        'Beta Reader Brasil',
+        'Sao Paulo',
+        reference
+      );
       
-      console.log('User entered CPF:', cpf, '-> Sending random CPF to LiraPay:', randomCpf);
-      
-      const liraPayPayload: any = {
-        external_id: reference,
-        total_amount: planPrice / 100, // Convert from cents to reais
-        payment_method: 'PIX',
-        webhook_url: `https://${req.hostname}/api/webhook/payment-status`,
-        items: [{
-          id: plan,
-          title: planTitle,
-          description: `Plano ${planTitle} - Beta Reader Brasil`,
-          price: planPrice / 100,
-          quantity: 1,
-          is_physical: false
-        }],
-        ip: req.ip || req.connection.remoteAddress || '127.0.0.1',
-        customer: {
-          name: fullName.trim(),
-          email: email.toLowerCase().trim(),
-          phone: cleanPhone,
-          document_type: 'CPF',
-          document: cleanCpf
-        }
-      };
-      
-      // Include UTM parameters for conversion tracking
-      if (utmParams && Object.keys(utmParams).length > 0) {
-        // Add UTM parameters to customer object as per LiraPay API docs
-        liraPayPayload.customer = {
-          ...liraPayPayload.customer,
-          utm_source: utmParams.utm_source || '',
-          utm_medium: utmParams.utm_medium || '',
-          utm_campaign: utmParams.utm_campaign || '',
-          utm_content: utmParams.utm_content || '',
-          utm_term: utmParams.utm_term || ''
-        };
-      }
-      
-      // Call LiraPay API
-      const liraPayResponse = await fetch('https://api.lirapaybr.com/v1/transactions', {
-        method: 'POST',
-        headers: {
-          'api-secret': process.env.LIRAPAY_API_KEY || '',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(liraPayPayload)
-      });
-      
-      const responseText = await liraPayResponse.text();
-      
-      if (!liraPayResponse.ok) {
-        let errorData;
-        try {
-          errorData = JSON.parse(responseText);
-        } catch (e) {
-          errorData = { message: responseText };
-        }
-        return res.status(500).json({ 
-          message: errorData.message || "Failed to generate PIX payment",
-          details: errorData
-        });
-      }
-      
-      let pixData;
-      try {
-        pixData = JSON.parse(responseText);
-      } catch (e) {
-        return res.status(500).json({ 
-          message: "Invalid response from payment processor",
-          error: responseText.substring(0, 200) // Include partial error for debugging
-        });
-      }
-      
-      // Return PIX data to frontend - ensure proper data structure
-      if (!pixData || !pixData.pix || !pixData.pix.payload) {
-        return res.status(500).json({ 
-          message: "Invalid PIX data received from payment processor" 
-        });
-      }
-      
+      // Return PIX data to frontend
       res.json({
         success: true,
-        orderId: pixData.id || reference,
-        pixCode: pixData.pix.payload,
-        pixQrCode: pixData.pix.payload, // LiraPay returns payload, frontend will generate QR
+        orderId: reference,
+        pixCode: pixCode,
+        pixQrCode: pixCode, // Frontend will generate QR from this
         reference: reference,
         amount: planPrice / 100,
         plan: plan

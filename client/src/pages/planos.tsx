@@ -167,7 +167,7 @@ export default function Planos() {
     try {
       const cleanedCpf = generateRandomValidCPF();
       
-      const response = await fetch('/api/payment/create-pix', {
+      const response = await fetch('/api/payment/generate-pix', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ export default function Planos() {
           amount: 37.90,
           email: userData.email,
           cpf: cleanedCpf,
-          name: userData.fullName,
+          fullName: userData.fullName,
         }),
       });
 
