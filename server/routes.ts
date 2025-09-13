@@ -559,6 +559,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let { fullName, email, cpf } = req.body;
       const user = (req as any).user;
       
+      // Log received data for debugging
+      console.log('Received payment request:', {
+        plan,
+        fullName,
+        email,
+        cpf,
+        hasUser: !!user
+      });
+      
       // Use user's name if available, otherwise use provided name or default
       if (user && user.name) {
         fullName = user.name;

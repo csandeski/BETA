@@ -49,7 +49,7 @@ export default function OnboardingComplete() {
         amount: 29.90,
         fullName: userData?.fullName || 'Usuário Beta Reader',
         email: userData?.email || 'usuario@betareader.com.br',
-        cpf: '12345678900' // Use a valid test CPF
+        cpf: '09092192651' // 090.921.926-51 without formatting
       };
 
       const response = await fetch('/api/payment/generate-pix', {
