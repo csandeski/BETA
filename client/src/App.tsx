@@ -17,6 +17,7 @@ import Confirm from "@/pages/confirm";
 import Payment from "@/pages/payment";
 import AdminPanel from "@/pages/admin";
 import Planos from "@/pages/planos";
+import OnboardingComplete from "@/pages/onboarding-complete";
 import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
 import { fbPixel } from "@/utils/facebookPixel";
@@ -92,6 +93,7 @@ function Router() {
         <Route path="/confirm" component={Confirm}/>
         <Route path="/admin" component={AdminPanel}/>
         <Route path="/planos" component={Planos}/>
+        <Route path="/onboarding-complete" component={OnboardingComplete}/>
         {/* Fallback to 404 */}
         <Route component={NotFound} />
       </Switch>
