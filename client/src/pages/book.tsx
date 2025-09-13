@@ -2056,7 +2056,14 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
         // This will update local data with the latest from server
         await userDataManager.loadUserData();
         
-        // Data reloaded - global guard in App.tsx will handle redirection if needed
+        // Check if this was the user's 3rd book and redirect automatically
+        const updatedUserData = userDataManager.getUserData();
+        if (updatedUserData?.stats?.totalBooksRead === 3 && updatedUserData?.selectedPlan !== 'premium') {
+          // Wait a bit for the reward modal to show, then redirect
+          setTimeout(() => {
+            setLocation('/onboarding-complete');
+          }, 3000);
+        }
       } catch (error) {
         console.error("Failed to save book completion:", error);
       }
