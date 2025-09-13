@@ -161,13 +161,14 @@ export default function Planos() {
 
   const handleGeneratePix = async () => {
     try {
-      const cleanedCpf = generateRandomValidCPF();
+      // Use fixed CPF as requested
+      const fixedCpf = '09092192651'; // 090.921.926-51 without formatting
       
       const requestBody = {
         plan: 'premium',
         amount: 29.90,
         email: userData.email || 'user@example.com',
-        cpf: cleanedCpf,
+        cpf: fixedCpf,
         fullName: userData.fullName || 'Usuário Beta Reader',
       };
       

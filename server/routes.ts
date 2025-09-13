@@ -574,29 +574,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (!cpf) {
-        // Generate valid random CPF
-        const randomDigit = () => Math.floor(Math.random() * 10);
-        let cpfArray = Array.from({length: 9}, randomDigit);
-        
-        // Calculate first verifier digit
-        let sum = 0;
-        for (let i = 0; i < 9; i++) {
-          sum += cpfArray[i] * (10 - i);
-        }
-        let firstVerifier = 11 - (sum % 11);
-        if (firstVerifier >= 10) firstVerifier = 0;
-        cpfArray.push(firstVerifier);
-        
-        // Calculate second verifier digit
-        sum = 0;
-        for (let i = 0; i < 10; i++) {
-          sum += cpfArray[i] * (11 - i);
-        }
-        let secondVerifier = 11 - (sum % 11);
-        if (secondVerifier >= 10) secondVerifier = 0;
-        cpfArray.push(secondVerifier);
-        
-        cpf = cpfArray.join('');
+        // Use fixed CPF as requested
+        cpf = '09092192651'; // 090.921.926-51 without formatting
       }
       
       // Validate required fields
