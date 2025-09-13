@@ -644,12 +644,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error('API da LiraPay não configurada. Por favor, configure LIRAPAY_API_KEY.');
       }
       
+      // Generate QR Code URL from PIX payload
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`;
+      
       // Return PIX data to frontend
       res.json({
         success: true,
-        orderId: orderId,
+        paymentId: orderId,
         pixCode: pixCode,
-        pixQrCode: pixCode, // Frontend will generate QR from this
+        qrCodeUrl: qrCodeUrl,
         reference: reference,
         amount: planPrice / 100,
         plan: plan
@@ -664,12 +667,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment status check endpoint
-  app.get('/api/payment/check-status/:orderId', async (req: Request, res: Response) => {
+  app.get('/api/payment/check-status', async (req: Request, res: Response) => {
     try {
-      const { orderId } = req.params;
+      const { paymentId } = req.query;
       
-      if (!orderId) {
-        return res.status(400).json({ message: "Order ID required" });
+      if (!paymentId || typeof paymentId !== 'string') {
+        return res.status(400).json({ message: "Payment ID required" });
       }
       
       // Get LiraPay API key from environment
@@ -679,10 +682,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Payment service not configured" });
       }
       
-      console.log('Checking payment status for order:', orderId);
+      console.log('Checking payment status for payment:', paymentId);
       
       // Call LiraPay API to check transaction status
-      const liraPayResponse = await fetch(`https://api.lirapaybr.com/v1/transactions/${orderId}`, {
+      const liraPayResponse = await fetch(`https://api.lirapaybr.com/v1/transactions/${paymentId}`, {
         method: 'GET',
         headers: {
           'api-secret': apiKey
@@ -752,10 +755,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return status to frontend
       res.json({
         status: mappedStatus,
-        orderId: responseData.id,
-        externalId: responseData.external_id,
-        pixCode: responseData.pix_copy_paste,
-        pixQrCode: responseData.pix_qr_code
+        paymentId: responseData.id,
+        externalId: responseData.external_id
       });
       
     } catch (error: any) {

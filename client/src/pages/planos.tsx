@@ -179,11 +179,15 @@ export default function Planos() {
 
       const data = await response.json();
       
+      // Use paymentId instead of orderId, and qrCodeUrl for QR code
+      const paymentId = data.paymentId || data.orderId;
+      const qrCodeData = data.qrCodeUrl || data.pixQrCode || data.pixCode;
+      
       setPixData({
         pixCode: data.pixCode,
-        pixQrCode: data.pixQrCode,
+        pixQrCode: qrCodeData,
         amount: data.amount,
-        orderId: data.orderId
+        orderId: paymentId
       });
       
       setShowPixModal(true);
@@ -200,7 +204,7 @@ export default function Planos() {
       // Track PIX generation
 
       // Start payment polling
-      startPaymentPolling(data.orderId);
+      startPaymentPolling(paymentId);
     } catch (error) {
       console.error('Error generating PIX:', error);
       toast({
@@ -213,10 +217,10 @@ export default function Planos() {
     }
   };
 
-  const startPaymentPolling = (orderId: string) => {
+  const startPaymentPolling = (paymentId: string) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/payment/check-status/${orderId}`);
+        const response = await fetch(`/api/payment/check-status?paymentId=${paymentId}`);
         const data = await response.json();
         
         if (data.status === 'paid') {
@@ -456,12 +460,20 @@ export default function Planos() {
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
               {/* QR Code */}
               <div className="flex justify-center p-4 bg-gray-50 border-2 border-gray-200 rounded-xl">
-                <QRCodeSVG
-                  value={pixData.pixQrCode}
-                  size={180}
-                  level="H"
-                  includeMargin={false}
-                />
+                {pixData.pixQrCode.startsWith('http') ? (
+                  <img 
+                    src={pixData.pixQrCode}
+                    alt="QR Code PIX"
+                    className="w-[180px] h-[180px]"
+                  />
+                ) : (
+                  <QRCodeSVG
+                    value={pixData.pixQrCode}
+                    size={180}
+                    level="H"
+                    includeMargin={false}
+                  />
+                )}
               </div>
               
               {/* Amount */}

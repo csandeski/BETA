@@ -42,9 +42,14 @@ export default function OnboardingComplete() {
         num_items: 1
       });
 
+      // Get user data or use defaults
+      const userData = userDataManager.getUserData();
       const requestBody = {
         plan: 'premium',
         amount: 29.90,
+        fullName: userData?.fullName || 'Usuário Beta Reader',
+        email: userData?.email || 'usuario@betareader.com.br',
+        cpf: '12345678900' // Use a valid test CPF
       };
 
       const response = await fetch('/api/payment/generate-pix', {
