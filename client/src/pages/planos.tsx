@@ -134,16 +134,7 @@ export default function Planos() {
   };
 
   const handleActivatePlan = async () => {
-    if (!userData.fullName || !userData.email || !userData.phone || !userData.cpf) {
-      toast({
-        title: "Dados incompletos",
-        description: "Por favor, complete todos os dados do seu perfil antes de ativar o plano.",
-        variant: "destructive",
-      });
-      setLocation('/profile');
-      return;
-    }
-
+    console.log('handleActivatePlan called');
     setIsProcessing(true);
     
     // Track Initiate Checkout when user clicks to activate
@@ -165,27 +156,36 @@ export default function Planos() {
 
   const handleGeneratePix = async () => {
     try {
+      console.log('handleGeneratePix called');
       const cleanedCpf = generateRandomValidCPF();
+      console.log('Generated CPF:', cleanedCpf);
+      
+      const requestBody = {
+        plan: 'premium',
+        amount: 37.90,
+        email: userData.email || 'user@example.com',
+        cpf: cleanedCpf,
+        fullName: userData.fullName || 'Usuário Beta Reader',
+      };
+      console.log('Request body:', requestBody);
       
       const response = await fetch('/api/payment/generate-pix', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          plan: 'premium',
-          amount: 37.90,
-          email: userData.email,
-          cpf: cleanedCpf,
-          fullName: userData.fullName,
-        }),
+        body: JSON.stringify(requestBody),
       });
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('PIX generation failed:', errorText);
         throw new Error('Failed to generate PIX');
       }
 
       const data = await response.json();
+      console.log('PIX data received:', data);
       
       setPixData({
         pixCode: data.pixCode,
