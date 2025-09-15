@@ -531,7 +531,7 @@ export default function OnboardingComplete() {
       {/* 4. Plan Comparison Section */}
       <section className="px-6 sm:px-8 py-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-md mx-auto">
-          <div className="text-center mb-6">
+          <div className="text-center mb-8">
             <div className="inline-flex p-3 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl mb-4">
               <Zap className="h-8 w-8 text-indigo-600" />
             </div>
@@ -544,77 +544,139 @@ export default function OnboardingComplete() {
           </div>
 
           {/* Standard Plan */}
-          <Card className="mb-4 border-gray-200 overflow-hidden">
-            <div className="bg-gray-100 px-4 py-3">
+          <div className="mb-4 relative rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+            {/* Plan Header */}
+            <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 px-5 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-gray-900">Plano Padrão</h3>
-                <span className="text-sm font-semibold text-gray-600">Grátis</span>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-xl shadow-sm">
+                    <BookOpen className="h-5 w-5 text-gray-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">Plano Padrão</h3>
+                    <p className="text-xs text-gray-500">Para começar sua jornada</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-bold text-gray-900">Grátis</span>
+                  <p className="text-xs text-gray-500">para sempre</p>
+                </div>
               </div>
             </div>
-            <div className="p-4">
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <div className="p-1 bg-gray-100 rounded">
-                    <BookOpen className="h-3 w-3 text-gray-600" />
+            
+            {/* Features */}
+            <div className="p-5">
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="mt-0.5 p-1.5 bg-gray-100 rounded-lg">
+                    <BookOpen className="h-4 w-4 text-gray-500" />
                   </div>
-                  <span className="text-sm text-gray-700">Limite de 3 livros por dia</span>
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-700 block">Até 3 livros por dia</span>
+                    <span className="text-xs text-gray-500">Ideal para leitores casuais</span>
+                  </div>
                 </li>
-                <li className="flex items-start gap-2">
-                  <div className="p-1 bg-gray-100 rounded">
-                    <Target className="h-3 w-3 text-gray-600" />
+                <li className="flex items-start gap-3">
+                  <div className="mt-0.5 p-1.5 bg-gray-100 rounded-lg">
+                    <Target className="h-4 w-4 text-gray-500" />
                   </div>
-                  <span className="text-sm text-gray-700">Saque apenas ao atingir R$ 1.800</span>
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-700 block">Saque mínimo: R$ 1.800</span>
+                    <span className="text-xs text-gray-500">Acumule para retirar</span>
+                  </div>
                 </li>
-                <li className="flex items-start gap-2">
-                  <div className="p-1 bg-gray-100 rounded">
-                    <MessageCircle className="h-3 w-3 text-gray-600" />
+                <li className="flex items-start gap-3">
+                  <div className="mt-0.5 p-1.5 bg-gray-100 rounded-lg">
+                    <MessageCircle className="h-4 w-4 text-gray-500" />
                   </div>
-                  <span className="text-sm text-gray-700">Suporte básico via FAQ</span>
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-700 block">Suporte via FAQ</span>
+                    <span className="text-xs text-gray-500">Respostas às dúvidas comuns</span>
+                  </div>
                 </li>
               </ul>
             </div>
-          </Card>
+          </div>
 
           {/* Supporter Plan */}
-          <Card className="border-2 border-green-500 shadow-lg overflow-hidden relative">
-            <div className="absolute -top-1 -right-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">
-              RECOMENDADO
-            </div>
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-white">Plano Apoiador</h3>
-                <span className="text-sm font-semibold text-green-100">R$ 29,90</span>
+          <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            {/* Recommended Badge */}
+            <div className="absolute -top-1 -right-1 z-10">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 blur-lg opacity-75"></div>
+                <div className="relative bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold px-4 py-2 rounded-bl-2xl rounded-tr-2xl shadow-lg">
+                  ⭐ RECOMENDADO
+                </div>
               </div>
             </div>
-            <div className="p-4">
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <div className="p-1 bg-green-100 rounded">
-                    <BookOpen className="h-3 w-3 text-green-600" />
+            
+            {/* Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 pointer-events-none"></div>
+            
+            {/* Plan Header */}
+            <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                    <Heart className="h-6 w-6 text-white" />
                   </div>
-                  <span className="text-sm text-gray-700 font-medium">Livros ilimitados por dia</span>
+                  <div>
+                    <h3 className="font-bold text-white text-xl">Plano Apoiador</h3>
+                    <p className="text-xs text-green-100">Desbloqueie todo o potencial</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xs text-green-100">R$</span>
+                    <span className="text-3xl font-bold text-white">29,90</span>
+                  </div>
+                  <p className="text-xs text-green-100">por mês</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Features */}
+            <div className="relative bg-white p-5 border-2 border-green-100">
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="mt-0.5 p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                    <BookOpen className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-800 font-semibold block">Livros ilimitados</span>
+                    <span className="text-xs text-gray-600">Leia o quanto quiser, sem limites</span>
+                  </div>
                 </li>
-                <li className="flex items-start gap-2">
-                  <div className="p-1 bg-green-100 rounded">
-                    <Target className="h-3 w-3 text-green-600" />
+                <li className="flex items-start gap-3">
+                  <div className="mt-0.5 p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                    <Target className="h-4 w-4 text-green-600" />
                   </div>
-                  <span className="text-sm text-gray-700 font-medium">Saque a partir de R$ 50</span>
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-800 font-semibold block">Saque desde R$ 50</span>
+                    <span className="text-xs text-gray-600">36x mais rápido que o plano grátis</span>
+                  </div>
                 </li>
-                <li className="flex items-start gap-2">
-                  <div className="p-1 bg-green-100 rounded">
-                    <MessageCircle className="h-3 w-3 text-green-600" />
+                <li className="flex items-start gap-3">
+                  <div className="mt-0.5 p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                    <MessageCircle className="h-4 w-4 text-green-600" />
                   </div>
-                  <span className="text-sm text-gray-700 font-medium">Suporte prioritário via WhatsApp</span>
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-800 font-semibold block">WhatsApp prioritário</span>
+                    <span className="text-xs text-gray-600">Fale direto com nossa equipe</span>
+                  </div>
                 </li>
-                <li className="flex items-start gap-2">
-                  <div className="p-1 bg-green-100 rounded">
-                    <Heart className="h-3 w-3 text-green-600" />
+                <li className="flex items-start gap-3 pt-2 border-t border-green-100">
+                  <div className="mt-0.5 p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
+                    <Heart className="h-4 w-4 text-orange-500" />
                   </div>
-                  <span className="text-sm text-gray-700 font-medium">Ajuda a manter o app para todos</span>
+                  <div className="flex-1">
+                    <span className="text-sm text-gray-800 font-semibold block">Apoie a comunidade</span>
+                    <span className="text-xs text-gray-600">Mantenha o app gratuito para todos</span>
+                  </div>
                 </li>
               </ul>
             </div>
-          </Card>
+          </div>
 
           {/* Motivational Message */}
           <div className="mt-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
