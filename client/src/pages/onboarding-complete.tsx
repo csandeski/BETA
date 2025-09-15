@@ -707,25 +707,61 @@ export default function OnboardingComplete() {
           </div>
 
           <div className="space-y-3">
-            {/* Primary CTA - Become a Supporter */}
+            {/* Primary CTA - Become a Supporter - 3D Realistic Button */}
             <button
               onClick={handleBecomeSupporter}
               disabled={generatePixMutation.isPending}
-              className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
+              className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                transformStyle: 'preserve-3d',
+                perspective: '1000px'
+              }}
               data-testid="button-become-supporter"
             >
-              {generatePixMutation.isPending ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                  Gerando PIX...
-                </>
-              ) : (
-                <>
-                  <Heart className="h-5 w-5 group-hover:animate-pulse" />
-                  Quero ser Apoiador
-                  <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
+              {/* Button Shadow Base */}
+              <div className="absolute inset-0 bg-gradient-to-b from-green-700 to-green-900 rounded-2xl translate-y-2 blur-sm opacity-50"></div>
+              
+              {/* Main Button */}
+              <div 
+                className="relative py-5 px-6 rounded-2xl transform transition-all duration-200 group-hover:translate-y-0.5 group-active:translate-y-1"
+                style={{
+                  background: 'linear-gradient(180deg, #22c55e 0%, #10b981 50%, #059669 100%)',
+                  boxShadow: `
+                    0 8px 0 #047857,
+                    0 8px 20px rgba(34, 197, 94, 0.4),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                    inset 0 -2px 0 rgba(0, 0, 0, 0.2)
+                  `
+                }}
+              >
+                {/* Glass effect overlay */}
+                <div className="absolute inset-0 rounded-2xl opacity-20 bg-gradient-to-b from-white to-transparent pointer-events-none"></div>
+                
+                {/* Button Content */}
+                <div className="relative flex items-center justify-center gap-3">
+                  {generatePixMutation.isPending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                      <span className="text-white font-bold text-lg drop-shadow-md">Gerando PIX...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Heart className="h-6 w-6 text-white drop-shadow-md group-hover:animate-pulse" />
+                      <span className="text-white font-bold text-lg drop-shadow-md">Quero ser Apoiador</span>
+                      <ChevronRight className="h-5 w-5 text-white drop-shadow-md group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </div>
+                
+                {/* Shine effect */}
+                <div 
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%)',
+                    animation: 'shine 0.8s ease-in-out'
+                  }}
+                ></div>
+              </div>
             </button>
 
             {/* Secondary CTA - Continue Standard */}
