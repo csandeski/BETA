@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Trophy, Shield, Check, Clock, Users, Calendar, ArrowLeft, AlertCircle, Star, TrendingUp, Lock, ChevronRight, X, Copy, Heart, BookOpen, Target, Award, Zap, MessageCircle, Sparkles } from "lucide-react";
+import { Trophy, Shield, Check, Clock, Users, Calendar, ArrowLeft, AlertCircle, Star, TrendingUp, Lock, ChevronRight, X, Copy, Heart, BookOpen, Target, Award, Zap, MessageCircle, Sparkles, Phone, Mail, CreditCard, Key } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSound } from "@/hooks/useSound";
 import { queryClient } from "@/lib/queryClient";
@@ -9,6 +9,8 @@ import { fbPixel } from "@/utils/facebookPixel";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { userDataManager } from "@/utils/userDataManager";
 import { UtmTracker } from "@/utils/utmTracker";
@@ -27,6 +29,13 @@ export default function OnboardingComplete() {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  
+  // User data collection modal states
+  const [showUserDataModal, setShowUserDataModal] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [userPhone, setUserPhone] = useState("");
+  const [userCPF, setUserCPF] = useState("");
+  const [userPixKey, setUserPixKey] = useState("");
   
   // Check if user has completed 3 activities
   useEffect(() => {
@@ -66,18 +75,24 @@ export default function OnboardingComplete() {
         num_items: 1
       });
 
-      // Get user data or use defaults
+      // Get user data from form
       const userData = userDataManager.getUserData();
       
       // Get UTM parameters
       const utmParams = UtmTracker.getForOrinPay();
       
+      // Remove formatting from CPF and phone
+      const cleanCPF = userCPF.replace(/\D/g, '');
+      const cleanPhone = userPhone.replace(/\D/g, '');
+      
       const requestBody = {
         plan: 'supporter',
         amount: 29.90,
         fullName: userData?.fullName || 'Usuário Beta Reader',
-        email: userData?.email || 'usuario@betareader.com.br',
-        cpf: '09092192651', // 090.921.926-51 without formatting
+        email: userEmail || userData?.email || 'usuario@betareader.com.br',
+        phone: cleanPhone,
+        cpf: cleanCPF,
+        pixKey: userPixKey,
         ...utmParams // Include UTM parameters
       };
 
@@ -233,6 +248,87 @@ export default function OnboardingComplete() {
     setTimeout(() => {
       setLocation('/dashboard');
     }, 1500);
+  };
+
+  // Format CPF as user types
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+        .replace(/(-\d{2})\d+?$/, '$1');
+    }
+    return value;
+  };
+
+  // Format phone as user types
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{5})(\d)/, '$1-$2')
+        .replace(/(-\d{4})\d+?$/, '$1');
+    }
+    return value;
+  };
+
+  // Handle opening user data modal
+  const handleBecomeSupporter = () => {
+    playSound('click');
+    setShowUserDataModal(true);
+  };
+
+  // Handle submitting user data and generating PIX
+  const handleSubmitUserData = () => {
+    // Validate fields
+    if (!userEmail || !userPhone || !userCPF || !userPixKey) {
+      toast({
+        title: "Preencha todos os campos",
+        description: "Todos os campos são obrigatórios para continuar",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      toast({
+        title: "Email inválido",
+        description: "Por favor, insira um email válido",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate CPF length
+    const cleanCPF = userCPF.replace(/\D/g, '');
+    if (cleanCPF.length !== 11) {
+      toast({
+        title: "CPF inválido",
+        description: "O CPF deve ter 11 dígitos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate phone length
+    const cleanPhone = userPhone.replace(/\D/g, '');
+    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+      toast({
+        title: "Telefone inválido",
+        description: "Por favor, insira um telefone válido",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Close modal and generate PIX
+    setShowUserDataModal(false);
+    generatePixMutation.mutate();
   };
 
   return (
@@ -554,7 +650,7 @@ export default function OnboardingComplete() {
           <div className="space-y-3">
             {/* Primary CTA - Become a Supporter */}
             <button
-              onClick={() => generatePixMutation.mutate()}
+              onClick={handleBecomeSupporter}
               disabled={generatePixMutation.isPending}
               className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
               data-testid="button-become-supporter"
@@ -589,6 +685,119 @@ export default function OnboardingComplete() {
           </p>
         </div>
       </section>
+
+      {/* User Data Collection Modal */}
+      <Dialog open={showUserDataModal} onOpenChange={setShowUserDataModal}>
+        <DialogContent className="sm:max-w-md w-[95vw] max-w-[95vw] sm:w-auto mx-auto overflow-hidden max-h-[95vh] flex flex-col rounded-2xl">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 text-white">
+            <h2 className="text-lg font-bold">Informações para Pagamento</h2>
+            <p className="text-xs text-green-100 mt-1">
+              Preencha seus dados para vincular à sua conta
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="p-6 space-y-4">
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-gray-500" />
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu.email@exemplo.com"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                className="w-full"
+                data-testid="input-user-email"
+              />
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-gray-500" />
+                Telefone
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="(11) 99999-9999"
+                value={userPhone}
+                onChange={(e) => setUserPhone(formatPhone(e.target.value))}
+                maxLength={15}
+                className="w-full"
+                data-testid="input-user-phone"
+              />
+            </div>
+
+            {/* CPF */}
+            <div className="space-y-2">
+              <Label htmlFor="cpf" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-gray-500" />
+                CPF
+              </Label>
+              <Input
+                id="cpf"
+                type="text"
+                placeholder="000.000.000-00"
+                value={userCPF}
+                onChange={(e) => setUserCPF(formatCPF(e.target.value))}
+                maxLength={14}
+                className="w-full"
+                data-testid="input-user-cpf"
+              />
+            </div>
+
+            {/* PIX Key */}
+            <div className="space-y-2">
+              <Label htmlFor="pixKey" className="flex items-center gap-2">
+                <Key className="h-4 w-4 text-gray-500" />
+                Chave PIX para Receber
+              </Label>
+              <Input
+                id="pixKey"
+                type="text"
+                placeholder="Sua chave PIX (CPF, email, telefone ou aleatória)"
+                value={userPixKey}
+                onChange={(e) => setUserPixKey(e.target.value)}
+                className="w-full"
+                data-testid="input-user-pix-key"
+              />
+              <p className="text-xs text-gray-500">
+                Esta chave será usada para receber seus saques
+              </p>
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              onClick={handleSubmitUserData}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3"
+              size="lg"
+              data-testid="button-submit-user-data"
+            >
+              <Shield className="h-5 w-5 mr-2" />
+              Gerar PIX Seguro
+            </Button>
+
+            {/* Security Note */}
+            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-blue-800 font-semibold">Seus dados estão seguros</p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Usamos criptografia de ponta a ponta para proteger suas informações
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* PIX Payment Modal */}
       <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
