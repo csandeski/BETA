@@ -599,13 +599,11 @@ export default function OnboardingComplete() {
 
           {/* Supporter Plan */}
           <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            {/* Recommended Badge */}
-            <div className="absolute -top-1 -right-1 z-10">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 blur-lg opacity-75"></div>
-                <div className="relative bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-bold px-4 py-2 rounded-bl-2xl rounded-tr-2xl shadow-lg">
-                  ⭐ RECOMENDADO
-                </div>
+            {/* Recommended Badge - Improved Design */}
+            <div className="absolute top-3 right-3 z-10">
+              <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+                <Sparkles className="h-3 w-3" />
+                <span>MAIS POPULAR</span>
               </div>
             </div>
             
@@ -629,7 +627,7 @@ export default function OnboardingComplete() {
                     <span className="text-xs text-green-100">R$</span>
                     <span className="text-3xl font-bold text-white">29,90</span>
                   </div>
-                  <p className="text-xs text-green-100">por mês</p>
+                  <p className="text-xs text-green-100 font-semibold">pagamento único</p>
                 </div>
               </div>
             </div>
