@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { userDataManager } from "@/utils/userDataManager";
 import { UtmTracker } from "@/utils/utmTracker";
+import QRCode from "react-qr-code";
 
 export default function OnboardingComplete() {
   const [, setLocation] = useLocation();
@@ -21,7 +22,6 @@ export default function OnboardingComplete() {
   const { playSound } = useSound();
   const [showPixModal, setShowPixModal] = useState(false);
   const [pixCode, setPixCode] = useState("");
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [paymentId, setPaymentId] = useState("");
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [pixCountdown, setPixCountdown] = useState(300);
@@ -112,9 +112,8 @@ export default function OnboardingComplete() {
       return response.json();
     },
     onSuccess: (data) => {
-      if (data.pixCode && data.qrCodeUrl && data.paymentId) {
+      if (data.pixCode && data.paymentId) {
         setPixCode(data.pixCode);
-        setQrCodeUrl(data.qrCodeUrl);
         setPaymentId(data.paymentId);
         setShowPixModal(true);
         setPixCountdown(300);
@@ -957,15 +956,19 @@ export default function OnboardingComplete() {
             </div>
             
             {/* QR Code */}
-            {qrCodeUrl && (
+            {pixCode && (
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-4 border-2 border-gray-200">
                 <p className="text-xs text-gray-600 text-center mb-3 font-semibold">Escaneie o QR Code</p>
-                <img 
-                  src={qrCodeUrl} 
-                  alt="QR Code PIX" 
-                  className="w-full max-w-[180px] sm:max-w-[200px] mx-auto"
-                  data-testid="img-qrcode"
-                />
+                <div className="bg-white p-4 rounded-lg mx-auto max-w-[200px]">
+                  <QRCode
+                    value={pixCode}
+                    size={172}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    viewBox={`0 0 172 172`}
+                    level="M"
+                    data-testid="img-qrcode"
+                  />
+                </div>
               </div>
             )}
             
