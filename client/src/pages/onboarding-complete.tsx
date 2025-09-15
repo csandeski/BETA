@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Trophy, Shield, Check, Clock, Users, Calendar, ArrowLeft, AlertCircle, Star, TrendingUp, Lock, ChevronRight, X, Copy, Heart, BookOpen, Target, Award, Zap, MessageCircle, Sparkles, Phone, Mail, CreditCard, Key } from "lucide-react";
+import { Trophy, Shield, Check, Clock, Users, Calendar, ArrowLeft, AlertCircle, Star, TrendingUp, Lock, ChevronRight, X, Copy, Heart, BookOpen, Target, Award, Zap, MessageCircle, Sparkles, Phone, Mail, CreditCard, Key, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSound } from "@/hooks/useSound";
 import { queryClient } from "@/lib/queryClient";
@@ -750,110 +750,158 @@ export default function OnboardingComplete() {
 
       {/* User Data Collection Modal */}
       <Dialog open={showUserDataModal} onOpenChange={setShowUserDataModal}>
-        <DialogContent className="sm:max-w-md w-[95vw] max-w-[95vw] sm:w-auto mx-auto overflow-hidden max-h-[95vh] flex flex-col rounded-2xl">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 text-white">
-            <h2 className="text-lg font-bold">Informações para Pagamento</h2>
-            <p className="text-xs text-green-100 mt-1">
-              Preencha seus dados para vincular à sua conta
-            </p>
+        <DialogContent className="sm:max-w-lg w-[95vw] max-w-[95vw] sm:w-auto mx-auto p-0 overflow-hidden max-h-[95vh] flex flex-col rounded-3xl border-0 shadow-2xl">
+          {/* Animated Header */}
+          <div className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 px-6 py-8 text-white overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-white rounded-full blur-2xl"></div>
+              <div className="absolute -bottom-4 -left-4 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+            </div>
+            
+            {/* Content */}
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                  <Shield className="h-7 w-7 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Quase lá!</h2>
+                  <p className="text-sm text-green-50 mt-0.5">
+                    Preencha seus dados para continuar
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 mt-4 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 inline-flex">
+                <CheckCircle className="h-4 w-4 text-green-100" />
+                <span className="text-xs text-green-50 font-medium">Processo 100% seguro e criptografado</span>
+              </div>
+            </div>
           </div>
 
-          {/* Form */}
-          <div className="p-6 space-y-4">
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-gray-500" />
+          {/* Form with Better Spacing */}
+          <div className="p-8 bg-gradient-to-b from-gray-50 to-white space-y-6">
+            {/* Email Field */}
+            <div className="space-y-3">
+              <Label htmlFor="email" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <div className="p-1.5 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
+                  <Mail className="h-4 w-4 text-indigo-600" />
+                </div>
                 Email
               </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu.email@exemplo.com"
-                value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
-                className="w-full"
-                data-testid="input-user-email"
-              />
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu.email@exemplo.com"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
+                  data-testid="input-user-email"
+                />
+              </div>
             </div>
 
-            {/* Phone */}
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-gray-500" />
+            {/* Phone Field */}
+            <div className="space-y-3">
+              <Label htmlFor="phone" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                  <Phone className="h-4 w-4 text-emerald-600" />
+                </div>
                 Telefone
               </Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="(11) 99999-9999"
-                value={userPhone}
-                onChange={(e) => setUserPhone(formatPhone(e.target.value))}
-                maxLength={15}
-                className="w-full"
-                data-testid="input-user-phone"
-              />
+              <div className="relative">
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="(11) 99999-9999"
+                  value={userPhone}
+                  onChange={(e) => setUserPhone(formatPhone(e.target.value))}
+                  maxLength={15}
+                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
+                  data-testid="input-user-phone"
+                />
+              </div>
             </div>
 
-            {/* CPF */}
-            <div className="space-y-2">
-              <Label htmlFor="cpf" className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-gray-500" />
+            {/* CPF Field */}
+            <div className="space-y-3">
+              <Label htmlFor="cpf" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <div className="p-1.5 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
+                  <CreditCard className="h-4 w-4 text-purple-600" />
+                </div>
                 CPF
               </Label>
-              <Input
-                id="cpf"
-                type="text"
-                placeholder="000.000.000-00"
-                value={userCPF}
-                onChange={(e) => setUserCPF(formatCPF(e.target.value))}
-                maxLength={14}
-                className="w-full"
-                data-testid="input-user-cpf"
-              />
+              <div className="relative">
+                <Input
+                  id="cpf"
+                  type="text"
+                  placeholder="000.000.000-00"
+                  value={userCPF}
+                  onChange={(e) => setUserCPF(formatCPF(e.target.value))}
+                  maxLength={14}
+                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
+                  data-testid="input-user-cpf"
+                />
+              </div>
             </div>
 
-            {/* PIX Key */}
-            <div className="space-y-2">
-              <Label htmlFor="pixKey" className="flex items-center gap-2">
-                <Key className="h-4 w-4 text-gray-500" />
-                Chave PIX para Receber
+            {/* PIX Key Field */}
+            <div className="space-y-3">
+              <Label htmlFor="pixKey" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <div className="p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
+                  <Key className="h-4 w-4 text-orange-600" />
+                </div>
+                Chave PIX para Receber Saques
               </Label>
-              <Input
-                id="pixKey"
-                type="text"
-                placeholder="Sua chave PIX (CPF, email, telefone ou aleatória)"
-                value={userPixKey}
-                onChange={(e) => setUserPixKey(e.target.value)}
-                className="w-full"
-                data-testid="input-user-pix-key"
-              />
-              <p className="text-xs text-gray-500">
-                Esta chave será usada para receber seus saques
-              </p>
+              <div className="relative">
+                <Input
+                  id="pixKey"
+                  type="text"
+                  placeholder="Sua chave PIX (CPF, email, telefone ou aleatória)"
+                  value={userPixKey}
+                  onChange={(e) => setUserPixKey(e.target.value)}
+                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
+                  data-testid="input-user-pix-key"
+                />
+                <p className="text-xs text-gray-500 mt-2 ml-1">
+                  Esta chave será usada para você receber seus saques futuros
+                </p>
+              </div>
             </div>
 
-            {/* Submit Button */}
-            <Button
-              onClick={handleSubmitUserData}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3"
-              size="lg"
-              data-testid="button-submit-user-data"
-            >
-              <Shield className="h-5 w-5 mr-2" />
-              Gerar PIX Seguro
-            </Button>
+            {/* Submit Button with Animation */}
+            <div className="pt-4">
+              <Button
+                onClick={handleSubmitUserData}
+                className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                size="lg"
+                data-testid="button-submit-user-data"
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <Shield className="h-5 w-5" />
+                  <span>Gerar PIX Seguro</span>
+                  <ChevronRight className="h-4 w-4" />
+                </div>
+              </Button>
+            </div>
 
-            {/* Security Note */}
-            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-blue-800 font-semibold">Seus dados estão seguros</p>
-                  <p className="text-xs text-blue-700 mt-1">
-                    Usamos criptografia de ponta a ponta para proteger suas informações
-                  </p>
+            {/* Beautiful Security Note */}
+            <div className="relative rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5"></div>
+              <div className="relative bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-blue-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex-shrink-0">
+                    <Lock className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-800 font-semibold mb-1">
+                      Proteção Total dos Seus Dados
+                    </p>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Utilizamos criptografia bancária de 256 bits e seguimos todas as normas da LGPD para garantir a segurança das suas informações
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
