@@ -63,7 +63,7 @@ function Router() {
   // No global guard - let users navigate freely, only redirect on specific actions
   
   // Only show nav if user is logged in and on appropriate pages
-  const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos';
+  const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos' && location !== '/onboarding-complete';
   const showInstallBanner = isLoggedIn && location !== '/'; // Não mostrar na tela inicial ou quando não logado
   
   // Inicializa Facebook Pixel apenas uma vez

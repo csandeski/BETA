@@ -259,7 +259,7 @@ export default function OnboardingComplete() {
       </header>
 
       {/* 1. Feedback Section */}
-      <section className="px-5 py-8">
+      <section className="px-6 sm:px-8 py-8">
         <div className="text-center mb-6">
           <div className="inline-flex p-3 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl mb-4">
             <Star className="h-8 w-8 text-yellow-600" />
@@ -324,7 +324,7 @@ export default function OnboardingComplete() {
       </section>
 
       {/* 2. Who We Are Section */}
-      <section className="px-5 py-8 bg-gradient-to-br from-blue-50 to-indigo-50 -mx-5">
+      <section className="px-6 sm:px-8 py-8 bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-6">
             <div className="inline-flex p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
@@ -385,7 +385,7 @@ export default function OnboardingComplete() {
       </section>
 
       {/* 3. Community Section */}
-      <section className="px-5 py-8">
+      <section className="px-6 sm:px-8 py-8">
         <div className="text-center mb-6">
           <div className="inline-flex p-3 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl mb-4">
             <Users className="h-8 w-8 text-purple-600" />
@@ -433,7 +433,7 @@ export default function OnboardingComplete() {
       </section>
 
       {/* 4. Plan Comparison Section */}
-      <section className="px-5 py-8 bg-gradient-to-b from-gray-50 to-white -mx-5">
+      <section className="px-6 sm:px-8 py-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-6">
             <div className="inline-flex p-3 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl mb-4">
@@ -540,7 +540,7 @@ export default function OnboardingComplete() {
       </section>
 
       {/* 5. Soft CTA Section */}
-      <section className="px-5 py-8">
+      <section className="px-6 sm:px-8 py-8">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-gray-900 mb-2">
