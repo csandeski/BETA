@@ -352,7 +352,6 @@ export default function OnboardingComplete() {
           </span>
         </div>
       </header>
-
       {/* 1. Feedback Section */}
       <section className="px-6 sm:px-8 py-8">
         <div className="text-center mb-6">
@@ -417,7 +416,6 @@ export default function OnboardingComplete() {
           </div>
         )}
       </section>
-
       {/* 2. Who We Are Section */}
       <section className="px-6 sm:px-8 py-8 bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="max-w-md mx-auto">
@@ -478,7 +476,6 @@ export default function OnboardingComplete() {
           </div>
         </div>
       </section>
-
       {/* 3. Community Section */}
       <section className="px-6 sm:px-8 py-8">
         <div className="text-center mb-6">
@@ -526,7 +523,6 @@ export default function OnboardingComplete() {
           </p>
         </div>
       </section>
-
       {/* 4. Plan Comparison Section */}
       <section className="px-6 sm:px-8 py-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-md mx-auto">
@@ -695,7 +691,6 @@ export default function OnboardingComplete() {
           </div>
         </div>
       </section>
-
       {/* 5. Soft CTA Section */}
       <section className="px-6 sm:px-8 py-8">
         <div className="max-w-md mx-auto">
@@ -769,7 +764,7 @@ export default function OnboardingComplete() {
             {/* Secondary CTA - Continue Standard */}
             <button
               onClick={handleContinueStandard}
-              className="w-full py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2 mt-[25px] mb-[25px]"
               data-testid="button-continue-standard"
             >
               Continuar no Plano Padrão
@@ -782,7 +777,6 @@ export default function OnboardingComplete() {
           </p>
         </div>
       </section>
-
       {/* User Data Collection Modal */}
       <Dialog open={showUserDataModal} onOpenChange={setShowUserDataModal}>
         <DialogContent className="sm:max-w-lg w-[95vw] max-w-[95vw] sm:w-auto mx-auto p-0 overflow-hidden max-h-[95vh] flex flex-col rounded-3xl border-0 shadow-2xl">
@@ -943,7 +937,6 @@ export default function OnboardingComplete() {
           </div>
         </DialogContent>
       </Dialog>
-
       {/* PIX Payment Modal */}
       <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
         <DialogContent className="sm:max-w-md w-[95vw] max-w-[95vw] sm:w-auto mx-auto p-0 overflow-hidden max-h-[95vh] flex flex-col rounded-2xl" showCloseButton={false}>
