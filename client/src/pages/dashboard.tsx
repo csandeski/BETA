@@ -186,7 +186,21 @@ export default function Dashboard() {
     // Reload data when page becomes visible (when returning from book page)
     const handleFocus = async () => {
       // Immediately reload data for faster balance update
-      loadData();
+      // For guest users, reload from localStorage
+      const authResponse = await fetch('/api/auth/status');
+      const authData = await authResponse.json();
+      
+      if (!authData.isLoggedIn || !authData.userId) {
+        // Reload guest data from localStorage to get updates
+        const storedData = localStorage.getItem('guestUserData');
+        if (storedData) {
+          const guestData = JSON.parse(storedData);
+          setUserData(guestData);
+        }
+      } else {
+        // For logged in users, reload from database
+        loadData();
+      }
     };
     
     window.addEventListener('focus', handleFocus);
