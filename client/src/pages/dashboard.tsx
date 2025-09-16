@@ -97,10 +97,11 @@ export default function Dashboard() {
   const [showFaq, setShowFaq] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [isGuestUser, setIsGuestUser] = useState(false);
+  const [showSimpleWelcome, setShowSimpleWelcome] = useState(false);
   
   // Lock/unlock body scroll when modals open
   useEffect(() => {
-    if (showWithdrawModal || showPlanModal || showFirstRewardPopup || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal) {
+    if (showWithdrawModal || showPlanModal || showFirstRewardPopup || showCompleteBooksModal || showFreeChoiceModal || showWelcomeModal || showSimpleWelcome) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -110,7 +111,7 @@ export default function Dashboard() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [showWithdrawModal, showPlanModal, showFirstRewardPopup, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal]);
+  }, [showWithdrawModal, showPlanModal, showFirstRewardPopup, showCompleteBooksModal, showFreeChoiceModal, showWelcomeModal, showSimpleWelcome]);
   const [, setLocation] = useLocation();
   const { playSound } = useSound();
   const { toast } = useToast();
@@ -138,6 +139,13 @@ export default function Dashboard() {
         }
         setUserData(guestData);
         setIsGuestUser(true);
+        
+        // Check if user has already seen simple welcome
+        const hasSeenSimpleWelcome = localStorage.getItem('hasSeenSimpleWelcome');
+        if (!hasSeenSimpleWelcome) {
+          setShowSimpleWelcome(true);
+          localStorage.setItem('hasSeenSimpleWelcome', 'true');
+        }
         return;
       }
       
@@ -155,6 +163,13 @@ export default function Dashboard() {
           localStorage.removeItem('showWelcomeModal');
           setShowWelcomeModal(true);
           return; // Don't show other modals
+        }
+        
+        // Check if user has already seen simple welcome
+        const hasSeenSimpleWelcome = localStorage.getItem('hasSeenSimpleWelcome');
+        if (!hasSeenSimpleWelcome) {
+          setShowSimpleWelcome(true);
+          localStorage.setItem('hasSeenSimpleWelcome', 'true');
         }
         
         // Check if this is the first time user enters dashboard
@@ -858,6 +873,52 @@ export default function Dashboard() {
                 data-testid="button-continue-dashboard"
               >
                 Continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Simple Welcome Popup */}
+      {showSimpleWelcome && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSimpleWelcome(false)} />
+          
+          <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300 p-6">
+            <button
+              onClick={() => {
+                playSound('click');
+                setShowSimpleWelcome(false);
+              }}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              data-testid="button-close-simple-welcome"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+            
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl mb-4 shadow-lg">
+                <Sparkles className="h-7 w-7 text-white" />
+              </div>
+              
+              <h2 className="text-xl font-bold text-gray-900 mb-3">
+                Bem-vindo! 🎉
+              </h2>
+              
+              <p className="text-gray-600 mb-6">
+                Conclua as atividades e receba suas recompensas!
+              </p>
+              
+              <button
+                onClick={() => {
+                  playSound('success');
+                  setShowSimpleWelcome(false);
+                }}
+                className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all flex items-center justify-center gap-2 shadow-lg"
+                data-testid="button-start-now"
+              >
+                <span>Iniciar agora!</span>
+                <ArrowRight className="h-5 w-5" />
               </button>
             </div>
           </div>
