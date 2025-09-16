@@ -78,7 +78,15 @@ export default function OnboardingComplete() {
         phone: cleanPhone,
         cpf: cleanCPF,
         pixKey: userPixKey,
-        ...utmParams // Include UTM parameters
+        // Send UTM parameters as individual fields for LiraPay API
+        utm_source: utmParams.utm_source || undefined,
+        utm_medium: utmParams.utm_medium || undefined,
+        utm_campaign: utmParams.utm_campaign || undefined,
+        utm_term: utmParams.utm_term || undefined,
+        utm_content: utmParams.utm_content || undefined,
+        fbclid: utmParams.fbclid || undefined,
+        referrer: utmParams.referrer || undefined,
+        landingPage: utmParams.landingPage || undefined
       };
 
       const response = await fetch('/api/payment/generate-pix', {

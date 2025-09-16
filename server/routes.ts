@@ -697,31 +697,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
               email: email,
               phone: "11" + Math.random().toString().slice(2, 11), // Generate random phone number
               document_type: "CPF",
-              document: cpf.replace(/\D/g, '')
+              document: cpf.replace(/\D/g, ''),
+              // Include UTM parameters directly in customer object as per LiraPay API docs
+              ...(utm_source && { utm_source }),
+              ...(utm_medium && { utm_medium }),
+              ...(utm_campaign && { utm_campaign }),
+              ...(utm_term && { utm_term }),
+              ...(utm_content && { utm_content })
             }
           };
           
-          // Add UTM parameters to metadata or custom fields if they exist
-          const metadata: any = {};
-          if (utm_source) metadata.utm_source = utm_source;
-          if (utm_medium) metadata.utm_medium = utm_medium;
-          if (utm_campaign) metadata.utm_campaign = utm_campaign;
-          if (utm_term) metadata.utm_term = utm_term;
-          if (utm_content) metadata.utm_content = utm_content;
-          if (fbclid) metadata.fbclid = fbclid;
-          if (referrer) metadata.referrer = referrer;
-          if (landingPage) metadata.landingPage = landingPage;
-          
-          // Add metadata to request if any UTM params exist
-          if (Object.keys(metadata).length > 0) {
-            liraPayRequest.metadata = metadata;
+          // Store additional tracking data for internal use if needed
+          // UTMs are now sent directly in the customer object as per LiraPay API documentation
+          if (fbclid || referrer || landingPage) {
+            const trackingData = {
+              fbclid,
+              referrer,
+              landingPage
+            };
+            // Could store this internally if needed for tracking
+            console.log('Additional tracking data:', trackingData);
           }
           
           console.log('Calling LiraPay API at https://api.lirapaybr.com/v1/transactions');
           console.log('Request body:', {
             ...liraPayRequest,
-            customer: { ...liraPayRequest.customer, document: '***' },
-            metadata: liraPayRequest.metadata // Show UTM params being sent
+            customer: { 
+              ...liraPayRequest.customer, 
+              document: '***' // Hide sensitive CPF in logs
+              // UTM params are included in customer object
+            }
           });
           
           const liraPayResponse = await fetch('https://api.lirapaybr.com/v1/transactions', {

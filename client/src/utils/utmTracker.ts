@@ -13,6 +13,7 @@ export interface UtmParams {
 export class UtmTracker {
   private static UTM_STORAGE_KEY = 'beta_reader_utm_params';
   private static UTM_SESSION_KEY = 'beta_reader_utm_session';
+  private static UTM_PERSISTENT_KEY = 'beta_reader_utm_persistent';
 
   // Capture UTM parameters from URL
   static captureUtmParams(): UtmParams {
@@ -36,7 +37,7 @@ export class UtmTracker {
     return utmParams;
   }
 
-  // Save UTM parameters to session storage only
+  // Save UTM parameters to both session and local storage for persistence
   private static saveUtmParams(params: UtmParams): void {
     try {
       // Get existing params
@@ -44,19 +45,42 @@ export class UtmTracker {
       
       // Only overwrite if new params have more information
       if (!existingParams || this.hasMoreInfo(params, existingParams)) {
+        // Save to session storage for current session
         sessionStorage.setItem(this.UTM_SESSION_KEY, JSON.stringify(params));
+        // Also save to localStorage for persistence across sessions (Facebook ads)
+        localStorage.setItem(this.UTM_PERSISTENT_KEY, JSON.stringify({
+          ...params,
+          capturedAt: new Date().toISOString()
+        }));
       }
     } catch (error) {
       console.error('Failed to save UTM params:', error);
     }
   }
 
-  // Get stored UTM parameters
+  // Get stored UTM parameters (check both session and local storage)
   static getStoredUtmParams(): UtmParams | null {
     try {
-      // Only check session storage (current session)
+      // First check session storage (current session)
       const sessionParams = sessionStorage.getItem(this.UTM_SESSION_KEY);
-      return sessionParams ? JSON.parse(sessionParams) : null;
+      if (sessionParams) {
+        return JSON.parse(sessionParams);
+      }
+      
+      // Fallback to localStorage for persistent UTMs from Facebook ads
+      const persistentParams = localStorage.getItem(this.UTM_PERSISTENT_KEY);
+      if (persistentParams) {
+        const parsed = JSON.parse(persistentParams);
+        // Check if UTMs are not older than 30 days
+        const capturedAt = new Date(parsed.capturedAt || 0);
+        const daysSinceCapture = (new Date().getTime() - capturedAt.getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSinceCapture <= 30) {
+          delete parsed.capturedAt; // Remove internal field
+          return parsed;
+        }
+      }
+      
+      return null;
     } catch (error) {
       console.error('Failed to get UTM params:', error);
       return null;
@@ -80,6 +104,7 @@ export class UtmTracker {
   static clearUtmParams(): void {
     try {
       sessionStorage.removeItem(this.UTM_SESSION_KEY);
+      localStorage.removeItem(this.UTM_PERSISTENT_KEY);
     } catch (error) {
       console.error('Failed to clear UTM params:', error);
     }

@@ -22,6 +22,7 @@ import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
 import { fbPixel } from "@/utils/facebookPixel";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
+import { UtmTracker } from "@/utils/utmTracker";
 
 function Router() {
   const [location, setLocation] = useLocation();
@@ -66,14 +67,19 @@ function Router() {
   const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos' && location !== '/onboarding-complete';
   const showInstallBanner = isLoggedIn && location !== '/'; // Não mostrar na tela inicial ou quando não logado
   
-  // Inicializa Facebook Pixel apenas uma vez
+  // Inicializa Facebook Pixel e captura UTMs apenas uma vez
   useEffect(() => {
     fbPixel.init();
+    // Captura UTMs na inicialização do app
+    UtmTracker.captureUtmParams();
   }, []);
 
   // Scroll to top and track page views whenever location changes
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Captura UTMs em cada mudança de rota (caso venham UTMs novas)
+    UtmTracker.captureUtmParams();
     
     // Limpa o flag da página anterior para permitir novo PageView se voltar
     fbPixel.clearPageView();
