@@ -48,6 +48,7 @@ export default function UpgradeFlow() {
   const [pixCountdown, setPixCountdown] = useState(600); // 10 minutes
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isGeneratingPix, setIsGeneratingPix] = useState(false);
   const { toast } = useToast();
   const { playSound } = useSound();
 
@@ -166,6 +167,7 @@ export default function UpgradeFlow() {
   // Generate PIX mutation
   const generatePixMutation = useMutation({
     mutationFn: async (data: CheckoutFormData) => {
+      setIsGeneratingPix(true);
       const userData = userDataManager.getUserData();
       const utmParams = UtmTracker.getForOrinPay();
       
@@ -196,6 +198,7 @@ export default function UpgradeFlow() {
       return response.json();
     },
     onSuccess: (data) => {
+      setIsGeneratingPix(false);
       setPixData(data);
       setPixCountdown(600); // Reset to 10 minutes
       
@@ -216,6 +219,7 @@ export default function UpgradeFlow() {
       startPollingPaymentStatus(data.paymentId);
     },
     onError: (error: any) => {
+      setIsGeneratingPix(false);
       toast({
         title: "Erro ao gerar PIX",
         description: "Tente novamente em alguns instantes.",
@@ -292,9 +296,7 @@ export default function UpgradeFlow() {
   // Handle form submit
   const onSubmit = (data: CheckoutFormData) => {
     playSound('click');
-    setIsProcessing(true);
     generatePixMutation.mutate(data);
-    setIsProcessing(false);
   };
 
   // Format phone number
@@ -970,6 +972,35 @@ export default function UpgradeFlow() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Loading modal for PIX generation */}
+      {isGeneratingPix && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl p-8 max-w-sm w-full text-center"
+          >
+            <div className="flex flex-col items-center gap-4">
+              {/* Animated loading icon */}
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-gray-200 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-green-500 rounded-full border-t-transparent animate-spin"></div>
+              </div>
+              
+              {/* Text */}
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-gray-900">
+                  GERANDO PIX
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Aguarde um momento...
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
