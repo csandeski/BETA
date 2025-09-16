@@ -69,10 +69,10 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Mobile First Hero Section */}
-      <section className="px-4 py-8">
+      {/* Mobile First Hero Section - Compact */}
+      <section className="px-4 py-5">
         {/* Trust Badge */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-4">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full border border-green-200">
             <Shield className="h-3.5 w-3.5 text-green-600" />
             <span className="text-xs font-semibold text-gray-800">Plataforma Verificada</span>
@@ -85,39 +85,39 @@ export default function Home() {
         </div>
 
         {/* Main Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold leading-tight text-gray-900 mb-3">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold leading-tight text-gray-900 mb-2">
             Faça parte do Beta Reader{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
-              com benefícios exclusivos
+              e receba até R$ 38 por atividade concluída!
             </span>
           </h1>
-          <p className="text-base text-gray-600 px-4">
+          <p className="text-sm text-gray-600 px-4">
             Faça da sua paixão Renda usando seu celular
           </p>
         </div>
 
         {/* Quick Stats - Mobile Grid */}
-        <div className="grid grid-cols-3 gap-3 mb-8 max-w-sm mx-auto">
-          <div className="text-center p-3 bg-white rounded-xl shadow-sm">
-            <p className="text-xl font-bold text-gray-900">2.8Mil+</p>
+        <div className="grid grid-cols-3 gap-2 mb-6 max-w-sm mx-auto">
+          <div className="text-center p-2.5 bg-white rounded-xl shadow-sm">
+            <p className="text-lg font-bold text-gray-900">2.8Mil+</p>
             <p className="text-[10px] text-gray-600">Leitores</p>
           </div>
-          <div className="text-center p-3 bg-white rounded-xl shadow-sm">
-            <p className="text-xl font-bold text-gray-900">R$ 30</p>
-            <p className="text-[10px] text-gray-600">Por livro</p>
+          <div className="text-center p-2.5 bg-white rounded-xl shadow-sm">
+            <p className="text-lg font-bold text-green-600">R$ 38</p>
+            <p className="text-[10px] text-gray-600">Por atividade</p>
           </div>
-          <div className="text-center p-3 bg-white rounded-xl shadow-sm">
-            <p className="text-xl font-bold text-gray-900">1h</p>
+          <div className="text-center p-2.5 bg-white rounded-xl shadow-sm">
+            <p className="text-lg font-bold text-gray-900">Imediato</p>
             <p className="text-[10px] text-gray-600">Pagamento</p>
           </div>
         </div>
 
         {/* CTA Button - 3D Effect */}
-        <div className="mb-6">
+        <div className="mb-4">
           <Button 
             onClick={handleStartNow}
-            className="w-full py-7 text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-2xl shadow-2xl transition-all transform hover:scale-105 hover:-translate-y-1"
+            className="w-full py-6 text-base font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-2xl shadow-2xl transition-all transform hover:scale-105 hover:-translate-y-1"
             style={{
               boxShadow: '0 10px 25px -5px rgba(34, 197, 94, 0.5), 0 10px 10px -5px rgba(34, 197, 94, 0.04)',
               transform: 'perspective(500px) rotateX(5deg)',
@@ -136,155 +136,101 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Feature Highlight - Mobile Optimized */}
-      <section className="px-4 pb-8">
-        <Card className="p-5 bg-white border border-gray-200 shadow-sm">
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
-              <Clock className="h-5 w-5 text-green-600" />
+      {/* Feature Highlight - Mobile Optimized Compact */}
+      <section className="px-4 pb-6">
+        <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 shadow-sm">
+          <div className="flex items-start justify-between mb-2">
+            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-sm">
+              <DollarSign className="h-5 w-5 text-green-600" />
             </div>
-            <span className="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-semibold rounded-full">
-              TRANSPARENTE
+            <span className="px-2 py-0.5 bg-green-600 text-white text-[10px] font-semibold rounded-full">
+              ATÉ R$ 38
             </span>
           </div>
-          <h3 className="text-base font-bold text-gray-900 mb-2">
-            Sistema de Recompensas Transparente
+          <h3 className="text-sm font-bold text-gray-900 mb-2">
+            Ganhe até R$ 38 por atividade
           </h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Cada livro tem valor fixo pré-determinado. Você sabe exatamente quanto vai receber antes de começar.
+          <p className="text-xs text-gray-600 mb-3">
+            Valores transparentes e pagamento garantido após cada livro concluído.
           </p>
-          <div className="space-y-2 pt-3 border-t border-gray-200">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">Média por livro:</span>
-              <span className="font-semibold text-gray-900">R$ 8 - R$ 30</span>
+          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-green-200">
+            <div className="text-center">
+              <p className="text-sm font-bold text-green-600">5 min</p>
+              <p className="text-[10px] text-gray-600">Leitura</p>
             </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">Tempo médio de leitura:</span>
-              <span className="font-semibold text-gray-900">8-15 min</span>
+            <div className="text-center border-x border-green-200">
+              <p className="text-sm font-bold text-green-600">Imediato</p>
+              <p className="text-[10px] text-gray-600">Pagamento</p>
             </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">Pagamento garantido:</span>
-              <span className="font-semibold text-green-600">Em até 1 hora</span>
+            <div className="text-center">
+              <p className="text-sm font-bold text-green-600">100%</p>
+              <p className="text-[10px] text-gray-600">Seguro</p>
             </div>
           </div>
         </Card>
       </section>
 
-      {/* How it Works - Mobile Enhanced */}
-      <section className="px-4 py-8 bg-gray-50/50">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+      {/* How it Works - Mobile Enhanced Compact */}
+      <section className="px-4 py-6 bg-gray-50/50">
+        <h2 className="text-xl font-bold text-center text-gray-900 mb-1">
           Como Funciona
         </h2>
-        <p className="text-sm text-gray-600 text-center mb-6">
-          Processo validado e seguro
+        <p className="text-xs text-gray-600 text-center mb-4">
+          Processo simples e validado
         </p>
         
-        <div className="space-y-4 max-w-sm mx-auto">
+        <div className="space-y-3 max-w-sm mx-auto">
           {/* Step 1 */}
-          <Card className="p-4 bg-white border-l-4 border-l-green-500">
+          <Card className="p-3 bg-white border-l-4 border-l-green-500">
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+              <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
                 1
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 text-sm mb-1">Escolha e Reserve</h3>
-                <p className="text-xs text-gray-600 mb-2">
-                  Navegue pela biblioteca e reserve o livro desejado
+                <h3 className="font-bold text-gray-900 text-sm mb-1">Escolha um livro</h3>
+                <p className="text-xs text-gray-600">
+                  Selecione e leia com atenção
                 </p>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    <span className="text-[11px] text-gray-600">Valor exibido antes da leitura</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    <span className="text-[11px] text-gray-600">Diferentes categorias disponíveis</span>
-                  </div>
-                </div>
               </div>
             </div>
           </Card>
 
           {/* Step 2 */}
-          <Card className="p-4 bg-white border-l-4 border-l-green-500">
+          <Card className="p-3 bg-white border-l-4 border-l-green-500">
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+              <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
                 2
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 text-sm mb-1">Leitura Atenta</h3>
-                <p className="text-xs text-gray-600 mb-2">
-                  Leia com calma e atenção aos detalhes
+                <h3 className="font-bold text-gray-900 text-sm mb-1">Responda o quiz</h3>
+                <p className="text-xs text-gray-600">
+                  5 perguntas simples sobre o livro
                 </p>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    <span className="text-[11px] text-gray-600">Tempo médio de 8-15 minutos</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    <span className="text-[11px] text-gray-600">Sistema anti-fraude ativo</span>
-                  </div>
-                </div>
               </div>
             </div>
           </Card>
 
           {/* Step 3 */}
-          <Card className="p-4 bg-white border-l-4 border-l-green-500">
+          <Card className="p-3 bg-white border-l-4 border-l-green-500">
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+              <div className="flex-shrink-0 w-7 h-7 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
                 3
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 text-sm mb-1">Validação</h3>
-                <p className="text-xs text-gray-600 mb-2">
-                  Responda 3 perguntas sobre o conteúdo
+                <h3 className="font-bold text-gray-900 text-sm mb-1">Receba até R$ 38</h3>
+                <p className="text-xs text-gray-600">
+                  Pagamento instantâneo na sua carteira
                 </p>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    <span className="text-[11px] text-gray-600">Questões de múltipla escolha</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    <span className="text-[11px] text-gray-600">Avalie com estrelas</span>
-                  </div>
-                </div>
               </div>
             </div>
           </Card>
 
-          {/* Step 4 */}
-          <Card className="p-4 bg-white border-l-4 border-l-green-500">
-            <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
-                4
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 text-sm mb-1">Pagamento</h3>
-                <p className="text-xs text-gray-600 mb-2">
-                  Receba automaticamente em sua carteira
-                </p>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    <span className="text-[11px] text-gray-600">Saque via PIX em 1 hora</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-3 w-3 text-green-500" />
-                    <span className="text-[11px] text-gray-600">Sem taxas ou descontos</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
         </div>
       </section>
 
-      {/* Benefits Grid - Mobile Enhanced */}
-      <section className="px-4 py-8">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+      {/* Benefits Grid - Mobile Enhanced Compact */}
+      <section className="px-4 py-6">
+        <h2 className="text-xl font-bold text-center text-gray-900 mb-2">
           Vantagens Exclusivas
         </h2>
         <p className="text-sm text-gray-600 text-center mb-6">
