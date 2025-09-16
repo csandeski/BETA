@@ -978,10 +978,6 @@ export default function OnboardingComplete() {
             <div className="text-center mb-4">
               <p className="text-xs text-gray-500 uppercase font-semibold">Valor a pagar</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">R$ 29,90</p>
-              <div className="inline-flex items-center gap-1 mt-2 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
-                <AlertCircle className="h-3 w-3" />
-                Valor reembolsado em 1h
-              </div>
             </div>
             
             {/* QR Code */}
