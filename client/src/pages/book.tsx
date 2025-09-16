@@ -652,199 +652,6 @@ Desconfie da intuição quando:
 Lembre-se: "Nossa mente complacente é uma máquina de tirar conclusões precipitadas."`,
       questions: getGenericQuestions()
     },
-    // Removed duplicate pai-rico-pai-pobre entry - see new one below
-    "pai-rico-pai-pobre-old": {
-      title: "Pai Rico, Pai Pobre (OLD)",
-      author: "Robert Kiyosaki", 
-      reward: 40,
-      category: "Finanças Pessoais",
-      readingLevel: "Intermediário",
-      difficulty: "Médio",
-      estimatedTime: "35 min",
-      chapters: 10,
-      pages: 336,
-      publishYear: 1997,
-      synopsis: "Aprenda lições fundamentais sobre educação financeira, investimentos e como fazer o dinheiro trabalhar para você.",
-      content: `Pai Rico, Pai Pobre - Robert Kiyosaki
-
-Capítulo 1: A História de Dois Pais
-
-Robert Kiyosaki teve dois pais: um biológico (Pai Pobre) e o pai de seu melhor amigo (Pai Rico). Ambos eram homens inteligentes e trabalhadores, mas tinham visões opostas sobre dinheiro.
-
-PAI POBRE (PhD, Funcionário Público):
-"Estude muito para conseguir um bom emprego"
-"Nossa casa é nosso maior investimento"
-"Não posso comprar isso"
-"Dinheiro é a raiz de todo mal"
-"Jogue seguro, não arrisque"
-
-PAI RICO (8ª série, Empresário):
-"Estude muito para comprar boas empresas"
-"Nossa casa é um passivo, não um ativo"
-"Como posso comprar isso?"
-"A falta de dinheiro é a raiz de todo mal"
-"Aprenda a gerenciar riscos"
-
-Aos 9 anos, Robert decidiu ouvir o Pai Rico sobre dinheiro.
-
-Capítulo 2: A Primeira Lição - Os Ricos Não Trabalham Por Dinheiro
-
-Quando Robert pediu ao Pai Rico para ensiná-lo a ficar rico, recebeu uma oferta: trabalhar de graça em sua loja.
-
-Depois de semanas trabalhando sem receber, Robert ficou furioso. Foi aí que aprendeu a primeira lição:
-
-"Os pobres e a classe média trabalham por dinheiro. Os ricos fazem o dinheiro trabalhar para eles."
-
-A Armadilha do Medo e da Ganância
-
-MEDO: Medo de não pagar as contas nos faz aceitar qualquer emprego
-GANÂNCIA: Quando ganhamos mais, queremos mais coisas
-RESULTADO: Corrida dos Ratos - quanto mais ganhamos, mais gastamos
-
-Pai Rico explicou: "A maioria das pessoas tem um preço porque tem medo e ganância. Primeiro o medo de ficar sem dinheiro as motiva a trabalhar duro, depois, quando recebem o salário, a ganância as faz pensar em todas as coisas maravilhosas que o dinheiro pode comprar."
-
-Capítulo 3: Por Que Ensinar Alfabetização Financeira?
-
-A Diferença Fundamental: ATIVOS vs PASSIVOS
-
-ATIVO: Coloca dinheiro no seu bolso
-PASSIVO: Tira dinheiro do seu bolso
-
-Simples assim! Mas a maioria confunde...
-
-Exemplos de ATIVOS REAIS:
-• Imóveis que geram aluguel
-• Ações que pagam dividendos
-• Negócios que não exigem sua presença
-• Royalties de propriedade intelectual
-• Títulos e fundos que geram renda
-
-Exemplos de PASSIVOS:
-• Hipoteca da casa própria
-• Financiamento do carro
-• Cartões de crédito
-• Empréstimos estudantis
-
-Por Que Sua Casa NÃO é um Ativo?
-
-1. Você paga impostos sobre ela
-2. Você paga manutenção constante
-3. Pode desvalorizar
-4. Não gera renda (você mora nela)
-5. O dinheiro fica preso (iliquido)
-
-O Padrão de Fluxo de Caixa
-
-POBRE: Salário → Despesas
-CLASSE MÉDIA: Salário → Passivos → Despesas
-RICO: Ativos → Renda → Mais Ativos
-
-Capítulo 4: Cuide de Seus Próprios Negócios
-
-"Os ricos se concentram em suas colunas de ativos enquanto todos os outros se concentram em suas demonstrações de renda."
-
-A diferença entre Profissão e Negócio:
-
-PROFISSÃO: O que você faz para ganhar dinheiro
-NEGÓCIO: O que você faz para construir riqueza
-
-McDonald's: Hamburgueria ou Imobiliária?
-
-Ray Kroc perguntou a estudantes: "Qual é meu negócio?"
-"Hambúrgueres", responderam.
-"Não. Meu negócio é imobiliário."
-
-McDonald's possui os terrenos mais valiosos do mundo!
-
-Construindo Sua Coluna de Ativos
-
-Comece pequeno, mas comece:
-1. Compre ativos que você entende
-2. Reinvista os lucros para comprar mais ativos
-3. Use luxos como recompensa DEPOIS que os ativos pagarem por eles
-
-Regra de Ouro: "Compre ativos primeiro, luxos por último"
-
-Capítulo 5: Os Ricos Inventam Dinheiro
-
-Inteligência Financeira = Criatividade + Coragem
-
-Exemplo Real de Kiyosaki:
-• Comprou uma casa por $20.000 (pagou $2.000 de entrada)
-• Vendeu por $60.000 em 4 meses
-• Lucro: $40.000
-• Tempo investido: 5 horas
-• Ganho por hora: $8.000
-
-As Duas Opções na Vida:
-1. Jogar seguro e se contentar com pouco
-2. Desenvolver inteligência financeira e criar oportunidades
-
-"O dinheiro não é real. É apenas uma ideia. Se você acha que dinheiro é escasso, ele será. Se você acredita em abundância, criará oportunidades."
-
-Capítulo 6: Trabalhe Para Aprender, Não Por Dinheiro
-
-Habilidades Essenciais que a Escola Não Ensina:
-
-1. VENDAS E MARKETING
-"A habilidade de vender é a base de todo sucesso pessoal"
-
-2. COMUNICAÇÃO
-"Quanto mais pessoas você consegue alcançar, mais rico pode ficar"
-
-3. LIDERANÇA
-"Liderar pessoas é multiplicar seus resultados"
-
-4. CONTABILIDADE
-"Não precisa ser contador, mas precisa entender números"
-
-5. INVESTIMENTO
-"Faça o dinheiro trabalhar duro para você"
-
-6. DIREITO
-"Conheça as regras do jogo para jogar melhor"
-
-Capítulo 7: Superando Obstáculos
-
-Os 5 Maiores Medos que Impedem o Sucesso Financeiro:
-
-1. MEDO DE PERDER DINHEIRO
-Solução: Comece cedo, comece pequeno. Todos os ricos já perderam dinheiro.
-
-2. MEDO DE FRACASSAR  
-Solução: Fracasso é parte do sucesso. Aprenda e siga em frente.
-
-3. PREGUIÇA
-Solução: Ganância positiva - querer mais da vida é motivador.
-
-4. MAUS HÁBITOS
-Solução: Pague-se primeiro. Antes de pagar qualquer conta, separe para investir.
-
-5. ARROGÂNCIA
-Solução: O que você não sabe te prejudica. Continue aprendendo.
-
-Capítulo 8: Começando
-
-10 Passos Para Despertar Seu Gênio Financeiro:
-
-1. Encontre uma razão maior que a realidade - um sonho poderoso
-2. Escolha diariamente - cada gasto é uma escolha entre ser rico ou pobre
-3. Escolha amigos cuidadosamente - você é a média das 5 pessoas com quem mais convive
-4. Domine uma fórmula e depois aprenda outra - aprendizado contínuo
-5. Pague-se primeiro - disciplina é o fator #1
-6. Pague bem seus assessores - bons conselhos valem ouro
-7. Seja um "doador indiano" - dê esperando receber
-8. Use ativos para comprar luxos - não use crédito
-9. Tenha heróis - modele pessoas bem-sucedidas
-10. Ensine e receberá - quanto mais ensina, mais aprende
-
-A Mensagem Final
-
-"Há um rico dentro de você esperando para sair. Mas primeiro você precisa mudar sua mentalidade. Pare de pensar como pobre ou classe média. Questione crenças antigas sobre dinheiro. Eduque-se financeiramente. E mais importante: TOME AÇÃO."
-
-"Não é quanto dinheiro você ganha, mas quanto dinheiro você mantém, quão duro ele trabalha para você, e para quantas gerações você o mantém."`,
-      questions: getGenericQuestions()
-    },
     "a-arte-da-guerra": {
       title: "A Arte da Guerra",
       author: "Sun Tzu",
@@ -1977,173 +1784,258 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
       Amanhã de manhã, quando o despertador tocar, lembre-se: Você está a apenas uma manhã de distância de mudar toda sua vida.`,
       questions: getGenericQuestions()
     },
-    "pai-rico-pai-pobre": {
-      title: "Pai Rico, Pai Pobre",
-      author: "Robert Kiyosaki",
+    "o-caminho-do-sucesso-digital": {
+      title: "O Caminho do Sucesso Digital",
+      author: "Marcos Oliveira",
       reward: 26.00,
-      category: "Finanças",
+      category: "Negócios",
       readingLevel: "Intermediário",
       difficulty: "Médio",
-      synopsis: "Aprenda a diferença entre trabalhar por dinheiro e fazer o dinheiro trabalhar para você com lições práticas de educação financeira.",
+      synopsis: "Descubra estratégias comprovadas para construir negócios online lucrativos e criar múltiplas fontes de renda na era digital.",
       estimatedTime: "42 min",
-      chapters: 9,
-      pages: 220,
-      publishYear: 1997,
-      content: `Pai Rico, Pai Pobre - Robert Kiyosaki
+      chapters: 8,
+      pages: 210,
+      publishYear: 2024,
+      content: `O Caminho do Sucesso Digital - Marcos Oliveira
 
-      O Que os Ricos Ensinam a Seus Filhos Sobre Dinheiro
+      Como Construir Negócios Lucrativos na Internet
 
-      Robert Kiyosaki teve dois pais: seu pai biológico (Pai Pobre) - PhD, educado, funcionário público. E o pai de seu melhor amigo (Pai Rico) - sem educação formal, empresário multimilionário.
+      Minha jornada começou em 2018, com R$ 147 na conta e um notebook emprestado. Hoje, gerencio múltiplos negócios online que faturam 7 dígitos por ano. Este livro é o mapa que eu queria ter quando comecei.
 
-      A diferença? Mentalidade.
+      A grande verdade? O sucesso digital não é sobre ter muito capital inicial. É sobre entender as regras do jogo online.
 
-      Pai Pobre dizia: "Não posso pagar isso."
-      Pai Rico perguntava: "COMO posso pagar isso?"
+      Capítulo 1: A Nova Economia Digital
 
-      Uma fecha a mente. A outra força você a pensar.
+      Enquanto muitos ainda procuram empregos tradicionais, uma revolução silenciosa acontece. Pessoas comuns estão construindo impérios digitais da sala de casa.
 
-      Lição 1: Os Ricos Não Trabalham Por Dinheiro
+      O que mudou? Tudo.
 
-      Aos 9 anos, Robert e seu amigo Mike queriam ficar ricos. O Pai Rico concordou em ensiná-los, mas com uma condição: trabalhar de graça em sua loja.
+      ECONOMIA TRADICIONAL:
+      • Precisa de muito capital inicial
+      • Limitada por geografia
+      • Crescimento lento e linear
+      • Depende de estrutura física
 
-      Após semanas sem pagamento, Robert ficou furioso. Pai Rico sorriu: "Você está sentindo o que a maioria sente - raiva e frustração. Mas em vez de confrontar o medo, eles acordam e vão trabalhar esperando que o dinheiro acalme o medo."
+      ECONOMIA DIGITAL:
+      • Começa com quase zero
+      • Alcance global instantâneo
+      • Crescimento exponencial possível
+      • 100% online e escalável
 
-      A Armadilha do Rato (Rat Race):
-      Ganhar → Gastar → Precisar de mais → Trabalhar mais → Repetir
+      Meu primeiro negócio online começou vendendo um e-book de R$ 27. Primeiro mês: 3 vendas. Sexto mês: 300 vendas. Um ano depois: 3000 vendas mensais.
 
-      "A maioria das pessoas tem um preço. E têm um preço por causa das emoções chamadas medo e ganância."
+      A diferença? Sistemas automatizados.
 
-      Medo: De não pagar as contas
-      Ganância: De querer coisas melhores
+      Capítulo 2: Os 4 Pilares do Negócio Digital
 
-      Solução: Use as emoções a seu favor, não deixe elas controlarem você.
+      Pilar 1: AUDIÊNCIA
+      "Seu negócio vale o tamanho da sua audiência multiplicado pelo seu relacionamento com ela."
 
-      Lição 2: Alfabetização Financeira
+      Construa antes de precisar. A maioria tenta vender antes de construir confiança.
 
-      "Não é quanto dinheiro você ganha, mas quanto dinheiro você mantém."
+      Estratégia que funciona:
+      • Conteúdo gratuito de valor por 90 dias
+      • Construa lista de e-mail desde o dia 1
+      • Engajamento genuíno, não só números
 
-      Regra #1 - Conheça a diferença entre ATIVO e PASSIVO:
-      • ATIVO = Coloca dinheiro no seu bolso
-      • PASSIVO = Tira dinheiro do seu bolso
+      Pilar 2: OFERTA IRRESISTÍVEL
+      Não venda produtos. Resolva problemas urgentes e específicos.
 
-      Simples assim! Mas 95% das pessoas não entendem isso.
+      Fórmula da Oferta Perfeita:
+      Resultado Desejado + Prazo Específico + Garantia = Oferta Irresistível
 
-      Exemplos CHOCANTES:
-      • Sua casa? PASSIVO (sim, mesmo que valorize!)
-      • Carro novo? PASSIVO
-      • Ações que pagam dividendos? ATIVO
-      • Imóvel alugado? ATIVO
+      Exemplo real: "Aprenda inglês fluente em 6 meses ou devolvemos 100% do valor"
 
-      Fluxo de Caixa dos Pobres:
-      Salário → Despesas → Zero
+      Pilar 3: CONVERSÃO
+      Traffic sem conversão é desperdício. Conversão sem tráfego é ilusão.
 
-      Fluxo de Caixa da Classe Média:
-      Salário → Passivos → Despesas maiores → Mais trabalho
+      A Escada de Valor:
+      1. Isca Digital (Grátis) - Captura de leads
+      2. Produto Entrada (R$ 27-97) - Primeira venda
+      3. Produto Principal (R$ 297-997) - Lucro real
+      4. Produto Premium (R$ 2997+) - Maximização
 
-      Fluxo de Caixa dos Ricos:
-      Ativos → Renda → Mais ativos → Liberdade financeira
+      Pilar 4: ESCALA
+      Automatize tudo que puder. Delegue o resto.
 
-      Lição 3: Cuide dos Seus Negócios
+      Ferramentas essenciais (investimento inicial):
+      • Plataforma de e-mail marketing: R$ 50/mês
+      • Hospedagem e domínio: R$ 30/mês
+      • Ferramentas de automação: R$ 100/mês
 
-      Ray Kroc (McDonald's) perguntou: "Em que negócio eu estou?"
-      Resposta óbvia: "Hamburgers!"
-      Ray: "Errado. Estou no negócio IMOBILIÁRIO."
+      Total: Menos de R$ 200/mês para começar.
 
-      McDonald's possui as melhores esquinas do mundo!
+      Capítulo 3: Estratégias de Monetização
 
-      Seu verdadeiro negócio = Sua coluna de ATIVOS
+      As 7 Formas de Ganhar Dinheiro Online:
 
-      Tipos de ativos para focar:
-      1. Negócios que não exigem sua presença
-      2. Ações e títulos
-      3. Imóveis que geram renda
-      4. Royalties (música, livros, patentes)
-      5. Qualquer coisa que valorize e tenha mercado
+      1. INFOPRODUTOS
+      Crie uma vez, venda infinitamente.
+      Margem: 95-100%
+      Exemplo: Cursos, e-books, mentorias
 
-      "Os ricos compram ativos. Os pobres só têm despesas. A classe média compra passivos pensando que são ativos."
+      2. AFILIAÇÃO
+      Venda produtos dos outros.
+      Margem: 30-70%
+      Sem suporte ao cliente
 
-      Lição 4: A História dos Impostos
+      3. CONSULTORIA
+      Troque tempo por dinheiro premium.
+      Valor: R$ 500-5000/hora
+      Limite: Suas horas disponíveis
 
-      Os ricos sabem jogar o jogo:
+      4. SOFTWARE/APPS
+      Receita recorrente mensal.
+      LTV alto (Lifetime Value)
+      Exemplo: SaaS, aplicativos
 
-      Funcionário: Ganha → Paga imposto → Gasta
-      Empresário: Ganha → Gasta → Paga imposto sobre o que sobra
+      5. E-COMMERCE
+      Produtos físicos online.
+      Margem: 30-50%
+      Pode usar dropshipping
 
-      Corporações = Maior vantagem dos ricos
+      6. MEMBERSHIP SITES
+      Assinatura recorrente.
+      Previsibilidade de receita
+      Exemplo: Comunidades, clubes
 
-      O Poder do Q.I. Financeiro:
-      1. Contabilidade (ler números)
-      2. Investimento (fazer dinheiro gerar dinheiro)
-      3. Mercados (oferta e demanda)
-      4. Legislação (jogar dentro das regras)
+      7. SERVIÇOS DIGITAIS
+      Agência online, freelancing.
+      Escala com equipe
+      Margem: 40-60%
 
-      Lição 5: Os Ricos Inventam Dinheiro
+      Capítulo 4: Marketing Digital Que Vende
 
-      História real: Robert comprou uma casa por $20.000 em leilão. Vendeu por $60.000. Tempo investido: 5 horas. Ganho: $40.000.
+      A Verdade Sobre Tráfego:
 
-      "A mente é o ativo mais poderoso que temos."
+      TRÁFEGO ORGÂNICO:
+      • Leva tempo para construir
+      • Custo zero em ads
+      • Resultado duradouro
+      • SEO + Conteúdo + Consistência
 
-      Duas opções na vida:
-      1. Jogar pelo seguro e nunca enriquecer
-      2. Jogar inteligentemente e criar oportunidades
+      TRÁFEGO PAGO:
+      • Resultados imediatos
+      • Precisa de budget
+      • Escalável rapidamente
+      • Facebook/Google/YouTube Ads
 
-      Inteligência Financeira = Resolver problemas financeiros
+      O Funil de Vendas Que Converte:
 
-      Problema: Não tenho dinheiro para investir
-      Solução pobre: Desistir
-      Solução rica: Como posso criar dinheiro para investir?
+      TOPO: Conteúdo gratuito → Captura e-mail
+      MEIO: E-mail sequence → Construir relacionamento
+      FUNDO: Oferta → Venda → Upsell
 
-      Lição 6: Trabalhe Para Aprender, Não Por Dinheiro
+      Taxa de conversão média:
+      • Landing page: 20-30%
+      • E-mail para venda: 2-5%
+      • Upsell: 20-30%
 
-      JOB = Just Over Broke (Apenas Acima da Falência)
+      Capítulo 5: Mentalidade do Empreendedor Digital
 
-      Habilidades essenciais que escolas não ensinam:
-      • Vendas e marketing
-      • Comunicação
-      • Liderança
-      • Gestão de pessoas
-      • Gestão de sistemas
-      • Gestão de fluxo de caixa
+      Os 5 Mindsets Essenciais:
 
-      "Especialistas ganham bem. Generalistas ficam ricos."
+      1. ABUNDÂNCIA vs ESCASSEZ
+      "Existe dinheiro infinito na internet. Você só precisa criar valor suficiente para atraí-lo."
 
-      Conselho controverso: Mude de emprego frequentemente para aprender habilidades diferentes. Cada emprego é uma universidade paga.
+      2. FALHE RÁPIDO
+      Cada fracasso é dado valioso. Teste rápido, falhe barato, aprenda sempre.
 
-      Os 5 Maiores Obstáculos
+      3. FOCO LASER
+      Um negócio funcionando vale mais que dez ideias no papel.
 
-      1. MEDO - Especialmente de perder dinheiro
-      "Todos têm medo de perder. A diferença é como você lida com o medo."
+      4. INVESTIDOR, NÃO GASTADOR
+      Cada real gasto deve ter potencial de retorno. ROI sempre.
 
-      2. CINISMO - Dúvidas paralisantes
-      "Os cínicos criticam. Os vencedores analisam."
+      5. LONGO PRAZO
+      Construa ativos digitais, não apenas renda rápida.
 
-      3. PREGUIÇA - Disfarçada de "estar ocupado"
-      "Pessoas ocupadas são frequentemente as mais preguiçosas."
+      Capítulo 6: Erros Fatais (e Como Evitá-los)
 
-      4. MAUS HÁBITOS
-      "Pague-se primeiro, sempre."
+      ERRO #1: Perfeccionismo
+      Feito é melhor que perfeito. Lance e melhore.
 
-      5. ARROGÂNCIA
-      "O que eu não sei me faz perder dinheiro."
+      ERRO #2: Não validar antes
+      Venda antes de criar. Pré-venda valida demanda.
 
-      Como Começar
+      ERRO #3: Fazer tudo sozinho
+      Delegue cedo. Seu tempo vale mais criando.
 
-      1. Encontre uma razão maior que a realidade - O PORQUÊ
-      2. Escolha diariamente - Cada gasto é uma escolha
-      3. Escolha seus amigos cuidadosamente - Você é a média dos 5
-      4. Domine uma fórmula e aprenda outra - Aprendizado contínuo
-      5. Pague-se primeiro - Automatize
-      6. Pague bem seus consultores - Bom conselho é barato
-      7. Seja um "doador indiano" - Doe esperando retorno
-      8. Use ativos para comprar luxos - Nunca o contrário
-      9. Heróis inspiram - Quem você admira?
-      10. Ensine e receberá - Quanto mais ensina, mais aprende
+      ERRO #4: Ignorar os números
+      Métricas são tudo. CAC, LTV, ROI, Conversão.
 
-      A Verdade Final
+      ERRO #5: Desistir cedo demais
+      Sucesso vem depois de muitos "quase desisti".
 
-      "Há um mundo de diferença entre ter dinheiro e ser rico. Ser rico é ter a liberdade de não se preocupar com dinheiro."
+      Capítulo 7: O Sistema de Produtividade 10X
 
-      O segredo não é trabalhar duro. É trabalhar inteligentemente. Faça o dinheiro trabalhar duro para você.`,
+      Como produzir 10x mais que a média:
+
+      MANHÃ PODEROSA (5h-9h):
+      • Trabalho profundo
+      • Sem distrações
+      • Tarefas mais importantes
+
+      TÉCNICA POMODORO ADAPTADA:
+      • 90 minutos foco total
+      • 20 minutos pausa
+      • 4 blocos por dia
+
+      BATCHING:
+      • Segunda: Criação de conteúdo
+      • Terça: Gravações e vídeos
+      • Quarta: Estratégia e planejamento
+      • Quinta: Reuniões e networking
+      • Sexta: Análise e otimização
+
+      Capítulo 8: Escalando Para 7 Dígitos
+
+      O Caminho dos 6 aos 7 Dígitos:
+
+      R$ 0 - 10K/mês: Validação
+      • Encontre o que funciona
+      • Um produto, um canal
+
+      R$ 10K - 50K/mês: Otimização
+      • Melhore conversões
+      • Automatize processos
+
+      R$ 50K - 100K/mês: Expansão
+      • Novos produtos
+      • Novos canais
+
+      R$ 100K+/mês: Delegação
+      • Monte equipe
+      • Foque no estratégico
+
+      A Equipe dos 7 Dígitos:
+      1. Assistente virtual
+      2. Copywriter
+      3. Designer
+      4. Gestor de tráfego
+      5. Suporte ao cliente
+
+      Investimento em equipe: 30-40% do faturamento
+
+      Ferramentas Avançadas:
+      • CRM completo
+      • Automação avançada
+      • Analytics profissional
+      • Plataforma robusta
+
+      Pensamentos Finais
+
+      O sucesso digital não é sorte. É sistema, persistência e execução.
+
+      Não existe saturação para quem entrega valor real.
+
+      Comece hoje, mesmo que pequeno. Em 12 meses, você pode estar vivendo uma realidade completamente diferente.
+
+      A pergunta não é "se" vai funcionar. É "quando" você vai começar.
+
+      Lembre-se: Na economia digital, a única barreira real está na sua mente.
+
+      O futuro é digital. E o futuro é agora.`,
       questions: getGenericQuestions()
     }
   };

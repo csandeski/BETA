@@ -281,8 +281,8 @@ export default function Dashboard() {
     },
     {
       id: 5,
-      title: "Pai Rico, Pai Pobre",
-      author: "Robert Kiyosaki",
+      title: "O Caminho do Sucesso Digital",
+      author: "Marcos Oliveira",
       reward: "26.00",
       pages: 220,
       rating: 4.5,
@@ -290,8 +290,8 @@ export default function Dashboard() {
       isNew: true,
       difficulty: "Médio",
       color: "from-cyan-400 to-blue-500",
-      slug: "pai-rico-pai-pobre",
-      synopsis: "Aprenda a diferença entre trabalhar por dinheiro e fazer o dinheiro trabalhar para você com lições práticas de educação financeira."
+      slug: "o-caminho-do-sucesso-digital",
+      synopsis: "Descubra estratégias comprovadas para construir negócios online lucrativos e criar múltiplas fontes de renda na era digital."
     },
   ];
   
