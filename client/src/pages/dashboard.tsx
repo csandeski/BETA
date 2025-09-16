@@ -355,7 +355,7 @@ export default function Dashboard() {
             <div>
               <p className="text-xs text-gray-700 font-semibold uppercase">Este Mês</p>
               <p className="text-base font-bold text-gray-900 mt-0.5">
-                <span className="text-green-500">↑</span> R$ {userData?.stats.monthEarnings.toFixed(2).replace('.', ',') || '0,00'}
+                <span className="text-green-500">↑</span> R$ {userData?.stats?.monthEarnings ? userData.stats.monthEarnings.toFixed(2).replace('.', ',') : '0,00'}
               </p>
             </div>
             <div>
@@ -365,7 +365,7 @@ export default function Dashboard() {
             <div>
               <p className="text-xs text-gray-700 font-semibold uppercase">Avaliação</p>
               <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="text-base font-bold text-gray-900">{userData?.stats.averageRating?.toFixed(1) || '0.0'}</span>
+                <span className="text-base font-bold text-gray-900">{userData?.stats?.averageRating ? userData.stats.averageRating.toFixed(1) : '0.0'}</span>
                 <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
               </div>
             </div>
