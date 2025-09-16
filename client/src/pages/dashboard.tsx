@@ -14,6 +14,75 @@ import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 
+// Function to create guest user data structure
+function createGuestUserData(): UserData {
+  // Load guest data from localStorage or create new
+  const storedData = localStorage.getItem('guestUserData');
+  if (storedData) {
+    return JSON.parse(storedData);
+  }
+  
+  const now = new Date();
+  const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const today = now.getDay();
+  const lastSevenDays = [];
+  
+  for (let i = 6; i >= 0; i--) {
+    const dayIndex = (today - i + 7) % 7;
+    lastSevenDays.push({
+      dia: days[dayIndex],
+      valor: 0
+    });
+  }
+  
+  const guestData: UserData = {
+    fullName: "Visitante",
+    email: "",
+    phone: "",
+    registeredAt: now.toISOString(),
+    balance: 0,
+    booksCompleted: [],
+    stats: {
+      totalEarnings: 0,
+      todayEarnings: 0,
+      weekEarnings: 0,
+      monthEarnings: 0,
+      totalBooksRead: 0,
+      todayBooksRead: 0,
+      averageRating: 0,
+      lastSevenDays: lastSevenDays,
+      weeklyGoal: 500,
+      weeklyProgress: 0,
+      monthlyGoal: 2000,
+      monthlyProgress: 0,
+      streak: 0,
+      totalActivities: 0,
+      easyBooksCount: 0,
+      mediumBooksCount: 0,
+      hardBooksCount: 0
+    },
+    selectedPlan: null,
+    canWithdraw: false,
+    transactions: [],
+    monthlyGoal: 500,
+    totalEarnings: 0,
+    plan: 'free',
+    createdAt: now.toISOString(),
+    dailyBooksRead: 0,
+    lastReadDate: new Date().toLocaleDateString('pt-BR'),
+    completedBooks: []
+  };
+  
+  // Save to localStorage
+  localStorage.setItem('guestUserData', JSON.stringify(guestData));
+  return guestData;
+}
+
+// Function to update guest user data
+function updateGuestUserData(data: UserData): void {
+  localStorage.setItem('guestUserData', JSON.stringify(data));
+}
+
 export default function Dashboard() {
   const [showBalance, setShowBalance] = useState(true);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -28,6 +97,7 @@ export default function Dashboard() {
   const [currentBookSet, setCurrentBookSet] = useState(0);
   const [showFaq, setShowFaq] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [isGuestUser, setIsGuestUser] = useState(false);
   
   // Lock/unlock body scroll when modals open
   useEffect(() => {
@@ -57,12 +127,15 @@ export default function Dashboard() {
       const authData = await authResponse.json();
       
       if (!authData.isLoggedIn || !authData.userId) {
-        // Redirect to home page if not logged in
-        setLocation('/');
+        // User is not logged in - create guest data
+        const guestData = createGuestUserData();
+        setUserData(guestData);
+        setIsGuestUser(true);
         return;
       }
       
-      // Load fresh data from database
+      // Load fresh data from database for logged in users
+      setIsGuestUser(false);
       await userDataManager.loadUserData();
       const data = userDataManager.getUserData();
       if (data) {

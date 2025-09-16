@@ -38,11 +38,12 @@ function Router() {
       .catch(() => setIsLoggedIn(false));
   }, [location]);
 
-  // Load user data when logged in
+  // Load user data when logged in or check guest data
   useEffect(() => {
     const loadUserData = async () => {
+      setIsLoadingUserData(true);
+      
       if (isLoggedIn) {
-        setIsLoadingUserData(true);
         try {
           await userDataManager.loadUserData();
           const data = userDataManager.getUserData();
@@ -69,9 +70,30 @@ function Router() {
           setIsLoadingUserData(false);
         }
       } else {
-        setUserData(null);
+        // Check guest user data
+        const guestDataStr = localStorage.getItem('guestUserData');
+        if (guestDataStr) {
+          const guestData = JSON.parse(guestDataStr);
+          setUserData(guestData);
+          
+          // Check if guest needs to complete payment flow
+          const hasCompleted3Books = (guestData?.stats?.totalBooksRead || 0) >= 3;
+          const hasSeenPricing = localStorage.getItem('pricing_seen_v1') === 'true';
+          
+          if (hasCompleted3Books) {
+            setNeedsPaymentFlow(true);
+            // Mark as seen if they've completed 3 books
+            if (!hasSeenPricing) {
+              localStorage.setItem('pricing_seen_v1', 'true');
+            }
+          } else {
+            setNeedsPaymentFlow(false);
+          }
+        } else {
+          setUserData(null);
+          setNeedsPaymentFlow(false);
+        }
         setIsLoadingUserData(false);
-        setNeedsPaymentFlow(false);
       }
     };
     

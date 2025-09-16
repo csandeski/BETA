@@ -7,6 +7,41 @@ import { userDataManager } from "@/utils/userDataManager";
 import { apiClient } from "@/lib/api";
 import { lockBodyScroll, unlockBodyScroll } from "@/utils/scrollLock";
 
+// Helper function to handle guest book completion
+function completeGuestBook(bookData: any) {
+  // Get existing guest data
+  const storedData = localStorage.getItem('guestUserData');
+  if (storedData) {
+    const guestData = JSON.parse(storedData);
+    
+    // Update stats
+    guestData.stats.totalBooksRead += 1;
+    guestData.stats.totalActivities += 1;
+    guestData.stats.todayBooksRead += 1;
+    guestData.stats.totalEarnings += bookData.reward;
+    guestData.stats.todayEarnings += bookData.reward;
+    guestData.balance += bookData.reward;
+    
+    // Add to completed books
+    guestData.booksCompleted.push({
+      id: Date.now().toString(),
+      bookSlug: bookData.bookSlug,
+      title: bookData.title,
+      reward: bookData.reward,
+      completedAt: new Date().toISOString(),
+      rating: bookData.rating
+    });
+    
+    guestData.completedBooks.push(bookData.bookSlug);
+    
+    // Save updated data
+    localStorage.setItem('guestUserData', JSON.stringify(guestData));
+    
+    return guestData;
+  }
+  return null;
+}
+
 export default function BookReading() {
   const [, params] = useRoute("/book/:slug");
   const [, setLocation] = useLocation();
@@ -24,6 +59,7 @@ export default function BookReading() {
   const [ambientSoundEnabled, setAmbientSoundEnabled] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [userTotalEarned, setUserTotalEarned] = useState(0);
+  const [isGuestUser, setIsGuestUser] = useState(false);
   const { playSound, startAmbientSound, stopAmbientSound } = useSound();
 
   const bookSlug = params?.slug || "";
@@ -34,8 +70,18 @@ export default function BookReading() {
     window.scrollTo({ top: 0, behavior: 'instant' });
     
     const loadData = async () => {
-      // Load fresh data from database
-      await userDataManager.loadUserData();
+      // Check if user is logged in
+      const authResponse = await fetch('/api/auth/status');
+      const authData = await authResponse.json();
+      
+      if (!authData.isLoggedIn || !authData.userId) {
+        // User is not logged in - mark as guest
+        setIsGuestUser(true);
+      } else {
+        // Load fresh data from database for logged in user
+        setIsGuestUser(false);
+        await userDataManager.loadUserData();
+      }
     };
     
     loadData();
@@ -2039,30 +2085,55 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
       setAmbientSoundEnabled(false); // Para o som ambiente ao completar a leitura
       stopAmbientSound(); // Garante que o som pare
       
-      // Save to server first
+      // Save book completion
       try {
-        await apiClient.completeBook({
-          bookSlug: bookSlug,
-          title: currentBook.title,
-          author: currentBook.author,
-          reward: currentBook.reward,
-          rating: rating,
-          opinion: opinion,
-          readingTime: readingTime,
-          quizAnswers: answers
-        });
-        
-        // Reload data from database to ensure consistency
-        // This will update local data with the latest from server
-        await userDataManager.loadUserData();
-        
-        // Check if this was the user's 3rd book and redirect automatically
-        const updatedUserData = userDataManager.getUserData();
-        if (updatedUserData?.stats?.totalBooksRead === 3 && updatedUserData?.selectedPlan !== 'premium') {
-          // Wait a bit for the reward modal to show, then redirect
-          setTimeout(() => {
-            setLocation('/onboarding-complete');
-          }, 3000);
+        if (isGuestUser) {
+          // Guest user - save to localStorage
+          const bookData = {
+            bookSlug: bookSlug,
+            title: currentBook.title,
+            author: currentBook.author,
+            reward: currentBook.reward,
+            rating: rating,
+            opinion: opinion,
+            readingTime: readingTime,
+            quizAnswers: answers
+          };
+          
+          const updatedGuestData = completeGuestBook(bookData);
+          
+          // Check if this was the guest's 3rd book and redirect automatically
+          if (updatedGuestData?.stats?.totalBooksRead >= 3) {
+            // Wait a bit for the reward modal to show, then redirect
+            setTimeout(() => {
+              setLocation('/onboarding-complete');
+            }, 3000);
+          }
+        } else {
+          // Logged in user - save to server
+          await apiClient.completeBook({
+            bookSlug: bookSlug,
+            title: currentBook.title,
+            author: currentBook.author,
+            reward: currentBook.reward,
+            rating: rating,
+            opinion: opinion,
+            readingTime: readingTime,
+            quizAnswers: answers
+          });
+          
+          // Reload data from database to ensure consistency
+          // This will update local data with the latest from server
+          await userDataManager.loadUserData();
+          
+          // Check if this was the user's 3rd book and redirect automatically
+          const updatedUserData = userDataManager.getUserData();
+          if (updatedUserData?.stats?.totalBooksRead === 3 && updatedUserData?.selectedPlan !== 'premium') {
+            // Wait a bit for the reward modal to show, then redirect
+            setTimeout(() => {
+              setLocation('/onboarding-complete');
+            }, 3000);
+          }
         }
       } catch (error) {
         console.error("Failed to save book completion:", error);

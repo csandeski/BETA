@@ -71,7 +71,22 @@ export default function OnboardingComplete() {
   // Check if user has completed 3 activities
   useEffect(() => {
     const checkAccess = async () => {
-      const userData = userDataManager.getUserData();
+      // Check if logged in user
+      const authResponse = await fetch('/api/auth/status');
+      const authData = await authResponse.json();
+      
+      let userData = null;
+      
+      if (authData.isLoggedIn && authData.userId) {
+        // Logged in user
+        userData = userDataManager.getUserData();
+      } else {
+        // Guest user - check localStorage
+        const guestDataStr = localStorage.getItem('guestUserData');
+        if (guestDataStr) {
+          userData = JSON.parse(guestDataStr);
+        }
+      }
       
       // If no user data or less than 3 books completed, redirect to dashboard
       if (!userData || !userData.stats?.totalBooksRead || userData.stats.totalBooksRead < 3) {

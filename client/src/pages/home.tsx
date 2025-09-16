@@ -17,7 +17,8 @@ export default function Home() {
 
   const handleStartNow = () => {
     playSound('click');
-    setShowRegistration(true);
+    // Go directly to dashboard without registration
+    setLocation('/dashboard');
   };
 
   const handleLogin = () => {
@@ -388,7 +389,7 @@ export default function Home() {
               className="w-full py-5 text-base font-bold bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl shadow-xl transition-all"
               data-testid="button-final-cta"
             >
-              Criar Conta Grátis
+              Começar Agora
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
