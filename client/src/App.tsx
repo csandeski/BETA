@@ -28,6 +28,7 @@ function Router() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
+  const [needsPaymentFlow, setNeedsPaymentFlow] = useState(false);
   
   // Check if user is logged in via API
   useEffect(() => {
@@ -46,6 +47,22 @@ function Router() {
           await userDataManager.loadUserData();
           const data = userDataManager.getUserData();
           setUserData(data);
+          
+          // Check if user needs to complete payment flow
+          // User needs payment if: has completed 3+ activities AND is not a supporter
+          const hasCompleted3Books = (data?.stats?.totalBooksRead || 0) >= 3;
+          const isSupporter = data?.plan === 'premium';
+          const hasSeenPricing = localStorage.getItem('pricing_seen_v1') === 'true';
+          
+          if (hasCompleted3Books && !isSupporter) {
+            setNeedsPaymentFlow(true);
+            // Mark as seen if they've completed 3 books
+            if (!hasSeenPricing) {
+              localStorage.setItem('pricing_seen_v1', 'true');
+            }
+          } else {
+            setNeedsPaymentFlow(false);
+          }
         } catch (error) {
           console.error('Failed to load user data:', error);
         } finally {
@@ -54,13 +71,20 @@ function Router() {
       } else {
         setUserData(null);
         setIsLoadingUserData(false);
+        setNeedsPaymentFlow(false);
       }
     };
     
     loadUserData();
   }, [isLoggedIn]);
 
-  // No global guard - let users navigate freely, only redirect on specific actions
+  // Global payment flow enforcement
+  useEffect(() => {
+    if (!isLoadingUserData && needsPaymentFlow && location !== '/onboarding-complete') {
+      // Force redirect to onboarding payment flow
+      setLocation('/onboarding-complete');
+    }
+  }, [location, needsPaymentFlow, isLoadingUserData, setLocation]);
   
   // Only show nav if user is logged in and on appropriate pages
   const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos' && location !== '/onboarding-complete';

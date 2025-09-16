@@ -1,42 +1,73 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Trophy, Shield, Check, Clock, Users, Calendar, ArrowLeft, AlertCircle, Star, TrendingUp, Lock, ChevronRight, X, Copy, Heart, BookOpen, Target, Award, Zap, MessageCircle, Sparkles, Phone, Mail, CreditCard, Key, CheckCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useSound } from "@/hooks/useSound";
-import { queryClient } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
-import { fbPixel } from "@/utils/facebookPixel";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { userDataManager } from "@/utils/userDataManager";
+import { useSound } from "@/hooks/useSound";
+import { fbPixel } from "@/utils/facebookPixel";
 import { UtmTracker } from "@/utils/utmTracker";
 import QRCode from "react-qr-code";
+import {
+  Heart,
+  ChevronRight,
+  ChevronLeft,
+  Shield,
+  X,
+  Clock,
+  Copy,
+  AlertCircle,
+  BookOpen,
+  Target,
+  Users,
+  Award,
+  Zap,
+  MessageCircle,
+  Sparkles,
+  Check,
+  Star,
+  ThumbsUp,
+  Smile,
+  Gift,
+  CreditCard,
+  Loader2
+} from "lucide-react";
 
 export default function OnboardingComplete() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { playSound } = useSound();
-  const [showPixModal, setShowPixModal] = useState(false);
-  const [pixCode, setPixCode] = useState("");
-  const [paymentId, setPaymentId] = useState("");
-  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
-  const [pixCountdown, setPixCountdown] = useState(300);
-  const [isPixExpired, setIsPixExpired] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState("");
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   
-  // User data collection modal states
-  const [showUserDataModal, setShowUserDataModal] = useState(false);
+  // Step management - restore state from localStorage
+  const [currentStep, setCurrentStep] = useState(() => {
+    const savedPricing = localStorage.getItem('pricing_seen_v1') === 'true';
+    return savedPricing ? 4 : 1;  // Start at pricing if already seen
+  });
+  const [hasSeenPricing, setHasSeenPricing] = useState(() => {
+    return localStorage.getItem('pricing_seen_v1') === 'true';
+  });
+  
+  // User data
+  const [userFullName, setUserFullName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [userCPF, setUserCPF] = useState("");
-  const [userPixKey, setUserPixKey] = useState("");
   
+  // Payment state
+  const [showPixModal, setShowPixModal] = useState(false);
+  const [showGeneratingPix, setShowGeneratingPix] = useState(false);
+  const [pixPaymentId, setPixPaymentId] = useState<string | null>(null);
+  const [pixCode, setPixCode] = useState<string | null>(null);
+  const [pixCountdown, setPixCountdown] = useState(600);
+  const [isPixExpired, setIsPixExpired] = useState(false);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const [checkoutTimer, setCheckoutTimer] = useState(600);
+
   // Check if user has completed 3 activities
   useEffect(() => {
     const checkAccess = async () => {
@@ -56,44 +87,195 @@ export default function OnboardingComplete() {
     checkAccess();
   }, [setLocation, toast]);
 
+  // Block navigation once pricing is seen
+  useEffect(() => {
+    if (hasSeenPricing) {
+      const handleBlockedAction = (e: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Always redirect to pricing step
+        setCurrentStep(4);
+        toast({
+          title: "Ação bloqueada",
+          description: "Complete o pagamento para continuar usando o app",
+          variant: "destructive"
+        });
+      };
+      
+      // Intercept all clicks outside the payment flow
+      const handleGlobalClick = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        const isPaymentFlow = target.closest('[data-payment-flow="true"]');
+        if (!isPaymentFlow) {
+          handleBlockedAction(e);
+        }
+      };
+      
+      document.addEventListener('click', handleGlobalClick, true);
+      window.addEventListener('popstate', handleBlockedAction);
+      
+      return () => {
+        document.removeEventListener('click', handleGlobalClick, true);
+        window.removeEventListener('popstate', handleBlockedAction);
+      };
+    }
+  }, [hasSeenPricing, toast]);
+
+  // Countdown timer for checkout
+  useEffect(() => {
+    if (currentStep === 5 && checkoutTimer > 0) {
+      const interval = setInterval(() => {
+        setCheckoutTimer((prev) => {
+          if (prev <= 1) {
+            toast({
+              title: "Tempo esgotado!",
+              description: "Reiniciando processo de pagamento...",
+              variant: "destructive"
+            });
+            setCurrentStep(4);
+            setCheckoutTimer(600);
+            return 600;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [currentStep, checkoutTimer, toast]);
+
+  // PIX countdown
+  useEffect(() => {
+    if (showPixModal && pixCountdown > 0 && !isPixExpired) {
+      const interval = setInterval(() => {
+        setPixCountdown((prev) => {
+          if (prev <= 1) {
+            setIsPixExpired(true);
+            setShowPixModal(false);
+            toast({
+              title: "PIX expirado",
+              description: "O código PIX expirou. Gere um novo código para continuar.",
+              variant: "destructive"
+            });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [showPixModal, pixCountdown, isPixExpired, toast]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})/, '$1-$2');
+    }
+    return value;
+  };
+
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{5})(\d)/, '$1-$2');
+    }
+    return value;
+  };
+
+  const handleNextStep = () => {
+    setCurrentStep(prev => prev + 1);
+    // Mark as seen when entering pricing step
+    if (currentStep === 3) {
+      setHasSeenPricing(true);
+      localStorage.setItem('pricing_seen_v1', 'true');
+    }
+  };
+
+  const handleActivateAccount = () => {
+    setCurrentStep(5);
+  };
+
+  const validateForm = () => {
+    if (!userFullName || userFullName.length < 3) {
+      toast({
+        title: "Nome inválido",
+        description: "Por favor, insira seu nome completo",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!userEmail || !emailRegex.test(userEmail)) {
+      toast({
+        title: "Email inválido",
+        description: "Por favor, insira um email válido",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    const cleanPhone = userPhone.replace(/\D/g, '');
+    if (!cleanPhone || cleanPhone.length < 10) {
+      toast({
+        title: "Telefone inválido",
+        description: "Por favor, insira um telefone válido",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    const cleanCPF = userCPF.replace(/\D/g, '');
+    if (!cleanCPF || cleanCPF.length !== 11) {
+      toast({
+        title: "CPF inválido",
+        description: "Por favor, insira um CPF válido com 11 dígitos",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    return true;
+  };
+
   const generatePixMutation = useMutation({
     mutationFn: async () => {
+      if (!validateForm()) {
+        throw new Error('Formulário inválido');
+      }
+      
+      setShowGeneratingPix(true);
       playSound('click');
       
-      fbPixel.trackAddToCart({
-        value: 29.90,
-        currency: 'BRL',
-        content_name: 'Supporter Plan',
-        content_type: 'product',
-        content_ids: ['supporter']
-      });
-
       fbPixel.trackInitiateCheckout({
         value: 29.90,
         currency: 'BRL',
-        content_name: 'Supporter Plan',
+        content_name: 'Account Activation',
         num_items: 1
       });
 
-      // Get user data from form
-      const userData = userDataManager.getUserData();
-      
-      // Get UTM parameters
       const utmParams = UtmTracker.getForOrinPay();
-      
-      // Remove formatting from CPF and phone
       const cleanCPF = userCPF.replace(/\D/g, '');
       const cleanPhone = userPhone.replace(/\D/g, '');
       
       const requestBody = {
         plan: 'supporter',
         amount: 29.90,
-        fullName: userData?.fullName || 'Usuário Beta Reader',
-        email: userEmail || userData?.email || 'usuario@betareader.com.br',
+        fullName: userFullName,
+        email: userEmail,
         phone: cleanPhone,
         cpf: cleanCPF,
-        pixKey: userPixKey,
-        ...utmParams // Include UTM parameters
+        ...utmParams
       };
 
       const response = await fetch('/api/payment/generate-pix', {
@@ -106,63 +288,43 @@ export default function OnboardingComplete() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate PIX');
+        throw new Error('Falha ao gerar PIX');
       }
 
       return response.json();
     },
     onSuccess: (data) => {
+      setShowGeneratingPix(false);
       if (data.pixCode && data.paymentId) {
         setPixCode(data.pixCode);
-        setPaymentId(data.paymentId);
+        setPixPaymentId(data.paymentId);
         setShowPixModal(true);
-        setPixCountdown(300);
+        setPixCountdown(600);
         setIsPixExpired(false);
         
         fbPixel.trackAddPaymentInfo({
           value: 29.90,
           currency: 'BRL',
-          content_name: 'Premium Plan'
+          content_name: 'Account Activation'
         });
         
-        startCountdown();
         startPollingPaymentStatus(data.paymentId);
-      } else {
-        throw new Error('Invalid response from payment API');
       }
     },
     onError: (error: any) => {
+      setShowGeneratingPix(false);
       console.error('Payment error:', error);
       toast({
         title: "Erro no pagamento",
-        description: error.message || "Não foi possível gerar o PIX. Tente novamente.",
+        description: "Não foi possível gerar o PIX. Tente novamente.",
         variant: "destructive",
       });
     }
   });
 
-  const startCountdown = () => {
-    const interval = setInterval(() => {
-      setPixCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setIsPixExpired(true);
-          setShowPixModal(false);
-          toast({
-            title: "PIX expirado",
-            description: "O código PIX expirou. Gere um novo código para continuar.",
-            variant: "destructive",
-          });
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
   const startPollingPaymentStatus = (paymentId: string) => {
     let pollCount = 0;
-    const maxPolls = 60;
+    const maxPolls = 120;
     
     const pollInterval = setInterval(async () => {
       pollCount++;
@@ -187,24 +349,28 @@ export default function OnboardingComplete() {
           fbPixel.trackPurchase({
             value: 29.90,
             currency: 'BRL',
-            content_name: 'Supporter Plan',
-            content_type: 'product',
-            content_ids: ['supporter']
+            content_name: 'Account Activation',
+            content_type: 'product'
           });
           
           await userDataManager.loadUserData();
-          queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/users/me'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/users/data'] });
+          
+          // Clear the pricing seen flag since they've paid
+          localStorage.removeItem('pricing_seen_v1');
           
           toast({
-            title: "Pagamento confirmado!",
-            description: "Obrigado por se tornar um apoiador!",
+            title: "Pagamento confirmado! 🎉",
+            description: "Sua conta foi ativada com sucesso!",
           });
           
           playSound('reward');
           setShowPixModal(false);
           
+          // Force full page reload to re-evaluate global guards
           setTimeout(() => {
-            setLocation('/dashboard');
+            window.location.href = '/dashboard';
           }, 2000);
         }
       } catch (error) {
@@ -216,732 +382,576 @@ export default function OnboardingComplete() {
   };
 
   const copyPixCode = () => {
-    navigator.clipboard.writeText(pixCode);
-    playSound('click');
-    toast({
-      title: "Código copiado!",
-      description: "Cole o código no app do seu banco",
-    });
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const handleRatingClick = (value: number) => {
-    setRating(value);
-    playSound('click');
-    if (value >= 4) {
-      setShowFeedbackForm(true);
-    }
-  };
-
-  const handleContinueStandard = () => {
-    playSound('click');
-    toast({
-      title: "Continuando no Plano Padrão",
-      description: "Você pode mudar de ideia a qualquer momento!",
-    });
-    setTimeout(() => {
-      setLocation('/dashboard');
-    }, 1500);
-  };
-
-  // Format CPF as user types
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      return numbers
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-        .replace(/(-\d{2})\d+?$/, '$1');
-    }
-    return value;
-  };
-
-  // Format phone as user types
-  const formatPhone = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      return numbers
-        .replace(/(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{5})(\d)/, '$1-$2')
-        .replace(/(-\d{4})\d+?$/, '$1');
-    }
-    return value;
-  };
-
-  // Handle opening user data modal
-  const handleBecomeSupporter = () => {
-    playSound('click');
-    setShowUserDataModal(true);
-  };
-
-  // Handle submitting user data and generating PIX
-  const handleSubmitUserData = () => {
-    // Validate fields
-    if (!userEmail || !userPhone || !userCPF || !userPixKey) {
+    if (pixCode) {
+      navigator.clipboard.writeText(pixCode);
+      playSound('click');
       toast({
-        title: "Preencha todos os campos",
-        description: "Todos os campos são obrigatórios para continuar",
-        variant: "destructive"
+        title: "Código copiado!",
+        description: "Cole o código no app do seu banco",
       });
-      return;
     }
-
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(userEmail)) {
-      toast({
-        title: "Email inválido",
-        description: "Por favor, insira um email válido",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Validate CPF length
-    const cleanCPF = userCPF.replace(/\D/g, '');
-    if (cleanCPF.length !== 11) {
-      toast({
-        title: "CPF inválido",
-        description: "O CPF deve ter 11 dígitos",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Validate phone length
-    const cleanPhone = userPhone.replace(/\D/g, '');
-    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-      toast({
-        title: "Telefone inválido",
-        description: "Por favor, insira um telefone válido",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Close modal and generate PIX
-    setShowUserDataModal(false);
-    generatePixMutation.mutate();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-green-50/20 to-white">
-      {/* Header */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-green-100/50 px-5 py-4 flex items-center justify-between z-10">
-        <button
-          onClick={() => {
-            playSound('click');
-            setLocation("/dashboard");
-          }}
-          className="p-2.5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl text-gray-600 hover:text-gray-900 hover:from-gray-100 hover:to-gray-200 transition-all"
-          data-testid="button-back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-900">Beta Reader</span>
-          <span className="text-xs px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-bold">
-            BRASIL
-          </span>
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white" data-payment-flow="true">
+      {/* Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <div className="h-2 bg-gray-200">
+          <div 
+            className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500"
+            style={{ width: `${(currentStep / 5) * 100}%` }}
+          />
         </div>
-      </header>
-      {/* 1. Feedback Section */}
-      <section className="px-6 sm:px-8 py-8">
-        <div className="text-center mb-6">
-          <div className="inline-flex p-3 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl mb-4">
-            <Star className="h-8 w-8 text-yellow-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Você está gostando do nosso app?
-          </h1>
-          <p className="text-sm text-gray-600">
-            Sua opinião é muito importante para nós
-          </p>
-        </div>
-
-        {/* Star Rating */}
-        <div className="flex justify-center gap-2 mb-4">
-          {[1, 2, 3, 4, 5].map((value) => (
-            <button
-              key={value}
-              onClick={() => handleRatingClick(value)}
-              className="p-2 transition-all hover:scale-110"
-              data-testid={`button-rating-${value}`}
-            >
-              <Star
-                className={`h-8 w-8 transition-colors ${
-                  value <= rating
-                    ? 'text-yellow-500 fill-yellow-500'
-                    : 'text-gray-300'
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-
-        {/* Feedback Form */}
-        {showFeedbackForm && (
-          <div className="mt-6 bg-white rounded-xl p-4 border border-gray-200 animate-in slide-in-from-bottom-4">
-            <label className="text-sm font-medium text-gray-700 block mb-2">
-              Deixe um comentário (opcional)
-            </label>
-            <Textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Conte-nos o que você mais gostou..."
-              className="w-full resize-none"
-              rows={3}
-              data-testid="input-feedback"
-            />
-            <button
-              onClick={() => {
-                playSound('click');
-                toast({
-                  title: "Obrigado pelo feedback!",
-                  description: "Sua opinião nos ajuda a melhorar",
-                });
-              }}
-              className="mt-3 px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
-              data-testid="button-send-feedback"
-            >
-              Enviar feedback
-            </button>
+        {currentStep === 5 && (
+          <div className="bg-red-50 border-b border-red-200 py-2 px-4">
+            <div className="flex items-center justify-center gap-2">
+              <Clock className="h-4 w-4 text-red-600 animate-pulse" />
+              <span className="text-sm font-bold text-red-600">
+                Tempo restante: {formatTime(checkoutTimer)}
+              </span>
+              <span className="text-xs text-red-500">
+                Complete o pagamento antes que o tempo acabe
+              </span>
+            </div>
           </div>
         )}
-      </section>
-      {/* 2. Who We Are Section */}
-      <section className="px-6 sm:px-8 py-8 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-6">
-            <div className="inline-flex p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl mb-4">
-              <BookOpen className="h-8 w-8 text-blue-600" />
+      </div>
+
+      <div className="max-w-md mx-auto px-4 py-16">
+        {/* Step 1: Are you enjoying our app? */}
+        {currentStep === 1 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center">
+              <div className="inline-flex p-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-3xl mb-6">
+                <Heart className="h-12 w-12 text-green-600" />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                Você está gostando do nosso app?
+              </h1>
+              <p className="text-gray-600 mb-8">
+                Sua opinião é muito importante para nós!
+              </p>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Quem Somos
-            </h2>
-            <p className="text-sm text-gray-600">
-              Uma plataforma que conecta leitores e escritores
-            </p>
-          </div>
 
-          <div className="space-y-4">
-            <Card className="p-4 bg-white/90 backdrop-blur">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <Target className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Nossa Missão</h3>
-                  <p className="text-sm text-gray-600">
-                    Realizamos testes de qualidade para editoras, coletando feedback de leitores reais antes do lançamento oficial dos livros.
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-white/90 backdrop-blur">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Users className="h-5 w-5 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Parcerias Especiais</h3>
-                  <p className="text-sm text-gray-600">
-                    Trabalhamos com autores independentes e mantemos um acervo digital curado especialmente para nossa comunidade.
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-white/90 backdrop-blur">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <Heart className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Sistema Colaborativo</h3>
-                  <p className="text-sm text-gray-600">
-                    Nosso app é mantido por uma comunidade de apoiadores que acreditam no poder da leitura e querem ajudar a manter o projeto vivo.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-      {/* 3. Community Section */}
-      <section className="px-6 sm:px-8 py-8">
-        <div className="text-center mb-6">
-          <div className="inline-flex p-3 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl mb-4">
-            <Users className="h-8 w-8 text-purple-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Nossa Comunidade
-          </h2>
-          <p className="text-sm text-gray-600">
-            Juntos, estamos transformando o mercado editorial
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-            <Users className="h-6 w-6 text-green-600 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-gray-900" data-testid="text-active-users">2.600+</p>
-            <p className="text-xs text-gray-600">Leitores ativos</p>
-          </Card>
-
-          <Card className="p-4 text-center bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-            <Award className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-gray-900" data-testid="text-years-active">6+ anos</p>
-            <p className="text-xs text-gray-600">De atividade</p>
-          </Card>
-
-          <Card className="p-4 text-center bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-            <BookOpen className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-gray-900" data-testid="text-books-tested">500+</p>
-            <p className="text-xs text-gray-600">Livros testados</p>
-          </Card>
-
-          <Card className="p-4 text-center bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200">
-            <Heart className="h-6 w-6 text-orange-600 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-gray-900" data-testid="text-supporters">1.200+</p>
-            <p className="text-xs text-gray-600">Apoiadores</p>
-          </Card>
-        </div>
-
-        <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 text-center">
-          <p className="text-sm text-green-800">
-            <span className="font-semibold">💚 Mensagem da comunidade:</span><br/>
-            "Cada apoiador nos ajuda a manter o app gratuito para milhares de leitores que não podem pagar"
-          </p>
-        </div>
-      </section>
-      {/* 4. Plan Comparison Section */}
-      <section className="px-6 sm:px-8 py-8 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <div className="inline-flex p-3 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl mb-4">
-              <Zap className="h-8 w-8 text-indigo-600" />
+            <div className="flex justify-center gap-3 mb-8">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  className="p-2 hover:scale-110 transition-transform"
+                  data-testid={`button-star-${star}`}
+                >
+                  <Star className="h-10 w-10 text-yellow-400 fill-yellow-400" />
+                </button>
+              ))}
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Escolha seu plano
-            </h2>
-            <p className="text-sm text-gray-600">
-              Você decide como quer usar o app
-            </p>
-          </div>
 
-          {/* Standard Plan */}
-          <div className="mb-4 relative rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-            {/* Plan Header */}
-            <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 px-5 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white rounded-xl shadow-sm">
-                    <BookOpen className="h-5 w-5 text-gray-600" />
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <Card className="p-4 text-center hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-green-500">
+                <ThumbsUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                <p className="text-sm font-semibold">Adorei!</p>
+              </Card>
+              <Card className="p-4 text-center hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-blue-500">
+                <Smile className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                <p className="text-sm font-semibold">Muito bom</p>
+              </Card>
+            </div>
+
+            <Card className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+              <div className="flex items-start gap-3">
+                <Gift className="h-6 w-6 text-orange-500 flex-shrink-0 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-800 font-semibold mb-1">
+                    Obrigado pelo feedback!
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Você já completou 3 atividades e desbloqueou acesso a uma experiência ainda melhor
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Button
+              onClick={handleNextStep}
+              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+              data-testid="button-continue-step1"
+            >
+              Continuar
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 2: Who We Are */}
+        {currentStep === 2 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center mb-8">
+              <div className="inline-flex p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl mb-4">
+                <BookOpen className="h-10 w-10 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Quem Somos
+              </h2>
+              <p className="text-sm text-gray-600">
+                Conheça nossa missão e comunidade
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-green-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-green-100 rounded-xl">
+                    <Target className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg">Plano Padrão</h3>
-                    <p className="text-xs text-gray-500">Para começar sua jornada</p>
+                    <h3 className="font-bold text-gray-900 mb-2">Nossa Missão</h3>
+                    <p className="text-sm text-gray-600">
+                      Conectamos leitores apaixonados com escritores talentosos, oferecendo feedback valioso antes do lançamento oficial dos livros.
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-2xl font-bold text-gray-900">Grátis</span>
-                  <p className="text-xs text-gray-500">para sempre</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Features */}
-            <div className="p-5">
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <div className="mt-0.5 p-1.5 bg-gray-100 rounded-lg">
-                    <BookOpen className="h-4 w-4 text-gray-500" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-700 block">Até 3 livros por dia</span>
-                    <span className="text-xs text-gray-500">Ideal para leitores casuais</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="mt-0.5 p-1.5 bg-gray-100 rounded-lg">
-                    <Target className="h-4 w-4 text-gray-500" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-700 block">Saque mínimo: R$ 1.800</span>
-                    <span className="text-xs text-gray-500">Acumule para retirar</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="mt-0.5 p-1.5 bg-gray-100 rounded-lg">
-                    <MessageCircle className="h-4 w-4 text-gray-500" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-700 block">Suporte via FAQ</span>
-                    <span className="text-xs text-gray-500">Respostas às dúvidas comuns</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
+              </Card>
 
-          {/* Supporter Plan */}
-          <div className="relative">
-            {/* Recommended Badge - Positioned at the top */}
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-              <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>MAIS POPULAR</span>
-              </div>
-            </div>
-            
-            <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 mt-2">
-              {/* Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 pointer-events-none"></div>
-              
-              {/* Plan Header */}
-              <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                    <Heart className="h-6 w-6 text-white" />
+              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-purple-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-purple-100 rounded-xl">
+                    <Users className="h-6 w-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-xl">Plano Apoiador</h3>
-                    <p className="text-xs text-green-100">Desbloqueie todo o potencial</p>
+                    <h3 className="font-bold text-gray-900 mb-2">Comunidade Ativa</h3>
+                    <p className="text-sm text-gray-600">
+                      Mais de 2.600 leitores ativos que já testaram mais de 500 livros em 6 anos de atividade.
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xs text-green-100">R$</span>
-                    <span className="text-3xl font-bold text-white">29,90</span>
+              </Card>
+
+              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-orange-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-orange-100 rounded-xl">
+                    <Heart className="h-6 w-6 text-orange-600" />
                   </div>
-                  <p className="text-xs text-green-100 font-semibold">pagamento único</p>
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-2">Sistema Colaborativo</h3>
+                    <p className="text-sm text-gray-600">
+                      Mantido por uma comunidade de apoiadores que acreditam no poder da leitura.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </Card>
             </div>
-            
-            {/* Features */}
-            <div className="relative bg-white p-5 border-2 border-green-100">
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <div className="mt-0.5 p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
-                    <BookOpen className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-800 font-semibold block">Livros ilimitados</span>
-                    <span className="text-xs text-gray-600">Leia o quanto quiser, sem limites</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="mt-0.5 p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
-                    <Target className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-800 font-semibold block">Saque desde R$ 50</span>
-                    <span className="text-xs text-gray-600">36x mais rápido que o plano grátis</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="mt-0.5 p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
-                    <MessageCircle className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-800 font-semibold block">WhatsApp prioritário</span>
-                    <span className="text-xs text-gray-600">Fale direto com nossa equipe</span>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 pt-2 border-t border-green-100">
-                  <div className="mt-0.5 p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
-                    <Heart className="h-4 w-4 text-orange-500" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm text-gray-800 font-semibold block">Apoie a comunidade</span>
-                    <span className="text-xs text-gray-600">Mantenha o app gratuito para todos</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            </div>
-          </div>
 
-          {/* Motivational Message */}
-          <div className="mt-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
-            <div className="flex items-start gap-2">
-              <Heart className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm text-gray-800 font-medium mb-1">
-                  Por que se tornar um apoiador?
-                </p>
-                <p className="text-xs text-gray-600">
-                  Além de desbloquear benefícios exclusivos, você ajuda a manter nossa plataforma acessível para estudantes, 
-                  professores e amantes da leitura que não podem contribuir financeiramente. 
-                  <span className="font-semibold"> Cada apoiador faz a diferença!</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* 5. Soft CTA Section */}
-      <section className="px-6 sm:px-8 py-8">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              A escolha é sua
-            </h2>
-            <p className="text-sm text-gray-600">
-              Independente da sua decisão, agradecemos por fazer parte da nossa comunidade
-            </p>
-          </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                <Users className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-gray-900">2.600+</p>
+                <p className="text-xs text-gray-600">Leitores ativos</p>
+              </Card>
 
-          <div className="space-y-3">
-            {/* Primary CTA - Become a Supporter - 3D Realistic Button */}
-            <button
-              onClick={handleBecomeSupporter}
-              disabled={generatePixMutation.isPending}
-              className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                transformStyle: 'preserve-3d',
-                perspective: '1000px'
-              }}
-              data-testid="button-become-supporter"
+              <Card className="p-4 text-center bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                <Award className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-gray-900">6+ anos</p>
+                <p className="text-xs text-gray-600">De atividade</p>
+              </Card>
+            </div>
+
+            <Button
+              onClick={handleNextStep}
+              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+              data-testid="button-continue-step2"
             >
-              {/* Button Shadow Base */}
-              <div className="absolute inset-0 bg-gradient-to-b from-green-700 to-green-900 rounded-2xl translate-y-2 blur-sm opacity-50"></div>
-              
-              {/* Main Button */}
-              <div 
-                className="relative py-5 px-6 rounded-2xl transform transition-all duration-200 group-hover:translate-y-0.5 group-active:translate-y-1"
-                style={{
-                  background: 'linear-gradient(180deg, #22c55e 0%, #10b981 50%, #059669 100%)',
-                  boxShadow: `
-                    0 8px 0 #047857,
-                    0 8px 20px rgba(34, 197, 94, 0.4),
-                    inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                    inset 0 -2px 0 rgba(0, 0, 0, 0.2)
-                  `
-                }}
-              >
-                {/* Glass effect overlay */}
-                <div className="absolute inset-0 rounded-2xl opacity-20 bg-gradient-to-b from-white to-transparent pointer-events-none"></div>
-                
-                {/* Button Content */}
-                <div className="relative flex items-center justify-center gap-3">
-                  {generatePixMutation.isPending ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                      <span className="text-white font-bold text-lg drop-shadow-md">Gerando PIX...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Heart className="h-6 w-6 text-white drop-shadow-md group-hover:animate-pulse" />
-                      <span className="text-white font-bold text-lg drop-shadow-md">Quero ser Apoiador</span>
-                      <ChevronRight className="h-5 w-5 text-white drop-shadow-md group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
-                </div>
-                
-                {/* Shine effect */}
-                <div 
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%)',
-                    animation: 'shine 0.8s ease-in-out'
-                  }}
-                ></div>
-              </div>
-            </button>
-
-            {/* Secondary CTA - Continue Standard */}
-            <button
-              onClick={handleContinueStandard}
-              className="w-full py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2 mt-[25px] mb-[25px]"
-              data-testid="button-continue-standard"
-            >
-              Continuar no Plano Padrão
-            </button>
+              Continuar
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
+        )}
 
-          {/* Reassurance Message */}
-          <p className="text-xs text-center text-gray-500 mt-4">
-            Você pode mudar de plano a qualquer momento
-          </p>
-        </div>
-      </section>
-      {/* User Data Collection Modal */}
-      <Dialog open={showUserDataModal} onOpenChange={setShowUserDataModal}>
-        <DialogContent className="sm:max-w-lg w-[95vw] max-w-[95vw] sm:w-auto mx-auto p-0 overflow-hidden max-h-[95vh] flex flex-col rounded-3xl border-0 shadow-2xl">
-          {/* Animated Header */}
-          <div className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 px-6 py-8 text-white overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute -top-4 -right-4 w-32 h-32 bg-white rounded-full blur-2xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+        {/* Step 3: Maintenance Fee Message */}
+        {currentStep === 3 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center mb-8">
+              <div className="inline-flex p-4 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl mb-4">
+                <Zap className="h-10 w-10 text-indigo-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Continue sua jornada de leitura
+              </h2>
+              <p className="text-gray-600 mb-2">
+                Para continuar usando o Beta Reader sem limites, cobramos uma 
+                <span className="font-bold text-green-600"> taxa única de manutenção </span>
+                para ativação da sua conta em nossos sistemas.
+              </p>
             </div>
-            
-            {/* Content */}
-            <div className="relative z-10">
+
+            <Card className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300">
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                  <Shield className="h-7 w-7 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">Quase lá!</h2>
-                  <p className="text-sm text-green-50 mt-0.5">
-                    Preencha seus dados para continuar
-                  </p>
-                </div>
+                <AlertCircle className="h-6 w-6 text-orange-500" />
+                <h3 className="font-bold text-gray-900">Por que cobramos?</h3>
               </div>
-              <div className="flex items-center gap-2 mt-4 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 inline-flex">
-                <CheckCircle className="h-4 w-4 text-green-100" />
-                <span className="text-xs text-green-50 font-medium">Processo 100% seguro e criptografado</span>
-              </div>
-            </div>
-          </div>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Manter servidores e infraestrutura funcionando 24/7</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Garantir suporte prioritário via WhatsApp</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Desenvolver novos recursos e melhorias</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Manter o app gratuito para quem não pode pagar</span>
+                </li>
+              </ul>
+            </Card>
 
-          {/* Form with Better Spacing */}
-          <div className="p-8 bg-gradient-to-b from-gray-50 to-white space-y-6">
-            {/* Email Field */}
-            <div className="space-y-3">
-              <Label htmlFor="email" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1.5 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
-                  <Mail className="h-4 w-4 text-indigo-600" />
+            <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 text-center">
+              <p className="text-sm text-green-800 font-semibold">
+                💚 Junte-se a mais de 1.200 apoiadores que mantêm nossa comunidade viva!
+              </p>
+            </div>
+
+            <Button
+              onClick={handleNextStep}
+              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+              data-testid="button-continue-step3"
+            >
+              Ver valor da ativação
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 4: Pricing Card */}
+        {currentStep === 4 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Ative sua conta agora
+              </h2>
+              <p className="text-sm text-gray-600">
+                Pagamento único, benefícios para sempre
+              </p>
+            </div>
+
+            {/* Price Card - Mobile Optimized */}
+            <div className="relative">
+              {/* Popular Badge */}
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>OFERTA ESPECIAL</span>
                 </div>
-                Email
-              </Label>
-              <div className="relative">
+              </div>
+
+              <Card className="relative mt-2 overflow-hidden border-2 border-green-300 shadow-2xl">
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-green-50 opacity-50" />
+                
+                {/* Header */}
+                <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-8">
+                  <div className="text-center">
+                    <h3 className="text-white font-bold text-2xl mb-2">Ativação Premium</h3>
+                    <p className="text-green-100 text-sm">Acesso completo e ilimitado</p>
+                    
+                    {/* Price */}
+                    <div className="mt-6">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <span className="text-green-100 text-sm line-through">R$ 49,90</span>
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                          -40%
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-center gap-1">
+                        <span className="text-white text-lg">R$</span>
+                        <span className="text-white text-5xl font-bold">29</span>
+                        <span className="text-white text-2xl">,90</span>
+                      </div>
+                      <p className="text-green-100 text-xs font-semibold mt-2">
+                        PAGAMENTO ÚNICO
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Benefits */}
+                <div className="relative p-6 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                      <BookOpen className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-gray-800 font-bold block">Livros ilimitados</span>
+                      <span className="text-xs text-gray-600">Leia quantos quiser, sem restrições</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                      <CreditCard className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-gray-800 font-bold block">Saque desde R$ 50</span>
+                      <span className="text-xs text-gray-600">36x mais rápido que usuários free</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                      <MessageCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-gray-800 font-bold block">Suporte VIP WhatsApp</span>
+                      <span className="text-xs text-gray-600">Atendimento prioritário e exclusivo</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 pt-3 border-t border-green-100">
+                    <div className="p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
+                      <Heart className="h-5 w-5 text-orange-500" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-gray-800 font-bold block">Apoie a comunidade</span>
+                      <span className="text-xs text-gray-600">Ajude outros leitores a ter acesso</span>
+                    </div>
+                  </div>
+
+                  {/* Urgency Box */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                      <div>
+                        <p className="text-xs font-bold text-red-700">Oferta por tempo limitado!</p>
+                        <p className="text-xs text-red-600">Preço normal: R$ 49,90</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CTA Button */}
+                  <button
+                    onClick={handleActivateAccount}
+                    className="relative w-full group"
+                    style={{
+                      transformStyle: 'preserve-3d',
+                      perspective: '1000px'
+                    }}
+                    data-testid="button-activate-account"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-green-700 to-green-900 rounded-2xl translate-y-2 blur-sm opacity-50"></div>
+                    
+                    <div 
+                      className="relative py-5 px-6 rounded-2xl transform transition-all duration-200 group-hover:translate-y-0.5 group-active:translate-y-1"
+                      style={{
+                        background: 'linear-gradient(180deg, #22c55e 0%, #10b981 50%, #059669 100%)',
+                        boxShadow: `
+                          0 8px 0 #047857,
+                          0 8px 20px rgba(34, 197, 94, 0.4),
+                          inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                          inset 0 -2px 0 rgba(0, 0, 0, 0.2)
+                        `
+                      }}
+                    >
+                      <div className="absolute inset-0 rounded-2xl opacity-20 bg-gradient-to-b from-white to-transparent pointer-events-none"></div>
+                      
+                      <div className="relative flex items-center justify-center gap-3">
+                        <Zap className="h-6 w-6 text-white drop-shadow-md" />
+                        <span className="text-white font-bold text-lg drop-shadow-md">Quero ativar minha conta</span>
+                        <ChevronRight className="h-5 w-5 text-white drop-shadow-md group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      
+                      <div 
+                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                        style={{
+                          background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%)',
+                          animation: 'shine 0.8s ease-in-out'
+                        }}
+                      ></div>
+                    </div>
+                  </button>
+
+                  {/* Security Badge */}
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mt-4">
+                    <Shield className="h-4 w-4 text-green-600" />
+                    <span>Pagamento 100% seguro via PIX</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Testimonial */}
+            <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+              <div className="flex gap-2 mb-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+              <p className="text-sm text-gray-700 italic mb-2">
+                "Vale cada centavo! Agora leio sem limites e ainda ganho muito mais rápido!"
+              </p>
+              <p className="text-xs text-gray-500 font-semibold">- Maria Silva, membro há 2 anos</p>
+            </Card>
+          </div>
+        )}
+
+        {/* Step 5: Checkout Form */}
+        {currentStep === 5 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Finalize sua ativação
+              </h2>
+              <p className="text-sm text-gray-600">
+                Preencha seus dados para gerar o PIX
+              </p>
+            </div>
+
+            {/* Checkout Summary */}
+            <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="font-bold text-gray-900">Ativação Premium</p>
+                  <p className="text-xs text-gray-600">Acesso ilimitado vitalício</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 line-through">R$ 49,90</p>
+                  <p className="text-2xl font-bold text-green-600">R$ 29,90</p>
+                </div>
+              </div>
+              <div className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1.5 rounded-full inline-flex items-center gap-1">
+                <Gift className="h-3 w-3" />
+                <span>Economia de R$ 20,00</span>
+              </div>
+            </Card>
+
+            {/* User Data Form */}
+            <Card className="p-4 space-y-4">
+              <div>
+                <Label htmlFor="fullName" className="text-sm font-semibold mb-1.5 block">
+                  Nome Completo
+                </Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="João da Silva"
+                  value={userFullName}
+                  onChange={(e) => setUserFullName(e.target.value)}
+                  className="h-12 text-base"
+                  data-testid="input-full-name"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="email" className="text-sm font-semibold mb-1.5 block">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="seu.email@exemplo.com"
+                  placeholder="seu@email.com"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
-                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
-                  data-testid="input-user-email"
+                  className="h-12 text-base"
+                  data-testid="input-email"
                 />
               </div>
-            </div>
 
-            {/* Phone Field */}
-            <div className="space-y-3">
-              <Label htmlFor="phone" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
-                  <Phone className="h-4 w-4 text-emerald-600" />
-                </div>
-                Telefone
-              </Label>
-              <div className="relative">
+              <div>
+                <Label htmlFor="phone" className="text-sm font-semibold mb-1.5 block">
+                  WhatsApp
+                </Label>
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="(11) 99999-9999"
+                  placeholder="(11) 98765-4321"
                   value={userPhone}
                   onChange={(e) => setUserPhone(formatPhone(e.target.value))}
+                  className="h-12 text-base"
+                  data-testid="input-phone"
                   maxLength={15}
-                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
-                  data-testid="input-user-phone"
                 />
               </div>
-            </div>
 
-            {/* CPF Field */}
-            <div className="space-y-3">
-              <Label htmlFor="cpf" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1.5 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
-                  <CreditCard className="h-4 w-4 text-purple-600" />
-                </div>
-                CPF
-              </Label>
-              <div className="relative">
+              <div>
+                <Label htmlFor="cpf" className="text-sm font-semibold mb-1.5 block">
+                  CPF
+                </Label>
                 <Input
                   id="cpf"
                   type="text"
-                  placeholder="000.000.000-00"
+                  placeholder="123.456.789-00"
                   value={userCPF}
                   onChange={(e) => setUserCPF(formatCPF(e.target.value))}
+                  className="h-12 text-base"
+                  data-testid="input-cpf"
                   maxLength={14}
-                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
-                  data-testid="input-user-cpf"
                 />
               </div>
-            </div>
+            </Card>
 
-            {/* PIX Key Field */}
-            <div className="space-y-3">
-              <Label htmlFor="pixKey" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
-                  <Key className="h-4 w-4 text-orange-600" />
+            {/* Payment Method */}
+            <Card className="p-4 border-2 border-green-300 bg-green-50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg">
+                  <img 
+                    src="https://logodownload.org/wp-content/uploads/2020/02/pix-bc-logo.png" 
+                    alt="PIX" 
+                    className="h-8 w-auto"
+                  />
                 </div>
-                Chave PIX para Receber Saques
-              </Label>
-              <div className="relative">
-                <Input
-                  id="pixKey"
-                  type="text"
-                  placeholder="Sua chave PIX (CPF, email, telefone ou aleatória)"
-                  value={userPixKey}
-                  onChange={(e) => setUserPixKey(e.target.value)}
-                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
-                  data-testid="input-user-pix-key"
-                />
-                <p className="text-xs text-gray-500 mt-2 ml-1">
-                  Esta chave será usada para você receber seus saques futuros
-                </p>
+                <div className="flex-1">
+                  <p className="font-bold text-gray-900">Pagamento via PIX</p>
+                  <p className="text-xs text-gray-600">Aprovação instantânea</p>
+                </div>
+                <Check className="h-6 w-6 text-green-600" />
               </div>
-            </div>
+            </Card>
 
-            {/* Submit Button with Animation */}
-            <div className="pt-4">
-              <Button
-                onClick={handleSubmitUserData}
-                className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-                size="lg"
-                data-testid="button-submit-user-data"
-              >
-                <div className="flex items-center justify-center gap-3">
-                  <Shield className="h-5 w-5" />
-                  <span>Gerar PIX Seguro</span>
-                  <ChevronRight className="h-4 w-4" />
-                </div>
-              </Button>
-            </div>
+            {/* Generate PIX Button */}
+            <Button
+              onClick={() => generatePixMutation.mutate()}
+              disabled={generatePixMutation.isPending}
+              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50"
+              data-testid="button-generate-pix"
+            >
+              {generatePixMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <CreditCard className="mr-2 h-5 w-5" />
+                  Gerar PIX de Inscrição
+                </>
+              )}
+            </Button>
 
-            {/* Beautiful Security Note */}
-            <div className="relative rounded-2xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5"></div>
-              <div className="relative bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-blue-100">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex-shrink-0">
-                    <Lock className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-800 font-semibold mb-1">
-                      Proteção Total dos Seus Dados
-                    </p>
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      Utilizamos criptografia bancária de 256 bits e seguimos todas as normas da LGPD para garantir a segurança das suas informações
-                    </p>
-                  </div>
-                </div>
+            {/* Security Note */}
+            <div className="text-center text-xs text-gray-500">
+              <div className="flex items-center justify-center gap-1 mb-2">
+                <Shield className="h-4 w-4 text-green-600" />
+                <span>Ambiente 100% seguro e criptografado</span>
               </div>
+              <p>Seus dados estão protegidos e não serão compartilhados</p>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        )}
+      </div>
+
+      {/* Generating PIX Popup */}
+      {showGeneratingPix && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="p-8 text-center max-w-sm w-full">
+            <Loader2 className="h-12 w-12 animate-spin text-green-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">GERANDO PIX</h3>
+            <p className="text-sm text-gray-600">Aguarde enquanto preparamos seu pagamento...</p>
+          </Card>
+        </div>
+      )}
+
       {/* PIX Payment Modal */}
       <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
-        <DialogContent className="sm:max-w-md w-[95vw] max-w-[95vw] sm:w-auto mx-auto p-0 overflow-hidden max-h-[95vh] flex flex-col rounded-2xl" showCloseButton={false}>
-          {/* Header with Timer */}
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-t-2xl">
+        <DialogContent className="max-w-md p-0 overflow-hidden max-h-[90vh]" data-payment-flow="true">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">
@@ -1002,7 +1012,7 @@ export default function OnboardingComplete() {
               <p className="text-xs text-gray-600 mb-2 sm:mb-3 text-center font-semibold">Ou use o código PIX copia e cola:</p>
               <div className="bg-gray-50 rounded-lg p-2 sm:p-3 mb-2 sm:mb-3">
                 <textarea
-                  value={pixCode}
+                  value={pixCode || ''}
                   readOnly
                   className="w-full bg-transparent text-[10px] sm:text-xs font-mono text-gray-700 resize-none border-0 outline-none"
                   rows={2}
@@ -1019,8 +1029,6 @@ export default function OnboardingComplete() {
                 Copiar Código PIX
               </Button>
             </div>
-            
-            {/* Status - removed annoying checking payment message */}
             
             {/* Instructions */}
             <div className="bg-blue-50 rounded-xl p-3 sm:p-4 border border-blue-200">
