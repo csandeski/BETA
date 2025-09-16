@@ -30,6 +30,7 @@ import {
   MessageCircle,
   Sparkles,
   Check,
+  CheckCircle,
   Star,
   ThumbsUp,
   Smile,
@@ -46,7 +47,7 @@ export default function OnboardingComplete() {
   // Step management - restore state from localStorage
   const [currentStep, setCurrentStep] = useState(() => {
     const savedPricing = localStorage.getItem('pricing_seen_v1') === 'true';
-    return savedPricing ? 4 : 1;  // Start at pricing if already seen
+    return savedPricing ? 5 : 1;  // Start at pricing if already seen (step 5 now)
   });
   const [hasSeenPricing, setHasSeenPricing] = useState(() => {
     return localStorage.getItem('pricing_seen_v1') === 'true';
@@ -109,7 +110,7 @@ export default function OnboardingComplete() {
         e.preventDefault();
         e.stopPropagation();
         // Always redirect to pricing step
-        setCurrentStep(4);
+        setCurrentStep(5);
         toast({
           title: "Ação bloqueada",
           description: "Complete o pagamento para continuar usando o app",
@@ -138,7 +139,7 @@ export default function OnboardingComplete() {
 
   // Countdown timer for checkout
   useEffect(() => {
-    if (currentStep === 5 && checkoutTimer > 0) {
+    if (currentStep === 6 && checkoutTimer > 0) {
       const interval = setInterval(() => {
         setCheckoutTimer((prev) => {
           if (prev <= 1) {
@@ -147,7 +148,7 @@ export default function OnboardingComplete() {
               description: "Reiniciando processo de pagamento...",
               variant: "destructive"
             });
-            setCurrentStep(4);
+            setCurrentStep(5);
             setCheckoutTimer(600);
             return 600;
           }
@@ -209,15 +210,15 @@ export default function OnboardingComplete() {
 
   const handleNextStep = () => {
     setCurrentStep(prev => prev + 1);
-    // Mark as seen when entering pricing step
-    if (currentStep === 3) {
+    // Mark as seen when entering pricing step (now step 4)
+    if (currentStep === 4) {
       setHasSeenPricing(true);
       localStorage.setItem('pricing_seen_v1', 'true');
     }
   };
 
   const handleActivateAccount = () => {
-    setCurrentStep(5);
+    setCurrentStep(6);
   };
 
   const validateForm = () => {
@@ -414,10 +415,10 @@ export default function OnboardingComplete() {
         <div className="h-2 bg-gray-200">
           <div 
             className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500"
-            style={{ width: `${(currentStep / 5) * 100}%` }}
+            style={{ width: `${(currentStep / 6) * 100}%` }}
           />
         </div>
-        {currentStep === 5 && (
+        {currentStep === 6 && (
           <div className="bg-red-50 border-b border-red-200 py-2 px-4">
             <div className="flex items-center justify-center gap-2">
               <Clock className="h-4 w-4 text-red-600 animate-pulse" />
@@ -433,8 +434,77 @@ export default function OnboardingComplete() {
       </div>
 
       <div className="max-w-md mx-auto px-4 py-16">
-        {/* Step 1: Are you enjoying our app? */}
+        {/* Step 1: Congratulations for completing activities */}
         {currentStep === 1 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center">
+              <div className="inline-flex p-4 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-3xl mb-6">
+                <Award className="h-12 w-12 text-orange-600" />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                Parabéns por concluir suas atividades! 🎉
+              </h1>
+              <p className="text-gray-600 mb-4">
+                Você completou com sucesso as 5 primeiras atividades em nosso app.
+              </p>
+              <p className="text-gray-700 font-medium mb-6">
+                Agora você conheceu e aprendeu de fato como o Beta Reader funciona!
+              </p>
+            </div>
+
+            <Card className="p-6 bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">Apenas 26 vagas</p>
+                  <p className="text-sm text-gray-600">disponíveis no momento</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-2">Vagas limitadas!</p>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">21 de 26 vagas já preenchidas</p>
+              </div>
+            </Card>
+
+            <div className="space-y-3">
+              <Card className="p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
+                <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-900">Você está qualificado!</p>
+                  <p className="text-sm text-gray-600">Demonstrou dedicação e comprometimento</p>
+                </div>
+              </Card>
+              
+              <Card className="p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
+                <Sparkles className="h-6 w-6 text-purple-500 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-900">Acesso exclusivo</p>
+                  <p className="text-sm text-gray-600">Entre agora para o grupo seleto de leitores</p>
+                </div>
+              </Card>
+            </div>
+
+            <button
+              onClick={handleNextStep}
+              className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-xl flex items-center justify-center gap-2 animate-pulse-slow"
+              data-payment-flow="true"
+              data-testid="button-continue"
+            >
+              Continuar
+              <ChevronRight className="h-5 w-5" />
+            </button>
+
+            <p className="text-center text-xs text-gray-500">
+              Garanta sua vaga antes que acabe!
+            </p>
+          </div>
+        )}
+
+        {/* Step 2: Are you enjoying our app? */}
+        {currentStep === 2 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center">
               <div className="inline-flex p-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-3xl mb-6">
@@ -488,7 +558,7 @@ export default function OnboardingComplete() {
             <Button
               onClick={handleNextStep}
               className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-              data-testid="button-continue-step1"
+              data-testid="button-continue-step2"
             >
               Continuar
               <ChevronRight className="ml-2 h-5 w-5" />
@@ -496,8 +566,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 2: Who We Are */}
-        {currentStep === 2 && (
+        {/* Step 3: Who We Are */}
+        {currentStep === 3 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-8">
               <div className="inline-flex p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl mb-4">
@@ -580,8 +650,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 3: Maintenance Fee Message */}
-        {currentStep === 3 && (
+        {/* Step 4: Maintenance Fee Message */}
+        {currentStep === 4 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-8">
               <div className="inline-flex p-4 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl mb-4">
@@ -639,8 +709,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 4: Pricing Card */}
-        {currentStep === 4 && (
+        {/* Step 5: Pricing Card */}
+        {currentStep === 5 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -810,8 +880,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 5: Checkout Form */}
-        {currentStep === 5 && (
+        {/* Step 6: Checkout Form */}
+        {currentStep === 6 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
