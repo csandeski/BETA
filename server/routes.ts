@@ -280,32 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/books/:slug', async (req: Request, res: Response) => {
-    try {
-      const book = await storage.getBookBySlug(req.params.slug);
-      if (!book) {
-        return res.status(404).json({ message: "Book not found" });
-      }
-      res.json(book);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message || "Failed to get book" });
-    }
-  });
-
-  app.post('/api/books', async (req: Request, res: Response) => {
-    try {
-      const data = insertBookSchema.parse(req.body);
-      const book = await storage.createBook(data);
-      res.json(book);
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      res.status(500).json({ message: error.message || "Failed to create book" });
-    }
-  });
-
-  // Book feed routes - NEW
+  // Book feed routes - MUST be before :slug route to avoid conflicts
   app.get('/api/books/feed', requireUser, async (req: Request, res: Response) => {
     try {
       // First seed books if needed (on first call)
@@ -339,6 +314,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Failed to refresh book feed" });
+    }
+  });
+
+  // Book by slug route - MUST be after specific routes like /feed
+  app.get('/api/books/:slug', async (req: Request, res: Response) => {
+    try {
+      const book = await storage.getBookBySlug(req.params.slug);
+      if (!book) {
+        return res.status(404).json({ message: "Book not found" });
+      }
+      res.json(book);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to get book" });
+    }
+  });
+
+  app.post('/api/books', async (req: Request, res: Response) => {
+    try {
+      const data = insertBookSchema.parse(req.body);
+      const book = await storage.createBook(data);
+      res.json(book);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message || "Failed to create book" });
     }
   });
 
