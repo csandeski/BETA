@@ -53,7 +53,7 @@ function createGuestUserData(): UserData {
       lastSevenDays: lastSevenDays,
       weeklyGoal: 500,
       weeklyProgress: 0,
-      monthlyGoal: 2000,
+      monthlyGoal: 500,
       monthlyProgress: 0,
       streak: 0,
       totalActivities: 0,
