@@ -226,6 +226,96 @@ export class DatabaseStorage implements IStorage {
         isActive: true,
       },
       {
+        slug: "atomic-habits",
+        title: "Hábitos Atômicos",
+        author: "James Clear",
+        synopsis: "Aprenda como pequenas mudanças podem gerar resultados extraordinários e construa sistemas eficazes para alcançar seus objetivos.",
+        content: "James Clear desvenda o processo de formação de hábitos e apresenta um sistema comprovado para criar bons hábitos e eliminar os ruins. Com exemplos práticos e estratégias baseadas em ciência...",
+        category: "Produtividade",
+        difficulty: "Fácil",
+        readingTime: 6,
+        reward: "40",
+        pages: 320,
+        chapters: 18,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "o-homem-mais-rico-da-babilonia",
+        title: "O Homem Mais Rico da Babilônia",
+        author: "George S. Clason",
+        synopsis: "Descubra os segredos milenares da prosperidade através de parábolas da antiga Babilônia sobre finanças e sucesso.",
+        content: "George S. Clason usa parábolas ambientadas na antiga Babilônia para ensinar lições atemporais sobre dinheiro, investimentos e prosperidade financeira...",
+        category: "Finanças",
+        difficulty: "Fácil",
+        readingTime: 4,
+        reward: "35",
+        pages: 160,
+        chapters: 7,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "pai-rico-pai-pobre",
+        title: "Pai Rico, Pai Pobre",
+        author: "Robert Kiyosaki",
+        synopsis: "Aprenda a diferença entre trabalhar por dinheiro e fazer o dinheiro trabalhar para você através de educação financeira.",
+        content: "Robert Kiyosaki compartilha as lições que aprendeu com seus dois 'pais' - seu pai biológico (pai pobre) e o pai de seu melhor amigo (pai rico) - sobre dinheiro e investimentos...",
+        category: "Finanças",
+        difficulty: "Médio",
+        readingTime: 7,
+        reward: "45",
+        pages: 336,
+        chapters: 9,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "o-poder-do-agora",
+        title: "O Poder do Agora",
+        author: "Eckhart Tolle",
+        synopsis: "Descubra como viver plenamente o presente e libertar-se da ansiedade do futuro e dos arrependimentos do passado.",
+        content: "Eckhart Tolle apresenta um guia espiritual para transcender o ego e encontrar paz interior através da consciência do momento presente...",
+        category: "Espiritualidade",
+        difficulty: "Médio",
+        readingTime: 5,
+        reward: "38",
+        pages: 236,
+        chapters: 10,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "os-7-habitos",
+        title: "Os 7 Hábitos das Pessoas Altamente Eficazes",
+        author: "Stephen R. Covey",
+        synopsis: "Desenvolva os hábitos essenciais para o sucesso pessoal e profissional através de princípios universais de eficácia.",
+        content: "Stephen Covey apresenta uma abordagem baseada em princípios para resolver problemas pessoais e profissionais, com insights profundos e conselhos práticos...",
+        category: "Liderança",
+        difficulty: "Médio",
+        readingTime: 9,
+        reward: "50",
+        pages: 432,
+        chapters: 7,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "a-sutil-arte",
+        title: "A Sutil Arte de Ligar o F*da-se",
+        author: "Mark Manson",
+        synopsis: "Uma abordagem contraintuitiva para viver bem: pare de tentar ser positivo o tempo todo e aceite suas limitações.",
+        content: "Mark Manson oferece uma perspectiva refrescante sobre desenvolvimento pessoal, argumentando que devemos aceitar nossas limitações e focar no que realmente importa...",
+        category: "Desenvolvimento Pessoal",
+        difficulty: "Fácil",
+        readingTime: 5,
+        reward: "38",
+        pages: 224,
+        chapters: 9,
+        questions: [],
+        isActive: true,
+      },
+      {
         slug: "rapido-e-devagar",
         title: "Rápido e Devagar",
         author: "Daniel Kahneman",
@@ -373,29 +463,33 @@ export class DatabaseStorage implements IStorage {
     const completedBooks = await this.getUserCompletedBooks(userId);
     const completedSlugs = completedBooks.map(b => b.bookSlug);
     
-    // Get active books that user hasn't completed yet
-    let query = this.getDb()
+    // Get all active books first
+    const allActiveBooks = await this.getDb()
       .select()
       .from(books)
       .where(eq(books.isActive, true));
     
+    let availableBooks = allActiveBooks;
+    
     // Filter out completed books if any
     if (completedSlugs.length > 0) {
-      query = this.getDb()
-        .select()
-        .from(books)
-        .where(
-          and(
-            eq(books.isActive, true),
-            notInArray(books.slug, completedSlugs)
-          )
-        );
+      const unreadBooks = allActiveBooks.filter(book => !completedSlugs.includes(book.slug));
+      
+      if (unreadBooks.length > 0) {
+        // User has unread books available
+        availableBooks = unreadBooks;
+      } else {
+        // User has read all books - allow re-reading by showing all books
+        console.log(`[getUserBookFeed] User ${userId} has read all books. Allowing re-reading.`);
+        availableBooks = allActiveBooks;
+      }
     }
     
-    const availableBooks = await query;
+    // Shuffle for variety in each feed refresh
+    const shuffled = [...availableBooks].sort(() => Math.random() - 0.5);
     
     // Return up to 3 books for the feed
-    return availableBooks.slice(0, 3);
+    return shuffled.slice(0, 3);
   }
   
   // Refresh user's book feed with throttle
