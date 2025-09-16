@@ -356,6 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         reward: req.body.reward || book.reward,
         rating: req.body.rating,
         opinion: req.body.opinion,
+        targetAudience: req.body.targetAudience,
         readingTime: req.body.readingTime,
         quizAnswers: req.body.quizAnswers || {},
       };

@@ -69,6 +69,7 @@ export const booksCompleted = pgTable("books_completed", {
   reward: decimal("reward", { precision: 10, scale: 2 }).notNull(),
   rating: integer("rating").notNull(), // 1-5
   opinion: text("opinion"),
+  targetAudience: text("target_audience"), // User's opinion on target audience
   readingTime: integer("reading_time").notNull(), // actual time in seconds
   quizAnswers: jsonb("quiz_answers"), // User's quiz answers
   completedAt: timestamp("completed_at").defaultNow().notNull(),

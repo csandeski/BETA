@@ -53,7 +53,7 @@ function completeGuestBook(bookData: any) {
       today.valor += rewardAmount;
     }
     
-    // Add to completed books
+    // Add to completed books with all necessary fields
     guestData.booksCompleted.push({
       id: Date.now().toString(),
       bookSlug: bookData.bookSlug,
@@ -61,7 +61,11 @@ function completeGuestBook(bookData: any) {
       reward: bookData.reward,
       completedAt: new Date().toISOString(),
       rating: bookData.rating,
-      difficulty: bookData.difficulty
+      difficulty: bookData.difficulty,
+      opinion: bookData.opinion,
+      targetAudience: bookData.targetAudience,
+      quizAnswers: bookData.quizAnswers,
+      readingTime: bookData.readingTime
     });
     
     guestData.completedBooks.push(bookData.bookSlug);
@@ -85,6 +89,7 @@ export default function BookReading() {
   const [validationStep, setValidationStep] = useState(0);
   const [rating, setRating] = useState(0);
   const [opinion, setOpinion] = useState("");
+  const [targetAudience, setTargetAudience] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isRobotVerified, setIsRobotVerified] = useState(false);
   const [showReward, setShowReward] = useState(false);
@@ -143,6 +148,28 @@ export default function BookReading() {
     }
   }, [validationStep]);
   
+  // Generic opinion questions for all books
+  const getGenericQuestions = () => [
+    {
+      id: "q1",
+      question: "Você gostou deste livro?",
+      options: ["Sim, gostei muito", "Gostei parcialmente", "Não, não gostei", "Indiferente"],
+      correct: 0 // Não há resposta certa para opinião, mas preciso manter para compatibilidade
+    },
+    {
+      id: "q2",
+      question: "Você acha que este livro tem potencial em vendas?",
+      options: ["Sim, tem grande potencial", "Tem potencial moderado", "Tem pouco potencial", "Não tem potencial"],
+      correct: 0
+    },
+    {
+      id: "q3",
+      question: "Você compraria este livro?",
+      options: ["Sim, com certeza", "Talvez, dependendo do preço", "Provavelmente não", "Não compraria"],
+      correct: 0
+    }
+  ];
+
   // Book data based on slug
   const books: Record<string, any> = {
     "o-poder-do-habito": {
@@ -217,26 +244,7 @@ Para mudar um hábito:
 4. Tenha um plano
 
 Lembre-se: pequenas vitórias levam a grandes mudanças. Comece com um hábito pequeno e use esse sucesso como alavanca para mudanças maiores.`,
-      questions: [
-        {
-          id: "q1",
-          question: "De acordo com o livro, quais são os três componentes fundamentais que formam o loop do hábito?",
-          options: ["Motivação, ação e resultado", "Deixa, rotina e recompensa", "Pensamento, comportamento e consequência", "Estímulo, resposta e feedback"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "Em qual parte específica do cérebro os hábitos são armazenados, segundo as pesquisas apresentadas?",
-          options: ["Córtex frontal", "Hipocampo", "Gânglios basais", "Cerebelo"],
-          correct: 2
-        },
-        {
-          id: "q3",
-          question: "Qual é a regra de ouro para mudar hábitos que o autor apresenta no livro?",
-          options: ["Eliminar completamente o hábito antigo", "Substituir a rotina mantendo deixa e recompensa", "Criar novos hábitos do zero", "Ignorar os hábitos ruins"],
-          correct: 1
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "mindset": {
       title: "Mindset",
@@ -363,26 +371,7 @@ Lembre-se: pequenas vitórias levam a grandes mudanças. Comece com um hábito p
       4. Tome ação baseada no mindset de crescimento
 
       A transformação não acontece da noite para o dia, mas cada pequeno passo conta. Como diz Dweck: "Tornar-se é melhor do que ser."`,
-      questions: [
-        {
-          id: "q1",
-          question: "Segundo Carol Dweck, quais são os dois tipos fundamentais de mindset apresentados no livro?",
-          options: ["Positivo e negativo", "Fixo e de crescimento", "Aberto e fechado", "Forte e fraco"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "Como o mindset de crescimento encara o esforço e os desafios?",
-          options: ["Como fraqueza e perda de tempo", "Como algo desnecessário para quem tem talento", "Como oportunidades de aprendizado e desenvolvimento", "Como obstáculos a serem evitados"],
-          correct: 2
-        },
-        {
-          id: "q3",
-          question: "Que tipo de elogio, segundo a pesquisa, promove o desenvolvimento de um mindset de crescimento?",
-          options: ["Elogiar a inteligência natural", "Elogiar o dom especial", "Elogiar o processo, esforço e estratégias", "Elogiar apenas os resultados finais"],
-          correct: 2
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "como-fazer-amigos": {
       title: "Como Fazer Amigos",
@@ -507,26 +496,7 @@ Lembre-se: pequenas vitórias levam a grandes mudanças. Comece com um hábito p
       Carnegie sugere: escolha UM princípio por semana. Pratique-o conscientemente. No fim de 6 semanas, você terá transformado sua vida social.
 
       Lembre-se: "Quando lidamos com pessoas, não lidamos com criaturas lógicas, mas com criaturas emotivas, cheias de preconceitos e movidas por orgulho e vaidade."`,
-      questions: [
-        {
-          id: "q1",
-          question: "Qual é o primeiro princípio fundamental que Dale Carnegie apresenta para lidar com pessoas?",
-          options: ["Sempre seja completamente honesto", "Não critique, não condene, não se queixe", "Sorria sempre que encontrar alguém", "Ouça mais do que fale"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "Segundo Carnegie, qual é o som mais doce para qualquer pessoa em qualquer idioma?",
-          options: ["Palavras de elogio", "Música suave", "Seu próprio nome", "Palavras de gratidão"],
-          correct: 2
-        },
-        {
-          id: "q3",
-          question: "Como fazer mais amigos de acordo com o princípio apresentado no livro?",
-          options: ["Sendo uma pessoa muito interessante", "Se interessando genuinamente pelos outros", "Tendo muito dinheiro e status", "Sendo popular e carismático"],
-          correct: 1
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "rapido-e-devagar": {
       title: "Rápido e Devagar",
@@ -680,26 +650,7 @@ Desconfie da intuição quando:
 • Não há feedback claro
 
 Lembre-se: "Nossa mente complacente é uma máquina de tirar conclusões precipitadas."`,
-      questions: [
-        {
-          id: "q1",
-          question: "Quais são os dois sistemas de pensamento descritos por Kahneman?",
-          options: ["Consciente e Inconsciente", "Rápido/Intuitivo e Devagar/Deliberado", "Emocional e Racional", "Automático e Manual"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "O que é a heurística da disponibilidade segundo o livro?",
-          options: ["Julgar probabilidades pela facilidade de lembrar exemplos", "Estar sempre disponível para ajudar", "Ter informações disponíveis rapidamente", "Disponibilizar recursos mentais"],
-          correct: 0
-        },
-        {
-          id: "q3",
-          question: "Qual é a regra do pico-fim mencionada no livro?",
-          options: ["Sempre terminar no ponto mais alto", "Começar devagar e terminar rápido", "Lembramos experiências pelo pico e como terminaram", "O fim justifica os meios"],
-          correct: 2
-        }
-      ]
+      questions: getGenericQuestions()
     },
     // Removed duplicate pai-rico-pai-pobre entry - see new one below
     "pai-rico-pai-pobre-old": {
@@ -892,26 +843,7 @@ A Mensagem Final
 "Há um rico dentro de você esperando para sair. Mas primeiro você precisa mudar sua mentalidade. Pare de pensar como pobre ou classe média. Questione crenças antigas sobre dinheiro. Eduque-se financeiramente. E mais importante: TOME AÇÃO."
 
 "Não é quanto dinheiro você ganha, mas quanto dinheiro você mantém, quão duro ele trabalha para você, e para quantas gerações você o mantém."`,
-      questions: [
-        {
-          id: "q1",
-          question: "Qual é a diferença fundamental entre ativos e passivos segundo o Pai Rico?",
-          options: ["Ativos são caros, passivos são baratos", "Ativos colocam dinheiro no bolso, passivos tiram", "Ativos são imóveis, passivos são dívidas", "Ativos são investimentos, passivos são gastos"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "Por que o Pai Rico considera que a casa própria NÃO é um ativo?",
-          options: ["Porque é muito cara", "Porque não gera renda e tem custos constantes", "Porque pode ser vendida", "Porque é um bem imobiliário"],
-          correct: 1
-        },
-        {
-          id: "q3",
-          question: "Qual é a principal mensagem sobre trabalho e aprendizado no livro?",
-          options: ["Trabalhe pelo maior salário possível", "Trabalhe para aprender habilidades, não apenas por dinheiro", "Trabalhe até se aposentar", "Trabalhe apenas no que gosta"],
-          correct: 1
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "a-arte-da-guerra": {
       title: "A Arte da Guerra",
@@ -1164,26 +1096,7 @@ Os princípios de Sun Tzu transcendem a guerra:
 • Paciência supera pressa
 
 "Vitória é reservada para aqueles que estão dispostos a pagar seu preço."`,
-      questions: [
-        {
-          id: "q1",
-          question: "Segundo Sun Tzu, qual é a suprema excelência na guerra?",
-          options: ["Vencer todas as batalhas", "Ter o maior exército", "Vencer sem lutar", "Conquistar territórios"],
-          correct: 2
-        },
-        {
-          id: "q2",
-          question: "Quais são os cinco fatores fundamentais para avaliar antes de qualquer conflito?",
-          options: ["Força, velocidade, armas, soldados, território", "Caminho, céu, terra, comando, disciplina", "Ataque, defesa, recuo, cerco, emboscada", "Planejamento, execução, controle, revisão, vitória"],
-          correct: 1
-        },
-        {
-          id: "q3",
-          question: "O que Sun Tzu diz sobre conhecer a si mesmo e ao inimigo?",
-          options: ["Conhecer apenas a si mesmo é suficiente", "Em cem batalhas, nunca estará em perigo", "O inimigo sempre terá vantagem", "O conhecimento não é importante na guerra"],
-          correct: 1
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "o-monge-e-o-executivo": {
       title: "O Monge e o Executivo",
@@ -1437,26 +1350,7 @@ Se a resposta é sim, você é um líder.
 Se é não, você é apenas um chefe.
 
 "A grandeza não está em ser servido, mas em servir."`,
-      questions: [
-        {
-          id: "q1",
-          question: "Qual é a diferença fundamental entre poder e autoridade segundo o livro?",
-          options: ["Poder é permanente, autoridade é temporária", "Poder força pela posição, autoridade influencia pela confiança", "Não há diferença real", "Autoridade é para chefes, poder é para líderes"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "O que significa liderança servidora na prática?",
-          options: ["Fazer tudo que os funcionários querem", "Identificar e atender necessidades legítimas da equipe", "Servir café para os funcionários", "Nunca dar ordens"],
-          correct: 1
-        },
-        {
-          id: "q3",
-          question: "Qual é a definição de amor ágape no contexto de liderança?",
-          options: ["Ter sentimentos positivos pela equipe", "Ser amigo de todos", "Dar aos outros o que precisam, não o que merecem", "Evitar conflitos sempre"],
-          correct: 2
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "os-7-habitos": {
       title: "Os 7 Hábitos das Pessoas Altamente Eficazes",
@@ -1686,26 +1580,7 @@ Vitórias Privadas precedem Vitórias Públicas:
 Legado Final:
 
 "O que importa mais é como vemos as coisas, não as coisas em si. Quando mudamos o paradigma, mudamos o resultado."`,
-      questions: [
-        {
-          id: "q1",
-          question: "Qual é a diferença entre pessoas proativas e reativas segundo Covey?",
-          options: ["Proativas são mais inteligentes", "Proativas escolhem suas respostas, reativas são controladas por circunstâncias", "Não há diferença real", "Reativas trabalham mais"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "Em qual quadrante da Matriz do Tempo pessoas eficazes passam mais tempo?",
-          options: ["Quadrante I - Urgente e Importante", "Quadrante II - Não Urgente mas Importante", "Quadrante III - Urgente mas Não Importante", "Quadrante IV - Não Urgente e Não Importante"],
-          correct: 1
-        },
-        {
-          id: "q3",
-          question: "Quais são as quatro dimensões do Hábito 7 (Afine o Instrumento)?",
-          options: ["Trabalho, casa, lazer, sono", "Física, espiritual, mental, social/emocional", "Saúde, dinheiro, família, amigos", "Corpo, mente, alma, coração"],
-          correct: 1
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "quem-pensa-enriquece": {
       title: "Quem Pensa Enriquece",
@@ -1950,26 +1825,7 @@ FÓrmula Final:
 DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECISÃO + PERSISTÊNCIA + MENTE-MESTRA + TRANSMUTAÇÃO + SUBCONSCIENTE + CÉREBRO + SEXTO SENTIDO = RIQUEZA
 
 "O que a mente pode conceber e acreditar, ela pode alcançar."`,
-      questions: [
-        {
-          id: "q1",
-          question: "Quais são os 6 passos para transformar desejo em riqueza segundo Napoleon Hill?",
-          options: ["Pensar, planejar, agir, revisar, ajustar, repetir", "Fixar quantia exata, determinar troca, estabelecer data, criar plano, escrever declaração, ler diariamente", "Estudar, trabalhar, economizar, investir, reinvestir, aposentar", "Sonhar, visualizar, acreditar, manifestar, receber, agradecer"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "O que Napoleon Hill define como 'Mente-Mestra'?",
-          options: ["Uma pessoa muito inteligente", "Coordenação de conhecimento entre duas ou mais pessoas com propósito definido", "O cérebro de um gênio", "Pensamento positivo individual"],
-          correct: 1
-        },
-        {
-          id: "q3",
-          question: "Qual é a fórmula principal do livro resumida em uma frase?",
-          options: ["Trabalho duro sempre compensa", "Dinheiro atrai dinheiro", "O que a mente pode conceber e acreditar, ela pode alcançar", "Sorte é preparação encontrando oportunidade"],
-          correct: 2
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "o-milagre-da-manha": {
       title: "O Milagre da Manhã",
@@ -2119,26 +1975,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
       "Toda manhã você tem duas escolhas: continuar dormindo com seus sonhos ou acordar e persegui-los."
 
       Amanhã de manhã, quando o despertador tocar, lembre-se: Você está a apenas uma manhã de distância de mudar toda sua vida.`,
-      questions: [
-        {
-          id: "q1",
-          question: "O que significa a sigla S.A.V.E.R.S. no método do Milagre da Manhã?",
-          options: ["Sono, Alimentação, Vida, Exercício, Reflexão, Sucesso", "Silêncio, Afirmações, Visualização, Exercício, Leitura, Escrita", "Saúde, Amor, Vitória, Energia, Riqueza, Sabedoria", "Simplicidade, Ação, Valor, Esforço, Resultado, Satisfação"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "Quantos dias o autor sugere para formar o novo hábito matinal?",
-          options: ["7 dias", "14 dias", "21 dias", "30 dias"],
-          correct: 3
-        },
-        {
-          id: "q3",
-          question: "Qual é a versão reduzida do Milagre da Manhã para quem tem pouco tempo?",
-          options: ["30 minutos no total", "15 minutos no total", "6 minutos (1 minuto por hábito)", "3 minutos no total"],
-          correct: 2
-        }
-      ]
+      questions: getGenericQuestions()
     },
     "pai-rico-pai-pobre": {
       title: "Pai Rico, Pai Pobre",
@@ -2307,32 +2144,13 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
       "Há um mundo de diferença entre ter dinheiro e ser rico. Ser rico é ter a liberdade de não se preocupar com dinheiro."
 
       O segredo não é trabalhar duro. É trabalhar inteligentemente. Faça o dinheiro trabalhar duro para você.`,
-      questions: [
-        {
-          id: "q1",
-          question: "Qual é a diferença fundamental entre um ativo e um passivo segundo o livro?",
-          options: ["Ativo valoriza, passivo desvaloriza", "Ativo coloca dinheiro no bolso, passivo tira", "Ativo é investimento, passivo é dívida", "Ativo é imóvel, passivo é carro"],
-          correct: 1
-        },
-        {
-          id: "q2",
-          question: "Por que Robert Kiyosaki diz que sua casa NÃO é um ativo?",
-          options: ["Porque casas sempre desvalorizam", "Porque tira dinheiro do bolso com despesas", "Porque imóveis são maus investimentos", "Porque ele prefere alugar"],
-          correct: 1
-        },
-        {
-          id: "q3",
-          question: "Qual é a principal lição sobre trabalhar por dinheiro?",
-          options: ["Sempre peça aumento", "Trabalhe mais horas para ganhar mais", "Trabalhe para aprender, não por dinheiro", "Encontre o emprego com maior salário"],
-          correct: 2
-        }
-      ]
+      questions: getGenericQuestions()
     }
   };
 
   // Get the current book based on slug, with fallback to first book
   const currentBook = books[bookSlug] || books["o-poder-do-habito"];
-  const totalQuizSteps = currentBook.questions.length + 2; // questions + rating + robot verification
+  const totalQuizSteps = currentBook.questions.length + 3; // questions + target audience + rating + robot verification
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -2438,8 +2256,10 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
       const currentQuestion = currentBook.questions[currentQuizStep - 1];
       if (!answers[currentQuestion.id]) return;
     } else if (currentQuizStep === currentBook.questions.length + 1) {
-      if (rating === 0 || !opinion) return;
+      if (!targetAudience || targetAudience.trim().length < 10) return;
     } else if (currentQuizStep === currentBook.questions.length + 2) {
+      if (rating === 0 || !opinion) return;
+    } else if (currentQuizStep === currentBook.questions.length + 3) {
       if (!isRobotVerified) return;
     }
     
@@ -2486,6 +2306,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
             reward: currentBook.reward,
             rating: rating,
             opinion: opinion,
+            targetAudience: targetAudience,
             readingTime: readingTime,
             quizAnswers: answers,
             difficulty: currentBook.difficulty
@@ -2509,6 +2330,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
             reward: currentBook.reward,
             rating: rating,
             opinion: opinion,
+            targetAudience: targetAudience,
             readingTime: readingTime,
             quizAnswers: answers,
             difficulty: currentBook.difficulty
@@ -2858,8 +2680,40 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
                 </div>
               )}
 
-              {/* Rating Step */}
+              {/* Target Audience Step */}
               {currentQuizStep === currentBook.questions.length + 1 && (
+                <div>
+                  <div className="text-center mb-8">
+                    <BookMarked className="h-16 w-16 text-purple-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Público-alvo do livro
+                    </h3>
+                    <p className="text-xs text-gray-600">
+                      Sua opinião nos ajuda a entender melhor nossos leitores
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block">
+                      <span className="text-sm font-medium text-gray-900 mb-2 block">Escreva qual tipo de público ideal para este livro:</span>
+                      <textarea
+                        value={targetAudience}
+                        onChange={(e) => setTargetAudience(e.target.value)}
+                        className="w-full p-4 border-2 border-gray-200 rounded-xl text-sm focus:border-purple-500 focus:outline-none transition-colors"
+                        rows={4}
+                        placeholder="Por exemplo: Empreendedores iniciantes, estudantes universitários, profissionais em busca de desenvolvimento pessoal..."
+                        minLength={10}
+                      />
+                      {targetAudience.length > 0 && targetAudience.length < 10 && (
+                        <p className="text-xs text-red-500 mt-2">Por favor, escreva pelo menos 10 caracteres</p>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Rating Step */}
+              {currentQuizStep === currentBook.questions.length + 2 && (
                 <div>
                   <div className="text-center mb-8">
                     <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
@@ -2914,7 +2768,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
               )}
 
               {/* Robot Verification Step */}
-              {currentQuizStep === currentBook.questions.length + 2 && (
+              {currentQuizStep === currentBook.questions.length + 3 && (
                 <div>
                   <div className="text-center mb-8">
                     <div className="mx-auto mb-4">
@@ -2994,13 +2848,15 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
                   onClick={handleQuizNext}
                   disabled={
                     (currentQuizStep <= currentBook.questions.length && !answers[currentBook.questions[currentQuizStep - 1]?.id]) ||
-                    (currentQuizStep === currentBook.questions.length + 1 && (rating === 0 || !opinion)) ||
-                    (currentQuizStep === currentBook.questions.length + 2 && !isRobotVerified)
+                    (currentQuizStep === currentBook.questions.length + 1 && (!targetAudience || targetAudience.trim().length < 10)) ||
+                    (currentQuizStep === currentBook.questions.length + 2 && (rating === 0 || !opinion)) ||
+                    (currentQuizStep === currentBook.questions.length + 3 && !isRobotVerified)
                   }
                   className={`flex-1 py-3 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
                     ((currentQuizStep <= currentBook.questions.length && answers[currentBook.questions[currentQuizStep - 1]?.id]) ||
-                    (currentQuizStep === currentBook.questions.length + 1 && rating > 0 && opinion) ||
-                    (currentQuizStep === currentBook.questions.length + 2 && isRobotVerified))
+                    (currentQuizStep === currentBook.questions.length + 1 && targetAudience && targetAudience.trim().length >= 10) ||
+                    (currentQuizStep === currentBook.questions.length + 2 && rating > 0 && opinion) ||
+                    (currentQuizStep === currentBook.questions.length + 3 && isRobotVerified))
                       ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 shadow-lg'
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}

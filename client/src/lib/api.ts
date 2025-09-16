@@ -122,6 +122,7 @@ class ApiClient {
     reward: number;
     rating: number;
     opinion: string;
+    targetAudience?: string;
     readingTime: number;
     quizAnswers?: any;
     difficulty?: string;
