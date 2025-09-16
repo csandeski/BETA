@@ -28,7 +28,7 @@ import {
   type InsertUserOnlineStatus,
 } from "@shared/schema";
 import { db as getDb } from "./db";
-import { eq, and, desc, gte, sql } from "drizzle-orm";
+import { eq, and, desc, gte, sql, notInArray, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -41,11 +41,15 @@ export interface IStorage {
   getAllBooks(): Promise<Book[]>;
   getBookBySlug(slug: string): Promise<Book | undefined>;
   createBook(book: InsertBook): Promise<Book>;
+  seedBooksIfNeeded(): Promise<void>;
+  getUserBookFeed(userId: string): Promise<Book[]>;
+  refreshUserBookFeed(userId: string): Promise<{ books: Book[], canRefresh: boolean }>;
   
   // Book completion operations
   getUserCompletedBooks(userId: string): Promise<BookCompleted[]>;
   isBookCompleted(userId: string, bookSlug: string): Promise<boolean>;
   completeBook(data: InsertBookCompleted): Promise<BookCompleted>;
+  completeBookFlow(userId: string, bookSlug: string, payload: any): Promise<{ success: boolean, reward?: string, balance?: string, message?: string }>;
   
   // Transaction operations
   getUserTransactions(userId: string): Promise<Transaction[]>;
@@ -165,6 +169,309 @@ export class DatabaseStorage implements IStorage {
       .values(insertBook)
       .returning();
     return book;
+  }
+  
+  // Seed initial books catalog if needed
+  async seedBooksIfNeeded(): Promise<void> {
+    // Check if books already exist
+    const existingBooks = await this.getDb().select().from(books).limit(1);
+    if (existingBooks.length > 0) {
+      return; // Books already seeded
+    }
+
+    const booksToSeed: InsertBook[] = [
+      {
+        slug: "o-poder-do-habito",
+        title: "O Poder do Hábito",
+        author: "Charles Duhigg", 
+        synopsis: "Descubra como os hábitos funcionam e aprenda técnicas práticas para transformar sua rotina e alcançar seus objetivos com mais facilidade.",
+        content: "Este livro explora a ciência dos hábitos e como podemos transformá-los para melhorar nossas vidas. Charles Duhigg apresenta casos fascinantes de empresas e pessoas que mudaram drasticamente ao entender o poder dos hábitos...",
+        category: "Desenvolvimento Pessoal",
+        difficulty: "Médio",
+        readingTime: 8,
+        reward: "45",
+        pages: 408,
+        chapters: 12,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "mindset",
+        title: "Mindset",
+        author: "Carol S. Dweck",
+        synopsis: "Explore a diferença entre mentalidade fixa e de crescimento, e como isso impacta diretamente seu sucesso pessoal e profissional.",
+        content: "Carol Dweck revoluciona nossa compreensão sobre desenvolvimento pessoal ao revelar como nossas crenças sobre nossas próprias habilidades exercem tremendo impacto em nosso sucesso...",
+        category: "Psicologia",
+        difficulty: "Fácil",
+        readingTime: 5,
+        reward: "38",
+        pages: 312,
+        chapters: 8,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "como-fazer-amigos",
+        title: "Como Fazer Amigos",
+        author: "Dale Carnegie",
+        synopsis: "Aprenda técnicas infalíveis para melhorar seus relacionamentos, influenciar pessoas positivamente e construir conexões duradouras.",
+        content: "Dale Carnegie apresenta princípios atemporais para construir relacionamentos significativos e influenciar pessoas de forma ética e positiva...",
+        category: "Relacionamentos",
+        difficulty: "Fácil",
+        readingTime: 6,
+        reward: "42",
+        pages: 256,
+        chapters: 10,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "rapido-e-devagar",
+        title: "Rápido e Devagar",
+        author: "Daniel Kahneman",
+        synopsis: "Entenda como sua mente toma decisões, os vieses cognitivos que afetam seu julgamento e como pensar de forma mais racional.",
+        content: "Daniel Kahneman, ganhador do Nobel, nos leva em uma jornada pela mente humana e os dois sistemas que dirigem a forma como pensamos...",
+        category: "Psicologia",
+        difficulty: "Difícil",
+        readingTime: 10,
+        reward: "48",
+        pages: 512,
+        chapters: 15,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "pai-rico-pai-pobre",
+        title: "Pai Rico, Pai Pobre",
+        author: "Robert Kiyosaki",
+        synopsis: "Aprenda lições fundamentais sobre educação financeira, investimentos e como fazer o dinheiro trabalhar para você.",
+        content: "Robert Kiyosaki conta a história de seus dois 'pais' - seu pai biológico e o pai de seu melhor amigo - e as formas diferentes como cada homem moldou seus pensamentos sobre dinheiro...",
+        category: "Finanças",
+        difficulty: "Médio",
+        readingTime: 7,
+        reward: "40",
+        pages: 336,
+        chapters: 9,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "a-arte-da-guerra",
+        title: "A Arte da Guerra",
+        author: "Sun Tzu",
+        synopsis: "Estratégias milenares de liderança e tática que podem ser aplicadas nos negócios e na vida pessoal.",
+        content: "Um dos tratados militares mais antigos do mundo, A Arte da Guerra de Sun Tzu oferece sabedoria atemporal sobre estratégia, liderança e vitória...",
+        category: "Estratégia",
+        difficulty: "Fácil",
+        readingTime: 5,
+        reward: "35",
+        pages: 160,
+        chapters: 13,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "o-monge-e-o-executivo",
+        title: "O Monge e o Executivo",
+        author: "James C. Hunter",
+        synopsis: "Uma história sobre a essência da liderança servidora e como liderar servindo aos outros.",
+        content: "John Daily tem problemas em casa e no trabalho. Para tentar resolver seus dilemas, ele participa de um retiro em um mosteiro...",
+        category: "Liderança",
+        difficulty: "Fácil",
+        readingTime: 6,
+        reward: "43",
+        pages: 144,
+        chapters: 7,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "os-segredos-da-mente-milionaria",
+        title: "Os Segredos da Mente Milionária",
+        author: "T. Harv Eker",
+        synopsis: "Descubra como sua programação mental determina seu sucesso financeiro e aprenda a reprogramar sua mente para a riqueza.",
+        content: "T. Harv Eker explica como identificamos e revisamos nosso 'modelo de dinheiro', desafiando nossos pensamentos limitantes...",
+        category: "Finanças",
+        difficulty: "Médio",
+        readingTime: 7,
+        reward: "44",
+        pages: 208,
+        chapters: 17,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "o-poder-do-agora",
+        title: "O Poder do Agora",
+        author: "Eckhart Tolle",
+        synopsis: "Um guia espiritual que ensina a importância de viver o presente e se libertar dos pensamentos negativos.",
+        content: "Eckhart Tolle nos mostra que para encontrar a verdadeira paz e realização, precisamos nos desapegar da nossa mente e viver plenamente o momento presente...",
+        category: "Espiritualidade",
+        difficulty: "Médio",
+        readingTime: 8,
+        reward: "46",
+        pages: 236,
+        chapters: 10,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "habitos-atomicos",
+        title: "Hábitos Atômicos",
+        author: "James Clear",
+        synopsis: "Um método fácil e comprovado de criar bons hábitos e se livrar dos maus através de pequenas mudanças diárias.",
+        content: "James Clear apresenta um sistema prático para fazer pequenas mudanças que levam a resultados notáveis. Aprenda como pequenos hábitos podem ter um impacto transformador...",
+        category: "Produtividade",
+        difficulty: "Fácil",
+        readingTime: 6,
+        reward: "41",
+        pages: 320,
+        chapters: 20,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "o-homem-mais-rico-da-babilonia",
+        title: "O Homem Mais Rico da Babilônia",
+        author: "George S. Clason",
+        synopsis: "Lições financeiras atemporais através de parábolas da antiga Babilônia sobre como construir e manter riqueza.",
+        content: "Através de histórias cativantes ambientadas na antiga Babilônia, George Clason transmite sabedoria financeira que permanece relevante até hoje...",
+        category: "Finanças",
+        difficulty: "Fácil",
+        readingTime: 5,
+        reward: "37",
+        pages: 160,
+        chapters: 8,
+        questions: [],
+        isActive: true,
+      },
+      {
+        slug: "pense-e-enriqueca",
+        title: "Pense e Enriqueça",
+        author: "Napoleon Hill",
+        synopsis: "Os 13 princípios do sucesso descobertos após 20 anos estudando os homens mais ricos do mundo.",
+        content: "Napoleon Hill passou 20 anos estudando os homens mais bem-sucedidos de sua época e destilou sua sabedoria em 13 princípios que qualquer pessoa pode aplicar...",
+        category: "Sucesso",
+        difficulty: "Médio",
+        readingTime: 9,
+        reward: "47",
+        pages: 388,
+        chapters: 13,
+        questions: [],
+        isActive: true,
+      }
+    ];
+
+    // Insert all books
+    await this.getDb().insert(books).values(booksToSeed);
+    console.log('[seedBooksIfNeeded] Seeded', booksToSeed.length, 'books');
+  }
+  
+  // Get personalized book feed for user
+  async getUserBookFeed(userId: string): Promise<Book[]> {
+    // Get list of books user has already completed
+    const completedBooks = await this.getUserCompletedBooks(userId);
+    const completedSlugs = completedBooks.map(b => b.bookSlug);
+    
+    // Get active books that user hasn't completed yet
+    let query = this.getDb()
+      .select()
+      .from(books)
+      .where(eq(books.isActive, true));
+    
+    // Filter out completed books if any
+    if (completedSlugs.length > 0) {
+      query = this.getDb()
+        .select()
+        .from(books)
+        .where(
+          and(
+            eq(books.isActive, true),
+            notInArray(books.slug, completedSlugs)
+          )
+        );
+    }
+    
+    const availableBooks = await query;
+    
+    // Return up to 3 books for the feed
+    return availableBooks.slice(0, 3);
+  }
+  
+  // Refresh user's book feed with throttle
+  async refreshUserBookFeed(userId: string): Promise<{ books: Book[], canRefresh: boolean }> {
+    // Check last refresh time (stored in user metadata or session)
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Simple throttle: Check if less than 5 seconds since last update
+    const lastRefresh = user.updatedAt;
+    const now = new Date();
+    const timeSinceLastRefresh = now.getTime() - lastRefresh.getTime();
+    const canRefresh = timeSinceLastRefresh >= 5000; // 5 seconds
+    
+    if (!canRefresh) {
+      // Return current feed without refreshing
+      const books = await this.getUserBookFeed(userId);
+      return { books, canRefresh: false };
+    }
+    
+    // Update user's last refresh time
+    await this.updateUser(userId, { updatedAt: now });
+    
+    // Get refreshed book feed
+    const books = await this.getUserBookFeed(userId);
+    return { books, canRefresh: true };
+  }
+  
+  // Complete book flow with validation and rewards
+  async completeBookFlow(userId: string, bookSlug: string, payload: any): Promise<{ success: boolean, reward?: string, balance?: string, message?: string }> {
+    try {
+      // Get book details
+      const book = await this.getBookBySlug(bookSlug);
+      if (!book) {
+        return { success: false, message: "Livro não encontrado" };
+      }
+      
+      // Check if already completed
+      const isCompleted = await this.isBookCompleted(userId, bookSlug);
+      if (isCompleted) {
+        return { success: false, message: "Livro já foi concluído anteriormente" };
+      }
+      
+      // Server-side reward computation (never trust client)
+      const reward = book.reward;
+      
+      // Complete the book and update balance
+      const completion = await this.completeBook({
+        userId,
+        bookSlug,
+        bookId: book.id,
+        title: book.title,
+        author: book.author,
+        reward,
+        rating: payload.rating || 5,
+        readingTime: payload.timeSpent || 300,
+      });
+      
+      // Get updated user balance
+      const user = await this.getUser(userId);
+      
+      return {
+        success: true,
+        reward,
+        balance: user?.balance || "0",
+        message: "Livro concluído com sucesso!"
+      };
+    } catch (error: any) {
+      console.error('[completeBookFlow] Error:', error);
+      return {
+        success: false,
+        message: error.message || "Erro ao completar o livro"
+      };
+    }
   }
 
   // Book completion operations

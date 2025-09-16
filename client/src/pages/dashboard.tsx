@@ -13,6 +13,10 @@ import { useSound } from "@/hooks/useSound";
 import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Book } from "@shared/schema";
 
 export default function Dashboard() {
   const [showBalance, setShowBalance] = useState(true);
@@ -24,8 +28,7 @@ export default function Dashboard() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [hasSeenCelebration, setHasSeenCelebration] = useState(false);
   const [showFirstRewardPopup, setShowFirstRewardPopup] = useState(false);
-  const [isLoadingBooks, setIsLoadingBooks] = useState(false);
-  const [currentBookSet, setCurrentBookSet] = useState(0);
+  const [lastRefreshTime, setLastRefreshTime] = useState(0);
   const [showFaq, setShowFaq] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   
@@ -127,8 +130,58 @@ export default function Dashboard() {
   const balance = userData?.balance.toFixed(2).replace('.', ',') || "0,00";
   const hiddenBalance = "•••••";
 
-  // Book sets for rotation
-  const bookSets = [
+  // Fetch books from API using React Query
+  const { data: books = [], isLoading: isLoadingBooks, refetch: refetchBooks } = useQuery<Book[]>({
+    queryKey: ['/api/books/feed'],
+    enabled: !!userData,
+    refetchOnWindowFocus: false,
+  });
+  
+  // Refresh books mutation with throttle
+  const refreshBooksMutation = useMutation({
+    mutationFn: async () => {
+      const now = Date.now();
+      if (now - lastRefreshTime < 5000) {
+        throw new Error('Por favor aguarde alguns segundos antes de atualizar novamente');
+      }
+      
+      const response = await fetch('/api/books/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to refresh books');
+      }
+      
+      const data = await response.json();
+      setLastRefreshTime(now);
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.canRefresh) {
+        queryClient.setQueryData(['/api/books/feed'], data.books);
+        toast({
+          title: "Livros atualizados!",
+          description: "Novos livros foram carregados para você.",
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Aguarde um momento",
+        description: error.message || "Por favor aguarde alguns segundos antes de atualizar novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Book sets for rotation (removed - using API now)
+  const oldBookSets = [
     // Set 0 - Initial books
     [
       {
@@ -266,7 +319,7 @@ export default function Dashboard() {
     ],
   ];
   
-  const books = bookSets[currentBookSet];
+  // Books now come from the API query above
   
   // Removed withdraw function - replaced with automatic redirect after 3 books
   
@@ -291,33 +344,7 @@ export default function Dashboard() {
   
   const handleRefreshBooks = async () => {
     playSound('click');
-    setIsLoadingBooks(true);
-    
-    // Check user's plan and book completion status
-    const hasPremiumPlan = userData?.selectedPlan === 'premium';
-    const hasCompletedThreeBooks = (userData?.stats.totalBooksRead || 0) >= 3;
-    
-    // Simulate loading
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    if (hasPremiumPlan || hasCompletedThreeBooks) {
-      // Premium users or users who completed 3 books can see new books
-      const nextSet = (currentBookSet + 1) % bookSets.length;
-      setCurrentBookSet(nextSet);
-      toast({
-        title: "Livros atualizados!",
-        description: "3 novos livros disponíveis para leitura.",
-      });
-    } else {
-      // Free users see same books with limit message
-      toast({
-        title: "Limite do plano gratuito",
-        description: "No plano gratuito você pode realizar apenas 3 atividades diárias.",
-        variant: "destructive",
-      });
-    }
-    
-    setIsLoadingBooks(false);
+    refreshBooksMutation.mutate();
   };
 
   return (
@@ -503,11 +530,11 @@ export default function Dashboard() {
             <h2 className="text-base font-semibold text-gray-900">Livros disponíveis</h2>
             <button 
               onClick={handleRefreshBooks}
-              disabled={isLoadingBooks}
+              disabled={refreshBooksMutation.isPending}
               className="flex items-center gap-1 text-xs text-green-600 hover:text-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="button-refresh-books"
             >
-              {isLoadingBooks ? (
+              {refreshBooksMutation.isPending ? (
                 <>
                   <Loader2 className="h-3 w-3 animate-spin" />
                   Atualizando...
@@ -522,7 +549,36 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-3">
-            {books.map((book, index) => {
+            {isLoadingBooks ? (
+              // Show skeleton loaders while loading
+              <>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white border-2 border-gray-200 rounded-2xl p-4">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="w-16 h-16 rounded-xl" />
+                      <div className="flex-1">
+                        <Skeleton className="h-5 w-3/4 mb-2" />
+                        <Skeleton className="h-4 w-1/2 mb-2" />
+                        <div className="flex items-center gap-4">
+                          <Skeleton className="h-3 w-16" />
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : books.length === 0 ? (
+              // Show message when no books available
+              <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-8 text-center">
+                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600 font-medium">Nenhum livro disponível no momento</p>
+                <p className="text-gray-500 text-sm mt-1">Clique em atualizar para carregar novos livros</p>
+              </div>
+            ) : (
+              // Render books
+              books.map((book: any, index: number) => {
               const isCompleted = userDataManager.isBookCompleted(book.slug);
               
               // Determinar qual livro deve ter destaque
@@ -576,7 +632,7 @@ export default function Dashboard() {
                       </div>
                       <div className="text-right">
                         <p className="text-base font-bold text-gray-900">
-                          R$ {book.reward}
+                          R$ {Number(book.reward).toFixed(2).replace('.', ',')}
                         </p>
                         {book.isNew && (
                           <span className="text-[10px] text-violet-600 font-semibold">NOVO</span>
@@ -625,7 +681,8 @@ export default function Dashboard() {
                 )}
               </div>
             );
-            })}
+            })
+            )}
           </div>
         </section>
 

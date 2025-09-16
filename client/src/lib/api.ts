@@ -31,10 +31,6 @@ class ApiClient {
       'Content-Type': 'application/json',
     };
 
-    if (this.userId) {
-      headers['X-User-Id'] = this.userId;
-    }
-
     const options: RequestInit = {
       method,
       headers,

@@ -37,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Middleware to check if user exists - now uses session
   const requireUser = async (req: Request, res: Response, next: any) => {
-    const userId = req.session.userId || req.headers['x-user-id'] as string;
+    const userId = req.session.userId;
     if (!userId) {
       return res.status(401).json({ message: "User ID required" });
     }
@@ -302,6 +302,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: error.message || "Failed to create book" });
+    }
+  });
+
+  // Book feed routes - NEW
+  app.get('/api/books/feed', requireUser, async (req: Request, res: Response) => {
+    try {
+      // First seed books if needed (on first call)
+      await storage.seedBooksIfNeeded();
+      
+      const userId = (req as any).user.id;
+      const books = await storage.getUserBookFeed(userId);
+      res.json(books);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to get book feed" });
+    }
+  });
+  
+  app.post('/api/books/refresh', requireUser, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user.id;
+      const result = await storage.refreshUserBookFeed(userId);
+      
+      if (!result.canRefresh) {
+        return res.status(429).json({ 
+          message: "Por favor aguarde alguns segundos antes de atualizar novamente",
+          books: result.books,
+          canRefresh: false 
+        });
+      }
+      
+      res.json({ 
+        books: result.books, 
+        canRefresh: true,
+        message: "Livros atualizados com sucesso!" 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to refresh book feed" });
     }
   });
 
