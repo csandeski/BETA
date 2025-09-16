@@ -93,8 +93,7 @@ export default function Dashboard() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [hasSeenCelebration, setHasSeenCelebration] = useState(false);
   const [showFirstRewardPopup, setShowFirstRewardPopup] = useState(false);
-  const [isLoadingBooks, setIsLoadingBooks] = useState(false);
-  const [currentBookSet, setCurrentBookSet] = useState(0);
+  // Removed book loading and rotation states - now fixed to 3 books only
   const [showFaq, setShowFaq] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [isGuestUser, setIsGuestUser] = useState(false);
@@ -178,10 +177,8 @@ export default function Dashboard() {
     
     // Reload data when page becomes visible (when returning from book page)
     const handleFocus = async () => {
-      // Add small delay to ensure book completion is saved
-      setTimeout(() => {
-        loadData();
-      }, 500);
+      // Immediately reload data for faster balance update
+      loadData();
     };
     
     window.addEventListener('focus', handleFocus);
@@ -200,146 +197,53 @@ export default function Dashboard() {
   const balance = userData?.balance.toFixed(2).replace('.', ',') || "0,00";
   const hiddenBalance = "•••••";
 
-  // Book sets for rotation
-  const bookSets = [
-    // Set 0 - Initial books
-    [
-      {
-        id: 1,
-        title: "O Poder do Hábito",
-        author: "Charles Duhigg",
-        reward: "45",
-        pages: 408,
-        rating: 4.5,
-        readTime: "8 min",
-        isNew: false,
-        difficulty: "Médio",
-        color: "from-emerald-400 to-teal-500",
-        slug: "o-poder-do-habito",
-        synopsis: "Descubra como os hábitos funcionam e aprenda técnicas práticas para transformar sua rotina e alcançar seus objetivos com mais facilidade."
-      },
-      {
-        id: 2,
-        title: "Mindset",
-        author: "Carol S. Dweck",
-        reward: "38",
-        pages: 312,
-        rating: 4.7,
-        readTime: "5 min",
-        isNew: true,
-        difficulty: "Fácil",
-        color: "from-violet-400 to-purple-500",
-        slug: "mindset",
-        synopsis: "Explore a diferença entre mentalidade fixa e de crescimento, e como isso impacta diretamente seu sucesso pessoal e profissional."
-      },
-      {
-        id: 3,
-        title: "Como Fazer Amigos",
-        author: "Dale Carnegie",
-        reward: "42",
-        pages: 256,
-        rating: 4.8,
-        readTime: "6 min",
-        isNew: false,
-        difficulty: "Fácil",
-        color: "from-blue-400 to-indigo-500",
-        slug: "como-fazer-amigos",
-        synopsis: "Aprenda técnicas infalíveis para melhorar seus relacionamentos, influenciar pessoas positivamente e construir conexões duradouras."
-      },
-    ],
-    // Set 1 - Second rotation
-    [
-      {
-        id: 4,
-        title: "Rápido e Devagar",
-        author: "Daniel Kahneman",
-        reward: "48",
-        pages: 512,
-        rating: 4.6,
-        readTime: "10 min",
-        isNew: true,
-        difficulty: "Difícil",
-        color: "from-orange-400 to-red-500",
-        slug: "rapido-e-devagar",
-        synopsis: "Entenda como sua mente toma decisões, os vieses cognitivos que afetam seu julgamento e como pensar de forma mais racional."
-      },
-      {
-        id: 5,
-        title: "Pai Rico, Pai Pobre",
-        author: "Robert Kiyosaki",
-        reward: "40",
-        pages: 336,
-        rating: 4.4,
-        readTime: "7 min",
-        isNew: false,
-        difficulty: "Médio",
-        color: "from-yellow-400 to-amber-500",
-        slug: "pai-rico-pai-pobre",
-        synopsis: "Aprenda lições fundamentais sobre educação financeira, investimentos e como fazer o dinheiro trabalhar para você."
-      },
-      {
-        id: 6,
-        title: "A Arte da Guerra",
-        author: "Sun Tzu",
-        reward: "35",
-        pages: 160,
-        rating: 4.3,
-        readTime: "5 min",
-        isNew: false,
-        difficulty: "Fácil",
-        color: "from-gray-400 to-slate-500",
-        slug: "a-arte-da-guerra",
-        synopsis: "Estratégias milenares de liderança e tática que podem ser aplicadas nos negócios e na vida pessoal."
-      },
-    ],
-    // Set 2 - Third rotation  
-    [
-      {
-        id: 7,
-        title: "O Monge e o Executivo",
-        author: "James C. Hunter",
-        reward: "43",
-        pages: 144,
-        rating: 4.5,
-        readTime: "6 min",
-        isNew: true,
-        difficulty: "Fácil",
-        color: "from-cyan-400 to-blue-500",
-        slug: "o-monge-e-o-executivo",
-        synopsis: "Uma história transformadora sobre liderança servidora e como desenvolver relações saudáveis no trabalho."
-      },
-      {
-        id: 8,
-        title: "Os 7 Hábitos",
-        author: "Stephen Covey",
-        reward: "47",
-        pages: 432,
-        rating: 4.8,
-        readTime: "9 min",
-        isNew: false,
-        difficulty: "Médio",
-        color: "from-pink-400 to-rose-500",
-        slug: "os-7-habitos",
-        synopsis: "Desenvolva hábitos fundamentais para alcançar eficácia pessoal e profissional de forma sustentável."
-      },
-      {
-        id: 9,
-        title: "Quem Pensa Enriquece",
-        author: "Napoleon Hill",
-        reward: "44",
-        pages: 360,
-        rating: 4.7,
-        readTime: "8 min",
-        isNew: false,
-        difficulty: "Médio",
-        color: "from-green-400 to-emerald-500",
-        slug: "quem-pensa-enriquece",
-        synopsis: "Descubra os 13 passos comprovados para alcançar riqueza e sucesso através do poder do pensamento."
-      },
-    ],
-  ];
+  // Removed book rotation - now using fixed 3 books only
   
-  const books = bookSets[currentBookSet];
+  // Fixed to only show the first 3 books
+  const books = [
+    {
+      id: 1,
+      title: "O Poder do Hábito",
+      author: "Charles Duhigg",
+      reward: "45",
+      pages: 408,
+      rating: 4.5,
+      readTime: "8 min",
+      isNew: false,
+      difficulty: "Médio",
+      color: "from-emerald-400 to-teal-500",
+      slug: "o-poder-do-habito",
+      synopsis: "Descubra como os hábitos funcionam e aprenda técnicas práticas para transformar sua rotina e alcançar seus objetivos com mais facilidade."
+    },
+    {
+      id: 2,
+      title: "Mindset",
+      author: "Carol S. Dweck",
+      reward: "38",
+      pages: 312,
+      rating: 4.7,
+      readTime: "5 min",
+      isNew: true,
+      difficulty: "Fácil",
+      color: "from-violet-400 to-purple-500",
+      slug: "mindset",
+      synopsis: "Explore a diferença entre mentalidade fixa e de crescimento, e como isso impacta diretamente seu sucesso pessoal e profissional."
+    },
+    {
+      id: 3,
+      title: "Como Fazer Amigos",
+      author: "Dale Carnegie",
+      reward: "42",
+      pages: 256,
+      rating: 4.8,
+      readTime: "6 min",
+      isNew: false,
+      difficulty: "Fácil",
+      color: "from-blue-400 to-indigo-500",
+      slug: "como-fazer-amigos",
+      synopsis: "Aprenda técnicas infalíveis para melhorar seus relacionamentos, influenciar pessoas positivamente e construir conexões duradouras."
+    },
+  ];
   
   // Removed withdraw function - replaced with automatic redirect after 3 books
   
@@ -362,36 +266,7 @@ export default function Dashboard() {
     setLocation(`/book/${slug}`);
   };
   
-  const handleRefreshBooks = async () => {
-    playSound('click');
-    setIsLoadingBooks(true);
-    
-    // Check user's plan and book completion status
-    const hasPremiumPlan = userData?.selectedPlan === 'premium';
-    const hasCompletedThreeBooks = (userData?.stats.totalBooksRead || 0) >= 3;
-    
-    // Simulate loading
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    if (hasPremiumPlan || hasCompletedThreeBooks) {
-      // Premium users or users who completed 3 books can see new books
-      const nextSet = (currentBookSet + 1) % bookSets.length;
-      setCurrentBookSet(nextSet);
-      toast({
-        title: "Livros atualizados!",
-        description: "3 novos livros disponíveis para leitura.",
-      });
-    } else {
-      // Free users see same books with limit message
-      toast({
-        title: "Limite do plano gratuito",
-        description: "No plano gratuito você pode realizar apenas 3 atividades diárias.",
-        variant: "destructive",
-      });
-    }
-    
-    setIsLoadingBooks(false);
-  };
+  // Removed book refresh functionality - now fixed to 3 books only
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-green-50/20 to-white">
@@ -574,24 +449,6 @@ export default function Dashboard() {
         <section className="px-5 py-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-semibold text-gray-900">Livros disponíveis</h2>
-            <button 
-              onClick={handleRefreshBooks}
-              disabled={isLoadingBooks}
-              className="flex items-center gap-1 text-xs text-green-600 hover:text-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              data-testid="button-refresh-books"
-            >
-              {isLoadingBooks ? (
-                <>
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Atualizando...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-3 w-3" />
-                  Atualizar livros
-                </>
-              )}
-            </button>
           </div>
 
           <div className="space-y-3">
