@@ -22,6 +22,10 @@ declare module 'express-session' {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize books catalog on startup
+  await storage.seedBooksIfNeeded();
+  console.log('Books catalog seeded successfully');
+  
   // Setup session middleware
   app.use(session({
     secret: process.env.SESSION_SECRET || 'beta-reader-brasil-secret-2024',
@@ -287,17 +291,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.seedBooksIfNeeded();
       
       const userId = (req as any).user.id;
-      const books = await storage.getUserBookFeed(userId);
+      let books = await storage.getUserBookFeed(userId);
+      
+      // Debug logging
+      console.log(`[BOOKS FEED] User ${userId} - Feed returned ${books.length} books`);
+      
+      // Fallback: if feed is empty but active books exist, return some active books
+      if (books.length === 0) {
+        const allActiveBooks = await storage.getAllBooks();
+        const activeBooks = allActiveBooks.filter(book => book.isActive);
+        console.log(`[BOOKS FEED] Fallback: Found ${activeBooks.length} active books`);
+        
+        if (activeBooks.length > 0) {
+          // Return up to 3 active books as fallback
+          books = activeBooks.slice(0, 3);
+          console.log(`[BOOKS FEED] Fallback: Returning ${books.length} active books`);
+        }
+      }
+      
       res.json(books);
     } catch (error: any) {
+      console.error('[BOOKS FEED] Error:', error);
       res.status(500).json({ message: error.message || "Failed to get book feed" });
     }
   });
   
   app.post('/api/books/refresh', requireUser, async (req: Request, res: Response) => {
     try {
+      // Seed books if needed
+      await storage.seedBooksIfNeeded();
+      
       const userId = (req as any).user.id;
-      const result = await storage.refreshUserBookFeed(userId);
+      let result = await storage.refreshUserBookFeed(userId);
       
       if (!result.canRefresh) {
         return res.status(429).json({ 
@@ -307,12 +332,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Debug logging
+      console.log(`[BOOKS REFRESH] User ${userId} - Refresh returned ${result.books.length} books`);
+      
+      // Fallback: if refresh is empty but active books exist, return some active books
+      if (result.books.length === 0) {
+        const allActiveBooks = await storage.getAllBooks();
+        const activeBooks = allActiveBooks.filter(book => book.isActive);
+        console.log(`[BOOKS REFRESH] Fallback: Found ${activeBooks.length} active books`);
+        
+        if (activeBooks.length > 0) {
+          // Return up to 3 active books as fallback
+          result.books = activeBooks.slice(0, 3);
+          console.log(`[BOOKS REFRESH] Fallback: Returning ${result.books.length} active books`);
+        }
+      }
+      
       res.json({ 
         books: result.books, 
         canRefresh: true,
-        message: "Livros atualizados com sucesso!" 
+        message: result.books.length > 0 ? "Livros atualizados com sucesso!" : "Nenhum livro disponível no momento" 
       });
     } catch (error: any) {
+      console.error('[BOOKS REFRESH] Error:', error);
       res.status(500).json({ message: error.message || "Failed to refresh book feed" });
     }
   });
