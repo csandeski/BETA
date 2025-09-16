@@ -220,8 +220,25 @@ class UserDataManager {
   }
 
   public isBookCompleted(bookSlug: string): boolean {
-    if (!this.userData) return false;
-    return this.userData.booksCompleted.some(book => book.bookSlug === bookSlug);
+    // First check if user is logged in and has userData
+    if (this.userData && this.userId) {
+      return this.userData.booksCompleted.some(book => book.bookSlug === bookSlug);
+    }
+    
+    // For guest users, check localStorage
+    const guestDataStr = localStorage.getItem('guestUserData');
+    if (guestDataStr) {
+      try {
+        const guestData = JSON.parse(guestDataStr);
+        if (guestData.booksCompleted && Array.isArray(guestData.booksCompleted)) {
+          return guestData.booksCompleted.some((book: any) => book.bookSlug === bookSlug);
+        }
+      } catch (error) {
+        console.error('Error checking guest book completion:', error);
+      }
+    }
+    
+    return false;
   }
 
   public async selectPlan(plan: string): Promise<void> {
