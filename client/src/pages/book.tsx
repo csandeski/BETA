@@ -2173,13 +2173,13 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
     setCurrentQuizStep(0);
     setShowValidation(true);
     
-    // Simulate validation steps - faster for better UX
-    setTimeout(() => setValidationStep(1), 200);
-    setTimeout(() => setValidationStep(2), 600);
-    setTimeout(() => setValidationStep(3), 1000);
-    setTimeout(() => setValidationStep(4), 1400);
-    setTimeout(() => setValidationStep(5), 1800);
-    setTimeout(() => setValidationStep(6), 2200);
+    // Simulate validation steps with more visible timing
+    setTimeout(() => setValidationStep(1), 500);
+    setTimeout(() => setValidationStep(2), 1200);
+    setTimeout(() => setValidationStep(3), 1900);
+    setTimeout(() => setValidationStep(4), 2600);
+    setTimeout(() => setValidationStep(5), 3300);
+    setTimeout(() => setValidationStep(6), 4000);
     setTimeout(async () => {
       setShowValidation(false);
       setShowReward(true);
@@ -2244,7 +2244,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
       } catch (error) {
         console.error("Failed to save book completion:", error);
       }
-    }, 2500); // Reduced from 6000ms to 2500ms for faster balance update
+    }, 4800); // Increased to 4800ms for better visibility of validation steps
   };
 
   const transactionId = `TRX${Date.now()}BR`;
