@@ -14,13 +14,41 @@ function completeGuestBook(bookData: any) {
   if (storedData) {
     const guestData = JSON.parse(storedData);
     
+    // Update main balance and earnings
+    guestData.balance += bookData.reward;
+    guestData.totalEarnings += bookData.reward;
+    
     // Update stats
     guestData.stats.totalBooksRead += 1;
     guestData.stats.totalActivities += 1;
     guestData.stats.todayBooksRead += 1;
     guestData.stats.totalEarnings += bookData.reward;
     guestData.stats.todayEarnings += bookData.reward;
-    guestData.balance += bookData.reward;
+    guestData.stats.weekEarnings += bookData.reward;
+    guestData.stats.monthEarnings += bookData.reward;
+    
+    // Update difficulty counts based on book difficulty
+    if (bookData.difficulty === 'Fácil') {
+      guestData.stats.easyBooksCount = (guestData.stats.easyBooksCount || 0) + 1;
+    } else if (bookData.difficulty === 'Médio') {
+      guestData.stats.mediumBooksCount = (guestData.stats.mediumBooksCount || 0) + 1;
+    } else if (bookData.difficulty === 'Difícil') {
+      guestData.stats.hardBooksCount = (guestData.stats.hardBooksCount || 0) + 1;
+    }
+    
+    // Calculate new average rating
+    const totalRatings = guestData.booksCompleted.reduce((sum: number, book: any) => sum + book.rating, 0) + bookData.rating;
+    guestData.stats.averageRating = totalRatings / (guestData.booksCompleted.length + 1);
+    
+    // Update progress towards goals
+    guestData.stats.weeklyProgress = Math.min(100, (guestData.stats.weekEarnings / guestData.stats.weeklyGoal) * 100);
+    guestData.stats.monthlyProgress = Math.min(100, (guestData.stats.monthEarnings / guestData.stats.monthlyGoal) * 100);
+    
+    // Update last seven days chart (add today's earning)
+    const today = guestData.stats.lastSevenDays[guestData.stats.lastSevenDays.length - 1];
+    if (today) {
+      today.valor += bookData.reward;
+    }
     
     // Add to completed books
     guestData.booksCompleted.push({
@@ -29,7 +57,8 @@ function completeGuestBook(bookData: any) {
       title: bookData.title,
       reward: bookData.reward,
       completedAt: new Date().toISOString(),
-      rating: bookData.rating
+      rating: bookData.rating,
+      difficulty: bookData.difficulty
     });
     
     guestData.completedBooks.push(bookData.bookSlug);
@@ -2097,7 +2126,8 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
             rating: rating,
             opinion: opinion,
             readingTime: readingTime,
-            quizAnswers: answers
+            quizAnswers: answers,
+            difficulty: currentBook.difficulty
           };
           
           const updatedGuestData = completeGuestBook(bookData);
@@ -2119,7 +2149,8 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
             rating: rating,
             opinion: opinion,
             readingTime: readingTime,
-            quizAnswers: answers
+            quizAnswers: answers,
+            difficulty: currentBook.difficulty
           });
           
           // Reload data from database to ensure consistency

@@ -124,6 +124,7 @@ class ApiClient {
     opinion: string;
     readingTime: number;
     quizAnswers?: any;
+    difficulty?: string;
   }) {
     return await this.request('POST', '/books/complete', data);
   }
