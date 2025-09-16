@@ -108,9 +108,9 @@ function Router() {
     }
   }, [location, needsPaymentFlow, isLoadingUserData, setLocation]);
   
-  // Only show nav if user is logged in and on appropriate pages
-  const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos' && location !== '/onboarding-complete';
-  const showInstallBanner = isLoggedIn && location !== '/'; // Não mostrar na tela inicial ou quando não logado
+  // Show nav on appropriate pages (for both logged in and guest users)
+  const showNav = location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos' && location !== '/onboarding-complete';
+  const showInstallBanner = location !== '/'; // Show install banner except on home page
   
   // Inicializa Facebook Pixel apenas uma vez
   useEffect(() => {
