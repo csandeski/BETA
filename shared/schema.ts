@@ -29,8 +29,6 @@ export const users = pgTable("users", {
   monthlyGoal: decimal("monthly_goal", { precision: 10, scale: 2 }).default('500').notNull(),
   canWithdraw: boolean("can_withdraw").default(false).notNull(),
   selectedPlan: varchar("selected_plan", { length: 20 }), // Plan selected after 3 books
-  mustUpgrade: boolean("must_upgrade").default(false).notNull(), // Set to true after 3 activities
-  hasSeenPricing: boolean("has_seen_pricing").default(false).notNull(), // Set to true when user sees pricing
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [

@@ -22,10 +22,6 @@ declare module 'express-session' {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize books catalog on startup
-  await storage.seedBooksIfNeeded();
-  console.log('Books catalog seeded successfully');
-  
   // Setup session middleware
   app.use(session({
     secret: process.env.SESSION_SECRET || 'beta-reader-brasil-secret-2024',
@@ -41,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Middleware to check if user exists - now uses session
   const requireUser = async (req: Request, res: Response, next: any) => {
-    const userId = req.session.userId;
+    const userId = req.session.userId || req.headers['x-user-id'] as string;
     if (!userId) {
       return res.status(401).json({ message: "User ID required" });
     }
@@ -258,41 +254,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upgrade flow routes
-  app.get('/api/upgrade/status', requireUser, async (req: Request, res: Response) => {
-    try {
-      const userId = (req as any).user.id;
-      const status = await storage.getUpgradeStatus(userId);
-      res.json(status);
-    } catch (error: any) {
-      console.error('[GET /api/upgrade/status] Error:', error);
-      res.status(500).json({ message: error.message || "Failed to get upgrade status" });
-    }
-  });
-  
-  app.post('/api/upgrade/reached-pricing', requireUser, async (req: Request, res: Response) => {
-    try {
-      const userId = (req as any).user.id;
-      await storage.setHasSeenPricing(userId);
-      res.json({ success: true });
-    } catch (error: any) {
-      console.error('[POST /api/upgrade/reached-pricing] Error:', error);
-      res.status(500).json({ message: error.message || "Failed to update pricing status" });
-    }
-  });
-  
-  app.post('/api/upgrade/confirm', requireUser, async (req: Request, res: Response) => {
-    try {
-      const userId = (req as any).user.id;
-      await storage.confirmUpgrade(userId);
-      const updatedUser = await storage.getUser(userId);
-      res.json({ success: true, user: updatedUser });
-    } catch (error: any) {
-      console.error('[POST /api/upgrade/confirm] Error:', error);
-      res.status(500).json({ message: error.message || "Failed to confirm upgrade" });
-    }
-  });
-  
   // Stats routes
   app.get('/api/users/stats', requireUser, async (req: Request, res: Response) => {
     try {
@@ -319,93 +280,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Book feed routes - MUST be before :slug route to avoid conflicts
-  app.get('/api/books/feed', requireUser, async (req: Request, res: Response) => {
-    try {
-      // First seed books if needed (on first call)
-      await storage.seedBooksIfNeeded();
-      
-      const userId = (req as any).user.id;
-      
-      // Check if user needs to upgrade
-      const upgradeStatus = await storage.getUpgradeStatus(userId);
-      if (upgradeStatus.mustUpgrade && upgradeStatus.plan !== 'premium') {
-        return res.status(423).json({ 
-          message: "Account locked", 
-          mustUpgrade: true,
-          hasSeenPricing: upgradeStatus.hasSeenPricing 
-        });
-      }
-      
-      let books = await storage.getUserBookFeed(userId);
-      
-      // Debug logging
-      console.log(`[BOOKS FEED] User ${userId} - Feed returned ${books.length} books`);
-      
-      // Fallback: if feed is empty but active books exist, return some active books
-      if (books.length === 0) {
-        const allActiveBooks = await storage.getAllBooks();
-        const activeBooks = allActiveBooks.filter(book => book.isActive);
-        console.log(`[BOOKS FEED] Fallback: Found ${activeBooks.length} active books`);
-        
-        if (activeBooks.length > 0) {
-          // Return up to 3 active books as fallback
-          books = activeBooks.slice(0, 3);
-          console.log(`[BOOKS FEED] Fallback: Returning ${books.length} active books`);
-        }
-      }
-      
-      res.json(books);
-    } catch (error: any) {
-      console.error('[BOOKS FEED] Error:', error);
-      res.status(500).json({ message: error.message || "Failed to get book feed" });
-    }
-  });
-  
-  app.post('/api/books/refresh', requireUser, async (req: Request, res: Response) => {
-    try {
-      // Seed books if needed
-      await storage.seedBooksIfNeeded();
-      
-      const userId = (req as any).user.id;
-      let result = await storage.refreshUserBookFeed(userId);
-      
-      if (!result.canRefresh) {
-        return res.status(429).json({ 
-          message: "Por favor aguarde alguns segundos antes de atualizar novamente",
-          books: result.books,
-          canRefresh: false 
-        });
-      }
-      
-      // Debug logging
-      console.log(`[BOOKS REFRESH] User ${userId} - Refresh returned ${result.books.length} books`);
-      
-      // Fallback: if refresh is empty but active books exist, return some active books
-      if (result.books.length === 0) {
-        const allActiveBooks = await storage.getAllBooks();
-        const activeBooks = allActiveBooks.filter(book => book.isActive);
-        console.log(`[BOOKS REFRESH] Fallback: Found ${activeBooks.length} active books`);
-        
-        if (activeBooks.length > 0) {
-          // Return up to 3 active books as fallback
-          result.books = activeBooks.slice(0, 3);
-          console.log(`[BOOKS REFRESH] Fallback: Returning ${result.books.length} active books`);
-        }
-      }
-      
-      res.json({ 
-        books: result.books, 
-        canRefresh: true,
-        message: result.books.length > 0 ? "Livros atualizados com sucesso!" : "Nenhum livro disponível no momento" 
-      });
-    } catch (error: any) {
-      console.error('[BOOKS REFRESH] Error:', error);
-      res.status(500).json({ message: error.message || "Failed to refresh book feed" });
-    }
-  });
-
-  // Book by slug route - MUST be after specific routes like /feed
   app.get('/api/books/:slug', async (req: Request, res: Response) => {
     try {
       const book = await storage.getBookBySlug(req.params.slug);
@@ -491,20 +365,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get updated user data to return
       const updatedUser = await storage.getUser(userId);
       const updatedStats = await storage.getUserStats(userId);
-      
-      // Check if user has completed 3 books and needs to upgrade
-      if (updatedStats && updatedStats.totalBooksRead >= 3 && updatedUser && updatedUser.plan === 'free' && !updatedUser.mustUpgrade) {
-        // Set mustUpgrade flag
-        await storage.updateUser(userId, { mustUpgrade: true });
-        // Fetch updated user data after setting mustUpgrade
-        const finalUser = await storage.getUser(userId);
-        return res.json({ 
-          completion, 
-          user: finalUser,
-          stats: updatedStats,
-          mustUpgrade: true
-        });
-      }
       
       res.json({ 
         completion, 
@@ -799,36 +659,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
               email: email,
               phone: "11" + Math.random().toString().slice(2, 11), // Generate random phone number
               document_type: "CPF",
-              document: cpf.replace(/\D/g, ''),
-              // Include UTM parameters directly in customer object as per LiraPay API docs
-              ...(utm_source && { utm_source }),
-              ...(utm_medium && { utm_medium }),
-              ...(utm_campaign && { utm_campaign }),
-              ...(utm_term && { utm_term }),
-              ...(utm_content && { utm_content })
+              document: cpf.replace(/\D/g, '')
             }
           };
           
-          // Store additional tracking data for internal use if needed
-          // UTMs are now sent directly in the customer object as per LiraPay API documentation
-          if (fbclid || referrer || landingPage) {
-            const trackingData = {
-              fbclid,
-              referrer,
-              landingPage
-            };
-            // Could store this internally if needed for tracking
-            console.log('Additional tracking data:', trackingData);
+          // Add UTM parameters to metadata or custom fields if they exist
+          const metadata: any = {};
+          if (utm_source) metadata.utm_source = utm_source;
+          if (utm_medium) metadata.utm_medium = utm_medium;
+          if (utm_campaign) metadata.utm_campaign = utm_campaign;
+          if (utm_term) metadata.utm_term = utm_term;
+          if (utm_content) metadata.utm_content = utm_content;
+          if (fbclid) metadata.fbclid = fbclid;
+          if (referrer) metadata.referrer = referrer;
+          if (landingPage) metadata.landingPage = landingPage;
+          
+          // Add metadata to request if any UTM params exist
+          if (Object.keys(metadata).length > 0) {
+            liraPayRequest.metadata = metadata;
           }
           
           console.log('Calling LiraPay API at https://api.lirapaybr.com/v1/transactions');
           console.log('Request body:', {
             ...liraPayRequest,
-            customer: { 
-              ...liraPayRequest.customer, 
-              document: '***' // Hide sensitive CPF in logs
-              // UTM params are included in customer object
-            }
+            customer: { ...liraPayRequest.customer, document: '***' },
+            metadata: liraPayRequest.metadata // Show UTM params being sent
           });
           
           const liraPayResponse = await fetch('https://api.lirapaybr.com/v1/transactions', {

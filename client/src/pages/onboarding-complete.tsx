@@ -60,6 +60,21 @@ export default function OnboardingComplete() {
     mutationFn: async () => {
       playSound('click');
       
+      fbPixel.trackAddToCart({
+        value: 29.90,
+        currency: 'BRL',
+        content_name: 'Supporter Plan',
+        content_type: 'product',
+        content_ids: ['supporter']
+      });
+
+      fbPixel.trackInitiateCheckout({
+        value: 29.90,
+        currency: 'BRL',
+        content_name: 'Supporter Plan',
+        num_items: 1
+      });
+
       // Get user data from form
       const userData = userDataManager.getUserData();
       
@@ -78,15 +93,7 @@ export default function OnboardingComplete() {
         phone: cleanPhone,
         cpf: cleanCPF,
         pixKey: userPixKey,
-        // Send UTM parameters as individual fields for LiraPay API
-        utm_source: utmParams.utm_source || undefined,
-        utm_medium: utmParams.utm_medium || undefined,
-        utm_campaign: utmParams.utm_campaign || undefined,
-        utm_term: utmParams.utm_term || undefined,
-        utm_content: utmParams.utm_content || undefined,
-        fbclid: utmParams.fbclid || undefined,
-        referrer: utmParams.referrer || undefined,
-        landingPage: utmParams.landingPage || undefined
+        ...utmParams // Include UTM parameters
       };
 
       const response = await fetch('/api/payment/generate-pix', {
@@ -111,16 +118,6 @@ export default function OnboardingComplete() {
         setShowPixModal(true);
         setPixCountdown(300);
         setIsPixExpired(false);
-        
-        // Track custom event when PIX is generated
-        fbPixel.trackCustom('PixGerado', {
-          value: 29.90,
-          currency: 'BRL',
-          content_name: 'Plano Apoiador',
-          plan: 'supporter',
-          orderId: data.paymentId,
-          pixCode: data.pixCode.substring(0, 20) // First 20 chars only for tracking
-        });
         
         fbPixel.trackAddPaymentInfo({
           value: 29.90,
@@ -187,18 +184,12 @@ export default function OnboardingComplete() {
           clearInterval(pollInterval);
           setIsCheckingPayment(false);
           
-          // Track Purchase event when payment is confirmed
           fbPixel.trackPurchase({
             value: 29.90,
             currency: 'BRL',
-            content_name: 'Plano Apoiador',
-            content_category: 'subscription',
+            content_name: 'Supporter Plan',
             content_type: 'product',
-            content_ids: ['supporter'],
-            num_items: 1,
-            transactionId: paymentId,
-            plan: 'supporter',
-            paymentMethod: 'pix'
+            content_ids: ['supporter']
           });
           
           await userDataManager.loadUserData();
@@ -287,19 +278,6 @@ export default function OnboardingComplete() {
   const handleBecomeSupporter = () => {
     playSound('click');
     setShowUserDataModal(true);
-    
-    // Track InitiateCheckout when modal opens
-    fbPixel.trackInitiateCheckout({
-      value: 29.90,
-      currency: 'BRL',
-      content_name: 'Plano Apoiador',
-      content_category: 'subscription',
-      content_ids: ['supporter'],
-      content_type: 'product',
-      num_items: 1,
-      plan: 'supporter',
-      paymentMethod: 'pix'
-    });
   };
 
   // Handle submitting user data and generating PIX
@@ -801,9 +779,9 @@ export default function OnboardingComplete() {
       </section>
       {/* User Data Collection Modal */}
       <Dialog open={showUserDataModal} onOpenChange={setShowUserDataModal}>
-        <DialogContent className="w-[95vw] sm:max-w-lg mx-auto p-0 overflow-hidden max-h-[90vh] flex flex-col rounded-2xl sm:rounded-3xl border-0 shadow-2xl">
+        <DialogContent className="sm:max-w-lg w-[95vw] max-w-[95vw] sm:w-auto mx-auto p-0 overflow-hidden max-h-[95vh] flex flex-col rounded-3xl border-0 shadow-2xl">
           {/* Animated Header */}
-          <div className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 px-4 sm:px-6 py-5 sm:py-8 text-white overflow-hidden flex-shrink-0">
+          <div className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 px-6 py-8 text-white overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute -top-4 -right-4 w-32 h-32 bg-white rounded-full blur-2xl"></div>
@@ -812,40 +790,31 @@ export default function OnboardingComplete() {
             
             {/* Content */}
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-2 sm:p-3 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                    <Shield className="h-5 sm:h-7 w-5 sm:w-7 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-bold">Quase lá!</h2>
-                    <p className="text-xs sm:text-sm text-green-50 mt-0.5">
-                      Preencha seus dados para continuar
-                    </p>
-                  </div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                  <Shield className="h-7 w-7 text-white" />
                 </div>
-                <button
-                  onClick={() => setShowUserDataModal(false)}
-                  className="p-1.5 sm:p-2 hover:bg-white/20 rounded-lg transition-colors"
-                  data-testid="button-close-user-data"
-                >
-                  <X className="h-4 sm:h-5 w-4 sm:w-5 text-white" />
-                </button>
+                <div>
+                  <h2 className="text-2xl font-bold">Quase lá!</h2>
+                  <p className="text-sm text-green-50 mt-0.5">
+                    Preencha seus dados para continuar
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 mt-3 sm:mt-4 bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 inline-flex">
-                <CheckCircle className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-green-100" />
-                <span className="text-[11px] sm:text-xs text-green-50 font-medium">Processo 100% seguro e criptografado</span>
+              <div className="flex items-center gap-2 mt-4 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 inline-flex">
+                <CheckCircle className="h-4 w-4 text-green-100" />
+                <span className="text-xs text-green-50 font-medium">Processo 100% seguro e criptografado</span>
               </div>
             </div>
           </div>
 
-          {/* Form with Better Spacing - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-5 sm:p-8 bg-gradient-to-b from-gray-50 to-white space-y-4 sm:space-y-6">
+          {/* Form with Better Spacing */}
+          <div className="p-8 bg-gradient-to-b from-gray-50 to-white space-y-6">
             {/* Email Field */}
-            <div className="space-y-2 sm:space-y-3">
+            <div className="space-y-3">
               <Label htmlFor="email" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1 sm:p-1.5 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
-                  <Mail className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-indigo-600" />
+                <div className="p-1.5 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
+                  <Mail className="h-4 w-4 text-indigo-600" />
                 </div>
                 Email
               </Label>
@@ -856,17 +825,17 @@ export default function OnboardingComplete() {
                   placeholder="seu.email@exemplo.com"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
-                  className="w-full h-12 sm:h-14 px-3 sm:px-4 text-sm sm:text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
+                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
                   data-testid="input-user-email"
                 />
               </div>
             </div>
 
             {/* Phone Field */}
-            <div className="space-y-2 sm:space-y-3">
+            <div className="space-y-3">
               <Label htmlFor="phone" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1 sm:p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
-                  <Phone className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-emerald-600" />
+                <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+                  <Phone className="h-4 w-4 text-emerald-600" />
                 </div>
                 Telefone
               </Label>
@@ -878,17 +847,17 @@ export default function OnboardingComplete() {
                   value={userPhone}
                   onChange={(e) => setUserPhone(formatPhone(e.target.value))}
                   maxLength={15}
-                  className="w-full h-12 sm:h-14 px-3 sm:px-4 text-sm sm:text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
+                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
                   data-testid="input-user-phone"
                 />
               </div>
             </div>
 
             {/* CPF Field */}
-            <div className="space-y-2 sm:space-y-3">
+            <div className="space-y-3">
               <Label htmlFor="cpf" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1 sm:p-1.5 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
-                  <CreditCard className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-purple-600" />
+                <div className="p-1.5 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
+                  <CreditCard className="h-4 w-4 text-purple-600" />
                 </div>
                 CPF
               </Label>
@@ -900,17 +869,17 @@ export default function OnboardingComplete() {
                   value={userCPF}
                   onChange={(e) => setUserCPF(formatCPF(e.target.value))}
                   maxLength={14}
-                  className="w-full h-12 sm:h-14 px-3 sm:px-4 text-sm sm:text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
+                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
                   data-testid="input-user-cpf"
                 />
               </div>
             </div>
 
             {/* PIX Key Field */}
-            <div className="space-y-2 sm:space-y-3">
+            <div className="space-y-3">
               <Label htmlFor="pixKey" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <div className="p-1 sm:p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
-                  <Key className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-orange-600" />
+                <div className="p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
+                  <Key className="h-4 w-4 text-orange-600" />
                 </div>
                 Chave PIX para Receber Saques
               </Label>
@@ -921,44 +890,44 @@ export default function OnboardingComplete() {
                   placeholder="Sua chave PIX (CPF, email, telefone ou aleatória)"
                   value={userPixKey}
                   onChange={(e) => setUserPixKey(e.target.value)}
-                  className="w-full h-12 sm:h-14 px-3 sm:px-4 text-sm sm:text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
+                  className="w-full h-14 px-4 text-base border-2 border-gray-200 hover:border-gray-300 focus:border-green-500 rounded-xl transition-all duration-200"
                   data-testid="input-user-pix-key"
                 />
-                <p className="text-[11px] sm:text-xs text-gray-500 mt-1.5 sm:mt-2 ml-1">
+                <p className="text-xs text-gray-500 mt-2 ml-1">
                   Esta chave será usada para você receber seus saques futuros
                 </p>
               </div>
             </div>
 
             {/* Submit Button with Animation */}
-            <div className="pt-3 sm:pt-4 pb-2">
+            <div className="pt-4">
               <Button
                 onClick={handleSubmitUserData}
-                className="w-full h-12 sm:h-14 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-sm sm:text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 size="lg"
                 data-testid="button-submit-user-data"
               >
-                <div className="flex items-center justify-center gap-2 sm:gap-3">
-                  <Shield className="h-4 sm:h-5 w-4 sm:w-5" />
+                <div className="flex items-center justify-center gap-3">
+                  <Shield className="h-5 w-5" />
                   <span>Gerar PIX Seguro</span>
-                  <ChevronRight className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                  <ChevronRight className="h-4 w-4" />
                 </div>
               </Button>
             </div>
 
             {/* Beautiful Security Note */}
-            <div className="relative rounded-xl sm:rounded-2xl overflow-hidden">
+            <div className="relative rounded-2xl overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5"></div>
-              <div className="relative bg-white/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-blue-100">
-                <div className="flex items-start gap-2.5 sm:gap-3">
-                  <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg sm:rounded-xl flex-shrink-0">
-                    <Lock className="h-4 sm:h-5 w-4 sm:w-5 text-blue-600" />
+              <div className="relative bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-blue-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex-shrink-0">
+                    <Lock className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-800 font-semibold mb-0.5 sm:mb-1">
+                    <p className="text-sm text-gray-800 font-semibold mb-1">
                       Proteção Total dos Seus Dados
                     </p>
-                    <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+                    <p className="text-xs text-gray-600 leading-relaxed">
                       Utilizamos criptografia bancária de 256 bits e seguimos todas as normas da LGPD para garantir a segurança das suas informações
                     </p>
                   </div>
