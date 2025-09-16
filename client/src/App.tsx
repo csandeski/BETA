@@ -98,7 +98,7 @@ function Router() {
     };
     
     loadUserData();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, location]); // Add location to deps to recheck on navigation
 
   // Global payment flow enforcement
   useEffect(() => {
