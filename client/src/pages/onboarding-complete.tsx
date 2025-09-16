@@ -1033,11 +1033,12 @@ export default function OnboardingComplete() {
         </div>
       )}
 
-      {/* PIX Payment Modal */}
-      <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
-        <DialogContent className="max-w-md p-0 overflow-hidden max-h-[90vh]" data-payment-flow="true">
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4">
-            <div className="flex items-center justify-between">
+      {/* PIX Payment Modal - Full Screen for Mobile */}
+      {showPixModal && (
+        <div className="fixed inset-0 z-[9999] bg-white" data-payment-flow="true">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-4 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">
                   <Shield className="h-5 w-5 text-white" />
@@ -1057,9 +1058,9 @@ export default function OnboardingComplete() {
             </div>
             
             {/* Timer Bar */}
-            <div className="mt-3 bg-white/20 rounded-lg px-3 py-2">
+            <div className="bg-white/20 rounded-lg px-3 py-2">
               <div className="flex items-center justify-center gap-2">
-                <Clock className="h-4 w-4 text-white" />
+                <Clock className="h-4 w-4 text-white animate-pulse" />
                 <span className="text-white text-sm font-medium">
                   Tempo restante: <span className="font-bold text-lg">{formatTime(pixCountdown)}</span>
                 </span>
@@ -1067,24 +1068,25 @@ export default function OnboardingComplete() {
             </div>
           </div>
           
-          <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto h-[calc(100vh-140px)] px-4 py-6">
             
             {/* Amount Display */}
-            <div className="text-center mb-4">
-              <p className="text-xs text-gray-500 uppercase font-semibold">Valor a pagar</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">R$ 29,90</p>
+            <div className="text-center mb-6">
+              <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide">Valor a pagar</p>
+              <p className="text-4xl font-bold text-gray-900 mt-2">R$ 29,90</p>
             </div>
             
             {/* QR Code */}
             {pixCode && (
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-4 border-2 border-gray-200">
-                <p className="text-xs text-gray-600 text-center mb-3 font-semibold">Escaneie o QR Code</p>
-                <div className="bg-white p-4 rounded-lg mx-auto max-w-[200px]">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 mb-5 shadow-sm">
+                <p className="text-sm text-gray-600 text-center mb-4 font-semibold">Escaneie o QR Code</p>
+                <div className="bg-white p-4 rounded-xl mx-auto" style={{ maxWidth: '220px' }}>
                   <QRCode
                     value={pixCode}
-                    size={172}
+                    size={188}
                     style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    viewBox={`0 0 172 172`}
+                    viewBox={`0 0 188 188`}
                     level="M"
                     data-testid="img-qrcode"
                   />
@@ -1093,20 +1095,21 @@ export default function OnboardingComplete() {
             )}
             
             {/* PIX Code */}
-            <div className="bg-white rounded-xl p-3 sm:p-4 mb-4 border-2 border-green-200">
-              <p className="text-xs text-gray-600 mb-2 sm:mb-3 text-center font-semibold">Ou use o código PIX copia e cola:</p>
-              <div className="bg-gray-50 rounded-lg p-2 sm:p-3 mb-2 sm:mb-3">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 mb-5 shadow-sm">
+              <p className="text-sm text-gray-700 mb-3 text-center font-semibold">Ou use o código PIX copia e cola:</p>
+              <div className="bg-white rounded-xl p-3 mb-3 border border-green-200">
                 <textarea
                   value={pixCode || ''}
                   readOnly
-                  className="w-full bg-transparent text-[10px] sm:text-xs font-mono text-gray-700 resize-none border-0 outline-none"
-                  rows={2}
+                  className="w-full bg-transparent text-xs font-mono text-gray-700 resize-none border-0 outline-none"
+                  rows={3}
+                  style={{ minHeight: '60px' }}
                   data-testid="input-pix-code"
                 />
               </div>
               <Button
                 onClick={copyPixCode}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3"
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg"
                 size="lg"
                 data-testid="button-copy-pix"
               >
@@ -1116,27 +1119,42 @@ export default function OnboardingComplete() {
             </div>
             
             {/* Instructions */}
-            <div className="bg-blue-50 rounded-xl p-3 sm:p-4 border border-blue-200">
-              <h4 className="text-xs font-bold text-blue-900 mb-2 flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
+            <div className="bg-blue-50 rounded-2xl p-4 mb-5 shadow-sm">
+              <h4 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
                 Como fazer o pagamento:
               </h4>
-              <ol className="text-xs text-blue-800 space-y-1 list-decimal list-inside">
-                <li>Abra o app do seu banco</li>
-                <li>Escolha a opção PIX</li>
-                <li>Escaneie o QR Code ou use "Pix Copia e Cola"</li>
-                <li>Confirme o pagamento de R$ 29,90</li>
+              <ol className="text-sm text-blue-800 space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">1.</span>
+                  <span>Abra o app do seu banco</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">2.</span>
+                  <span>Escolha a opção PIX</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">3.</span>
+                  <span>Escaneie o QR Code ou use "Pix Copia e Cola"</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">4.</span>
+                  <span>Confirme o pagamento de R$ 29,90</span>
+                </li>
               </ol>
             </div>
             
             {/* Security Badge */}
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
-              <Shield className="h-4 w-4 text-green-600" />
-              <span>Pagamento 100% seguro e criptografado</span>
+            <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center justify-center gap-2 text-sm text-gray-600">
+              <Shield className="h-5 w-5 text-green-600" />
+              <span className="font-medium">Pagamento 100% seguro e criptografado</span>
             </div>
+            
+            {/* Bottom Spacing */}
+            <div className="h-6"></div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }
