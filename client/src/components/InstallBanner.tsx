@@ -103,7 +103,7 @@ export default function InstallBanner() {
   return (
     <>
       {/* Banner */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 flex items-center justify-between shadow-md">
+      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-3.5 flex items-center justify-between shadow-md">
         <button
           onClick={handleInstallClick}
           className="flex items-center gap-2 flex-1"
