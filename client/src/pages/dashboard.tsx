@@ -130,12 +130,39 @@ export default function Dashboard() {
   const balance = userData?.balance.toFixed(2).replace('.', ',') || "0,00";
   const hiddenBalance = "•••••";
 
+  // Function to enrich book data with UI properties
+  const enrichBookData = (book: any) => {
+    const colorOptions = [
+      'from-violet-500 to-purple-500',
+      'from-blue-500 to-cyan-500',
+      'from-emerald-500 to-green-500',
+      'from-orange-500 to-red-500',
+      'from-pink-500 to-rose-500',
+      'from-indigo-500 to-blue-500',
+      'from-teal-500 to-green-500',
+      'from-amber-500 to-orange-500',
+    ];
+    
+    // Generate consistent color based on book title
+    const colorIndex = book.title.charCodeAt(0) % colorOptions.length;
+    
+    return {
+      ...book,
+      color: colorOptions[colorIndex],
+      rating: book.rating || (3.5 + (book.title.length % 15) / 10).toFixed(1), // Generate rating between 3.5-5.0
+      readTime: book.readingTime ? `${book.readingTime} min` : '10 min',
+    };
+  };
+
   // Fetch books from API using React Query
-  const { data: books = [], isLoading: isLoadingBooks, refetch: refetchBooks } = useQuery<Book[]>({
+  const { data: booksRaw = [], isLoading: isLoadingBooks, refetch: refetchBooks } = useQuery<Book[]>({
     queryKey: ['/api/books/feed'],
     enabled: !!userData,
     refetchOnWindowFocus: false,
   });
+  
+  // Enrich books with UI properties
+  const books = booksRaw.map(enrichBookData);
   
   // Refresh books mutation with throttle
   const refreshBooksMutation = useMutation({
@@ -164,7 +191,9 @@ export default function Dashboard() {
     },
     onSuccess: (data) => {
       if (data.canRefresh) {
-        queryClient.setQueryData(['/api/books/feed'], data.books);
+        // Apply enrichment to refreshed books
+        const enrichedBooks = data.books.map(enrichBookData);
+        queryClient.setQueryData(['/api/books/feed'], enrichedBooks);
         toast({
           title: "Livros atualizados!",
           description: "Novos livros foram carregados para você.",
