@@ -721,6 +721,31 @@ export default function OnboardingComplete() {
               </p>
             </div>
 
+            {/* Limited Spots Alert */}
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-4 border-2 border-orange-200 shadow-md mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center shadow-md">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg font-bold text-gray-900">
+                    Restam apenas 26 vagas!
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Garanta sua vaga agora antes que acabe
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full animate-pulse" style={{ width: '82%' }}></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 text-center">21 de 26 vagas preenchidas</p>
+              </div>
+            </div>
+
             {/* Price Card - Mobile Optimized */}
             <div className="relative">
               {/* Popular Badge */}
