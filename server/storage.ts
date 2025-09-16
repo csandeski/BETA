@@ -81,6 +81,11 @@ export interface IStorage {
   
   // Online status operations
   updateOnlineStatus(userId: string, isOnline: boolean): Promise<void>;
+  
+  // Upgrade status operations
+  getUpgradeStatus(userId: string): Promise<{ mustUpgrade: boolean, hasSeenPricing: boolean, plan: string }>;
+  setHasSeenPricing(userId: string): Promise<void>;
+  confirmUpgrade(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1366,6 +1371,38 @@ export class DatabaseStorage implements IStorage {
           lastSeen: new Date(),
         },
       });
+  }
+  
+  // Upgrade status operations
+  async getUpgradeStatus(userId: string): Promise<{ mustUpgrade: boolean, hasSeenPricing: boolean, plan: string }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      return { mustUpgrade: false, hasSeenPricing: false, plan: 'free' };
+    }
+    return {
+      mustUpgrade: user.mustUpgrade || false,
+      hasSeenPricing: user.hasSeenPricing || false,
+      plan: user.plan || 'free'
+    };
+  }
+  
+  async setHasSeenPricing(userId: string): Promise<void> {
+    await this.getDb()
+      .update(users)
+      .set({ hasSeenPricing: true, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+  
+  async confirmUpgrade(userId: string): Promise<void> {
+    await this.getDb()
+      .update(users)
+      .set({ 
+        plan: 'premium',
+        mustUpgrade: false,
+        hasSeenPricing: false,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
   }
 }
 

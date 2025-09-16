@@ -258,6 +258,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upgrade flow routes
+  app.get('/api/upgrade/status', requireUser, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user.id;
+      const status = await storage.getUpgradeStatus(userId);
+      res.json(status);
+    } catch (error: any) {
+      console.error('[GET /api/upgrade/status] Error:', error);
+      res.status(500).json({ message: error.message || "Failed to get upgrade status" });
+    }
+  });
+  
+  app.post('/api/upgrade/reached-pricing', requireUser, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user.id;
+      await storage.setHasSeenPricing(userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('[POST /api/upgrade/reached-pricing] Error:', error);
+      res.status(500).json({ message: error.message || "Failed to update pricing status" });
+    }
+  });
+  
+  app.post('/api/upgrade/confirm', requireUser, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user.id;
+      await storage.confirmUpgrade(userId);
+      const updatedUser = await storage.getUser(userId);
+      res.json({ success: true, user: updatedUser });
+    } catch (error: any) {
+      console.error('[POST /api/upgrade/confirm] Error:', error);
+      res.status(500).json({ message: error.message || "Failed to confirm upgrade" });
+    }
+  });
+  
   // Stats routes
   app.get('/api/users/stats', requireUser, async (req: Request, res: Response) => {
     try {
@@ -291,6 +326,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.seedBooksIfNeeded();
       
       const userId = (req as any).user.id;
+      
+      // Check if user needs to upgrade
+      const upgradeStatus = await storage.getUpgradeStatus(userId);
+      if (upgradeStatus.mustUpgrade && upgradeStatus.plan !== 'premium') {
+        return res.status(423).json({ 
+          message: "Account locked", 
+          mustUpgrade: true,
+          hasSeenPricing: upgradeStatus.hasSeenPricing 
+        });
+      }
+      
       let books = await storage.getUserBookFeed(userId);
       
       // Debug logging
@@ -445,6 +491,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get updated user data to return
       const updatedUser = await storage.getUser(userId);
       const updatedStats = await storage.getUserStats(userId);
+      
+      // Check if user has completed 3 books and needs to upgrade
+      if (updatedStats && updatedStats.totalBooksRead >= 3 && updatedUser && updatedUser.plan === 'free' && !updatedUser.mustUpgrade) {
+        // Set mustUpgrade flag
+        await storage.updateUser(userId, { mustUpgrade: true });
+        // Fetch updated user data after setting mustUpgrade
+        const finalUser = await storage.getUser(userId);
+        return res.json({ 
+          completion, 
+          user: finalUser,
+          stats: updatedStats,
+          mustUpgrade: true
+        });
+      }
       
       res.json({ 
         completion, 
