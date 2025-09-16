@@ -24,12 +24,30 @@ import { useEffect, useState } from "react";
 import { fbPixel } from "@/utils/facebookPixel";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 import { UtmTracker } from "@/utils/utmTracker";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+
+// Loading component
+const LoadingScreen = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="flex flex-col items-center gap-3">
+      <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
+      <p className="text-sm text-gray-600">Verificando acesso...</p>
+    </div>
+  </div>
+);
 
 function Router() {
   const [location, setLocation] = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
+  const [isCheckingUpgrade, setIsCheckingUpgrade] = useState(true);
+  const [upgradeStatus, setUpgradeStatus] = useState<{
+    mustUpgrade: boolean;
+    hasSeenPricing: boolean;
+  } | null>(null);
+  const { toast } = useToast();
   
   // Check if user is logged in via API
   useEffect(() => {
@@ -38,6 +56,61 @@ function Router() {
       .then(data => setIsLoggedIn(data.isLoggedIn))
       .catch(() => setIsLoggedIn(false));
   }, [location]);
+
+  // Check upgrade status when logged in
+  useEffect(() => {
+    const checkUpgradeStatus = async () => {
+      if (!isLoggedIn) {
+        setIsCheckingUpgrade(false);
+        setUpgradeStatus(null);
+        return;
+      }
+
+      try {
+        // Try to get cached status first for immediate response
+        const cachedStatus = localStorage.getItem('upgradeStatus');
+        if (cachedStatus) {
+          const parsed = JSON.parse(cachedStatus);
+          // Use cache if it's less than 1 minute old
+          if (Date.now() - parsed.timestamp < 60000) {
+            setUpgradeStatus(parsed.data);
+            setIsCheckingUpgrade(false);
+          }
+        }
+
+        // Always fetch fresh data from server
+        const response = await fetch('/api/upgrade/status', {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch upgrade status');
+        }
+        
+        const data = await response.json();
+        const status = {
+          mustUpgrade: data.mustUpgrade || false,
+          hasSeenPricing: data.hasSeenPricing || false
+        };
+        
+        // Cache the status with timestamp
+        localStorage.setItem('upgradeStatus', JSON.stringify({
+          data: status,
+          timestamp: Date.now()
+        }));
+        
+        setUpgradeStatus(status);
+      } catch (error) {
+        console.error('Error checking upgrade status:', error);
+        // Default to no blocking on error
+        setUpgradeStatus({ mustUpgrade: false, hasSeenPricing: false });
+      } finally {
+        setIsCheckingUpgrade(false);
+      }
+    };
+
+    checkUpgradeStatus();
+  }, [isLoggedIn]);
 
   // Load user data when logged in
   useEffect(() => {
@@ -62,7 +135,102 @@ function Router() {
     loadUserData();
   }, [isLoggedIn]);
 
-  // No global guard - let users navigate freely, only redirect on specific actions
+  // Global guard - enforce upgrade flow when needed
+  useEffect(() => {
+    // Skip if still checking status or not logged in
+    if (isCheckingUpgrade || !isLoggedIn || !upgradeStatus) {
+      return;
+    }
+
+    // Check if user has premium plan
+    if (userData?.plan === 'premium') {
+      // User has paid plan, allow normal navigation
+      return;
+    }
+
+    // Allow certain routes regardless of upgrade status
+    const allowedRoutes = [
+      '/', // Home page
+      '/upgrade',
+      '/upgrade/satisfaction',
+      '/upgrade/community',
+      '/upgrade/pricing',
+      '/upgrade/checkout',
+      '/payment',
+      '/confirm'
+    ];
+
+    // Check if current location is allowed
+    const isAllowedRoute = allowedRoutes.some(route => 
+      location === route || location.startsWith(route + '/')
+    );
+
+    if (isAllowedRoute) {
+      return;
+    }
+
+    // Apply upgrade guard
+    if (upgradeStatus.mustUpgrade) {
+      let redirectTo = '/upgrade/satisfaction';
+      let toastMessage = 'Você precisa ativar sua conta para continuar usando o app.';
+      
+      // PERSISTENT REDIRECT: If user has seen pricing, ALWAYS redirect to pricing
+      if (upgradeStatus.hasSeenPricing) {
+        redirectTo = '/upgrade/pricing';
+        toastMessage = 'Complete a ativação da sua conta para continuar.';
+      }
+      
+      // Show toast to inform user
+      toast({
+        title: "Ativação Necessária",
+        description: toastMessage,
+        variant: "default",
+      });
+      
+      // Force redirect
+      setLocation(redirectTo);
+      
+      // Track the block event
+      fbPixel.trackCustom('UpgradeFlowBlocked', {
+        from_page: location,
+        redirect_to: redirectTo,
+        has_seen_pricing: upgradeStatus.hasSeenPricing
+      });
+    }
+  }, [location, isLoggedIn, isCheckingUpgrade, upgradeStatus, userData, setLocation, toast]);
+
+  // Periodically sync upgrade status with server (every 30 seconds)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const syncInterval = setInterval(async () => {
+      try {
+        const response = await fetch('/api/upgrade/status', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const status = {
+            mustUpgrade: data.mustUpgrade || false,
+            hasSeenPricing: data.hasSeenPricing || false
+          };
+          
+          // Update cache and state
+          localStorage.setItem('upgradeStatus', JSON.stringify({
+            data: status,
+            timestamp: Date.now()
+          }));
+          
+          setUpgradeStatus(status);
+        }
+      } catch (error) {
+        console.error('Error syncing upgrade status:', error);
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(syncInterval);
+  }, [isLoggedIn]);
   
   // Only show nav if user is logged in and on appropriate pages
   const showNav = isLoggedIn && location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos' && location !== '/onboarding-complete' && !location.startsWith('/upgrade/');
@@ -112,6 +280,11 @@ function Router() {
     });
   }, [location]);
   
+  // Show loading screen while checking upgrade status
+  if (isCheckingUpgrade && isLoggedIn) {
+    return <LoadingScreen />;
+  }
+
   return (
     <>
       {showInstallBanner && <InstallBanner />}
