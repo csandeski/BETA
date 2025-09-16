@@ -331,7 +331,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
           {/* Dynamic Step Title - clean design */}
           <div className="space-y-2">
             <h2 className="text-lg font-bold text-gray-900">
-              {step === 1 && "Parabéns pelos 3 livros!"}
+              {step === 1 && "Parabéns pelos 5 livros!"}
               {step === 2 && "Sobre a Beta Reader Brasil"}
               {step === 3 && "Análise do seu potencial"}
               {step === 4 && "Escolha seu plano ideal"}
@@ -370,7 +370,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
                   </div>
                   
                   <h3 className="text-lg font-bold text-gray-900 mb-3">
-                    3 Livros Completados!
+                    5 Livros Completados!
                   </h3>
                   
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm mb-3 border border-gray-200">
@@ -586,7 +586,7 @@ export function PlanUpgradeModal({ isOpen, onClose, totalEarned = 0, onUpgrade, 
                   {[
                     { 
                       icon: Book, 
-                      title: "APENAS 3 livros/dia", 
+                      title: "APENAS 5 livros/dia", 
                       desc: "Plano pago: 20+ livros",
                       color: "text-red-600"
                     },

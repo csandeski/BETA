@@ -196,7 +196,7 @@ export default function Confirm() {
                   <span className="text-base font-bold text-green-600">R$ 348,10</span>
                 </div>
                 <p className="text-[10px] text-gray-500 mt-2">
-                  * Baseado em 3 livros/dia durante período ativo
+                  * Baseado em 5 livros/dia durante período ativo
                 </p>
               </div>
             </div>

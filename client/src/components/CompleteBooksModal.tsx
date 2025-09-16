@@ -22,7 +22,7 @@ export function CompleteBooksModal({ isOpen, onClose, booksRead }: CompleteBooks
 
   if (!isOpen) return null;
 
-  const booksRemaining = 3 - booksRead;
+  const booksRemaining = 5 - booksRead;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -54,21 +54,21 @@ export function CompleteBooksModal({ isOpen, onClose, booksRead }: CompleteBooks
 
           {/* Message */}
           <p className="text-sm text-gray-600 mb-6">
-            Para desbloquear os planos pagos, você precisa primeiro completar a leitura de <strong>3 livros</strong>.
+            Para desbloquear os planos pagos, você precisa primeiro completar a leitura de <strong>5 livros</strong>.
           </p>
 
           {/* Progress */}
           <div className="bg-gray-50 rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-700">Seu Progresso</span>
-              <span className="text-sm font-bold text-green-600">{booksRead}/3 livros</span>
+              <span className="text-sm font-bold text-green-600">{booksRead}/5 livros</span>
             </div>
             
             {/* Progress Bar */}
             <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500"
-                style={{ width: `${(booksRead / 3) * 100}%` }}
+                style={{ width: `${(booksRead / 5) * 100}%` }}
               />
             </div>
             

@@ -51,13 +51,13 @@ function Router() {
           
           // Check if user needs to complete payment flow
           // User needs payment if: has completed 3+ activities AND is not a supporter
-          const hasCompleted3Books = (data?.stats?.totalBooksRead || 0) >= 3;
+          const hasCompleted3Books = (data?.stats?.totalBooksRead || 0) >= 5;
           const isSupporter = data?.plan === 'premium';
           const hasSeenPricing = localStorage.getItem('pricing_seen_v1') === 'true';
           
           if (hasCompleted3Books && !isSupporter) {
             setNeedsPaymentFlow(true);
-            // Mark as seen if they've completed 3 books
+            // Mark as seen if they've completed 5 books
             if (!hasSeenPricing) {
               localStorage.setItem('pricing_seen_v1', 'true');
             }
@@ -77,12 +77,12 @@ function Router() {
           setUserData(guestData);
           
           // Check if guest needs to complete payment flow
-          const hasCompleted3Books = (guestData?.stats?.totalBooksRead || 0) >= 3;
+          const hasCompleted3Books = (guestData?.stats?.totalBooksRead || 0) >= 5;
           const hasSeenPricing = localStorage.getItem('pricing_seen_v1') === 'true';
           
           if (hasCompleted3Books) {
             setNeedsPaymentFlow(true);
-            // Mark as seen if they've completed 3 books
+            // Mark as seen if they've completed 5 books
             if (!hasSeenPricing) {
               localStorage.setItem('pricing_seen_v1', 'true');
             }

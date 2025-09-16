@@ -42,7 +42,7 @@ export default function ProjectionScreen({ onChoosePlan }: ProjectionScreenProps
             <ul className="space-y-3 mb-4">
               <li className="flex items-start gap-2">
                 <Clock className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                <span className="text-xs text-gray-600">3 livros por dia</span>
+                <span className="text-xs text-gray-600">5 livros por dia</span>
               </li>
               <li className="flex items-start gap-2">
                 <DollarSign className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" strokeWidth={2} />

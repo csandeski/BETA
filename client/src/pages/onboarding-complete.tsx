@@ -88,12 +88,12 @@ export default function OnboardingComplete() {
         }
       }
       
-      // If no user data or less than 3 books completed, redirect to dashboard
-      if (!userData || !userData.stats?.totalBooksRead || userData.stats.totalBooksRead < 3) {
+      // If no user data or less than 5 books completed, redirect to dashboard
+      if (!userData || !userData.stats?.totalBooksRead || userData.stats.totalBooksRead < 5) {
         setLocation('/dashboard');
         toast({
           title: "Acesso negado",
-          description: "Você precisa completar 3 atividades antes de acessar esta página.",
+          description: "Você precisa completar 5 atividades antes de acessar esta página.",
           variant: "destructive"
         });
       }
@@ -479,7 +479,7 @@ export default function OnboardingComplete() {
                     Obrigado pelo feedback!
                   </p>
                   <p className="text-xs text-gray-600">
-                    Você já completou 3 atividades e desbloqueou acesso a uma experiência ainda melhor
+                    Você já completou 5 atividades e desbloqueou acesso a uma experiência ainda melhor
                   </p>
                 </div>
               </div>

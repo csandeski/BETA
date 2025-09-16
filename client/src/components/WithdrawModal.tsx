@@ -25,7 +25,7 @@ export default function WithdrawModal({ isOpen, onClose, booksRead }: WithdrawMo
   
   if (!isOpen) return null;
 
-  if (booksRead < 3) {
+  if (booksRead < 5) {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl max-w-sm w-full p-6 pb-8 relative animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto">
@@ -50,18 +50,18 @@ export default function WithdrawModal({ isOpen, onClose, booksRead }: WithdrawMo
             </h2>
             
             <p className="text-xs text-gray-600 mb-6">
-              Para liberar seu saque, você precisa completar a leitura e avaliação de <span className="font-semibold text-green-600">3 livros</span>.
+              Para liberar seu saque, você precisa completar a leitura e avaliação de <span className="font-semibold text-green-600">5 livros</span>.
             </p>
 
             <div className="w-full bg-gray-100 rounded-lg p-4 mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-gray-700 font-semibold">Progresso</span>
-                <span className="text-xs font-bold text-green-600">{booksRead}/3 livros</span>
+                <span className="text-xs font-bold text-green-600">{booksRead}/5 livros</span>
               </div>
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all"
-                  style={{ width: `${(booksRead / 3) * 100}%` }}
+                  style={{ width: `${(booksRead / 5) * 100}%` }}
                 ></div>
               </div>
             </div>

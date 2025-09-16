@@ -254,22 +254,22 @@ export default function WalletPage() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleWithdraw}
-                disabled={totalBooksRead < 3}
+                disabled={totalBooksRead < 5}
                 className={`py-3 font-semibold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 ${
-                  totalBooksRead < 3
+                  totalBooksRead < 5
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
                     : 'bg-white text-green-600 hover:bg-gray-100'
                 }`}
                 data-testid="button-withdraw-wallet"
               >
                 <ArrowUpRight className="h-4 w-4" />
-                {totalBooksRead < 3 ? `Sacar (${3 - totalBooksRead} livros)` : 'Sacar'}
+                {totalBooksRead < 5 ? `Sacar (${5 - totalBooksRead} livros)` : 'Sacar'}
               </button>
               <button
                 onClick={() => {
                   playSound('click');
-                  // If user completed 3 books and is on free plan, redirect to onboarding
-                  if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.selectedPlan !== 'premium') {
+                  // If user completed 5 books and is on free plan, redirect to onboarding
+                  if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 5 && userData?.selectedPlan !== 'premium') {
                     setLocation('/onboarding-complete');
                   } else {
                     setLocation('/livros');

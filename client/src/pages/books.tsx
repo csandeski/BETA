@@ -170,7 +170,7 @@ export default function Books() {
   const handleStartReading = (bookId: number) => {
     playSound('click');
     
-    // Check if user has free plan and reached daily limit (3 books)
+    // Check if user has free plan and reached daily limit (5 books)
     if (userData?.selectedPlan === 'free' || !userData?.selectedPlan) {
       const todayBooks = userData?.stats?.todayBooksRead || 0;
       

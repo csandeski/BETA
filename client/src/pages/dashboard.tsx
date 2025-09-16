@@ -93,7 +93,7 @@ export default function Dashboard() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [hasSeenCelebration, setHasSeenCelebration] = useState(false);
   const [showFirstRewardPopup, setShowFirstRewardPopup] = useState(false);
-  // Removed book loading and rotation states - now fixed to 3 books only
+  // Removed book loading and rotation states - now fixed to 5 books only
   const [showFaq, setShowFaq] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [isGuestUser, setIsGuestUser] = useState(false);
@@ -166,8 +166,8 @@ export default function Dashboard() {
           // Could show first reward popup if needed
         }
         
-        // Check if user has completed exactly 3 books and hasn't seen the celebration
-        // Show modal regardless of plan status when hitting 3 books milestone
+        // Check if user has completed exactly 5 books and hasn't seen the celebration
+        // Show modal regardless of plan status when hitting 5 books milestone
         const celebrationKey = 'hasSeenThreeBooksCelebration';
         const hasSeenCelebrationBefore = localStorage.getItem(celebrationKey) === 'true';
         
@@ -219,9 +219,9 @@ export default function Dashboard() {
   const balance = userData?.balance.toFixed(2).replace('.', ',') || "0,00";
   const hiddenBalance = "•••••";
 
-  // Removed book rotation - now using fixed 3 books only
+  // Removed book rotation - now using fixed 5 books only
   
-  // Fixed to only show the first 3 books
+  // Fixed to only show the first 5 books
   const books = [
     {
       id: 1,
@@ -295,7 +295,7 @@ export default function Dashboard() {
     },
   ];
   
-  // Removed withdraw function - replaced with automatic redirect after 3 books
+  // Removed withdraw function - replaced with automatic redirect after 5 books
   
   const handleSelectPlan = async (plan: 'free' | 'premium') => {
     await userDataManager.selectPlan(plan);
@@ -316,7 +316,7 @@ export default function Dashboard() {
     setLocation(`/book/${slug}`);
   };
   
-  // Removed book refresh functionality - now fixed to 3 books only
+  // Removed book refresh functionality - now fixed to 5 books only
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-green-50/20 to-white">
@@ -412,7 +412,7 @@ export default function Dashboard() {
                 });
                 return;
               }
-              // If user completed 3 books and is on free plan, redirect to onboarding
+              // If user completed 5 books and is on free plan, redirect to onboarding
               if (userData?.selectedPlan !== 'premium') {
                 setLocation('/onboarding-complete');
               } else {
@@ -429,7 +429,7 @@ export default function Dashboard() {
             }`}
             data-testid="button-withdraw"
           >
-            {!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3 ? (
+            {!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 5 ? (
               <>
                 Sacar saldo (Complete {5 - (userData?.stats?.totalBooksRead || 0)} livros)
               </>
@@ -445,7 +445,7 @@ export default function Dashboard() {
         {/* Welcome Message with color accent */}
         <section className="px-5 py-4 border-b border-green-100 bg-gradient-to-r from-transparent via-green-100/30 to-transparent">
           {userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 5 ? (
-            // Show completion message for users who finished 3 books
+            // Show completion message for users who finished 5 books
             <div className="space-y-3">
               <div>
                 <h2 className="text-base font-semibold text-gray-900">
@@ -473,7 +473,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h2 className="text-base font-semibold text-gray-900">
-                  <span className="text-green-500 font-semibold">3 novas</span> atividades disponíveis
+                  <span className="text-green-500 font-semibold">{5 - (userData?.stats?.totalBooksRead || 0)} {(5 - (userData?.stats?.totalBooksRead || 0)) === 1 ? 'nova' : 'novas'}</span> atividades disponíveis
                 </h2>
                 <p className="text-xs text-gray-600 mt-0.5">
                   Continue lendo para aumentar seus ganhos
@@ -507,7 +507,7 @@ export default function Dashboard() {
               
               // Determinar qual livro deve ter destaque
               const completedBooksCount = books.filter(b => userDataManager.isBookCompleted(b.slug)).length;
-              const shouldHighlight = !isCompleted && index === completedBooksCount && completedBooksCount < 3;
+              const shouldHighlight = !isCompleted && index === completedBooksCount && completedBooksCount < 5;
               
               return (
               <div

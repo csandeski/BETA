@@ -165,7 +165,7 @@ export default function Livros() {
                 <p className="text-xs text-gray-700 font-semibold uppercase">Lidos Hoje</p>
                 <p className="text-sm font-bold text-gray-900">
                   {completedBooksToday}/
-                  {userData?.selectedPlan === 'premium' ? '∞' : '3'}
+                  {userData?.selectedPlan === 'premium' ? '∞' : '5'}
                 </p>
               </div>
             </div>
@@ -179,9 +179,9 @@ export default function Livros() {
           <div className="flex gap-3">
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-amber-900">Complete 3 atividades primeiro</p>
+              <p className="text-sm font-semibold text-amber-900">Complete 5 atividades primeiro</p>
               <p className="text-xs text-amber-700 mt-1">
-                Você precisa completar {3 - totalBooksCompleted} atividades da página inicial antes de acessar a biblioteca premium.
+                Você precisa completar {5 - totalBooksCompleted} atividades da página inicial antes de acessar a biblioteca premium.
               </p>
             </div>
           </div>
@@ -195,14 +195,14 @@ export default function Livros() {
             <div>
               <p className="text-sm font-semibold text-purple-900">Limite diário atingido</p>
               <p className="text-xs text-purple-700 mt-1">
-                No plano gratuito você pode ler até 3 livros por dia. Faça upgrade para Premium e leia ilimitado!
+                No plano gratuito você pode ler até 5 livros por dia. Faça upgrade para Premium e leia ilimitado!
               </p>
               <button
                 onClick={() => {
                   playSound('click');
-                  // Check if user has read 3 books before showing upgrade modal
+                  // Check if user has read 5 books before showing upgrade modal
                   const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-                  if (totalBooksRead >= 3) {
+                  if (totalBooksRead >= 5) {
                     // Modal removed
                   } else {
                     setShowCompleteBooksModal(true);
@@ -222,7 +222,7 @@ export default function Livros() {
         <div className="grid gap-4">
           {books.map(book => {
             const isCompleted = userDataManager.isBookCompleted(book.slug);
-            const isLocked = hasReachedLimit && !userData?.selectedPlan && userData?.selectedPlan !== 'premium';
+            const isLocked = hasReachedLimit && userData?.selectedPlan !== 'premium';
             
             return (
               <div
@@ -320,11 +320,11 @@ export default function Livros() {
             </h2>
             
             <p className="text-sm text-gray-600 text-center mb-4">
-              Você precisa completar pelo menos 3 atividades da página inicial antes de acessar a biblioteca premium.
+              Você precisa completar pelo menos 5 atividades da página inicial antes de acessar a biblioteca premium.
             </p>
             
             <p className="text-xs text-gray-700 font-semibold text-center mb-6">
-              Atividades completadas: {totalBooksCompleted}/3
+              Atividades completadas: {totalBooksCompleted}/5
             </p>
             
             <button
@@ -354,7 +354,7 @@ export default function Livros() {
             </h2>
             
             <p className="text-sm text-gray-600 text-center mb-4">
-              No plano gratuito você pode ler até 3 livros por dia. Você já leu {completedBooksToday} livros hoje.
+              No plano gratuito você pode ler até 5 livros por dia. Você já leu {completedBooksToday} livros hoje.
             </p>
             
             <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 mb-6">
@@ -381,9 +381,9 @@ export default function Livros() {
                 onClick={() => {
                   playSound('click');
                   setShowLimitWarning(false);
-                  // Check if user has read 3 books before showing upgrade modal
+                  // Check if user has read 5 books before showing upgrade modal
                   const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-                  if (totalBooksRead >= 3) {
+                  if (totalBooksRead >= 5) {
                     // Modal removed
                   } else {
                     setShowCompleteBooksModal(true);
