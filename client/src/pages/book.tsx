@@ -2329,7 +2329,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
             <div className="text-right">
               <p className="text-xs text-gray-500 mb-1">Recompensa</p>
               <p className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
-                R$ {currentBook.reward}
+                R$ {currentBook.reward.toFixed(2).replace('.', ',')}
               </p>
             </div>
           </div>
@@ -2422,7 +2422,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
                   <div>
                     <p className="text-sm font-medium text-gray-900">Receba sua recompensa</p>
                     <p className="text-xs text-gray-600 mt-0.5">
-                      Ganhe <span className="font-semibold text-green-600">R$ {currentBook.reward},00</span> pela conclusão
+                      Ganhe <span className="font-semibold text-green-600">R$ {currentBook.reward.toFixed(2).replace('.', ',')}</span> pela conclusão
                     </p>
                   </div>
                 </div>
@@ -3005,7 +3005,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
               </h1>
               
               <div className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent text-center mb-6">
-                + R$ {currentBook.reward},00
+                + R$ {currentBook.reward.toFixed(2).replace('.', ',')}
               </div>
               
               <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-3 mb-6">
