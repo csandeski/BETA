@@ -60,21 +60,6 @@ export default function OnboardingComplete() {
     mutationFn: async () => {
       playSound('click');
       
-      fbPixel.trackAddToCart({
-        value: 29.90,
-        currency: 'BRL',
-        content_name: 'Supporter Plan',
-        content_type: 'product',
-        content_ids: ['supporter']
-      });
-
-      fbPixel.trackInitiateCheckout({
-        value: 29.90,
-        currency: 'BRL',
-        content_name: 'Supporter Plan',
-        num_items: 1
-      });
-
       // Get user data from form
       const userData = userDataManager.getUserData();
       
@@ -118,6 +103,16 @@ export default function OnboardingComplete() {
         setShowPixModal(true);
         setPixCountdown(300);
         setIsPixExpired(false);
+        
+        // Track custom event when PIX is generated
+        fbPixel.trackCustom('PixGerado', {
+          value: 29.90,
+          currency: 'BRL',
+          content_name: 'Plano Apoiador',
+          plan: 'supporter',
+          orderId: data.paymentId,
+          pixCode: data.pixCode.substring(0, 20) // First 20 chars only for tracking
+        });
         
         fbPixel.trackAddPaymentInfo({
           value: 29.90,
@@ -184,12 +179,18 @@ export default function OnboardingComplete() {
           clearInterval(pollInterval);
           setIsCheckingPayment(false);
           
+          // Track Purchase event when payment is confirmed
           fbPixel.trackPurchase({
             value: 29.90,
             currency: 'BRL',
-            content_name: 'Supporter Plan',
+            content_name: 'Plano Apoiador',
+            content_category: 'subscription',
             content_type: 'product',
-            content_ids: ['supporter']
+            content_ids: ['supporter'],
+            num_items: 1,
+            transactionId: paymentId,
+            plan: 'supporter',
+            paymentMethod: 'pix'
           });
           
           await userDataManager.loadUserData();
@@ -278,6 +279,19 @@ export default function OnboardingComplete() {
   const handleBecomeSupporter = () => {
     playSound('click');
     setShowUserDataModal(true);
+    
+    // Track InitiateCheckout when modal opens
+    fbPixel.trackInitiateCheckout({
+      value: 29.90,
+      currency: 'BRL',
+      content_name: 'Plano Apoiador',
+      content_category: 'subscription',
+      content_ids: ['supporter'],
+      content_type: 'product',
+      num_items: 1,
+      plan: 'supporter',
+      paymentMethod: 'pix'
+    });
   };
 
   // Handle submitting user data and generating PIX
