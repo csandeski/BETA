@@ -842,7 +842,7 @@ export default function OnboardingComplete() {
                       
                       <div className="relative flex items-center justify-center gap-3">
                         <Zap className="h-6 w-6 text-white drop-shadow-md" />
-                        <span className="text-white font-bold text-lg drop-shadow-md">Quero ativar minha conta</span>
+                        <span className="text-white font-bold text-lg drop-shadow-md">Ativar minha Conta</span>
                         <ChevronRight className="h-5 w-5 text-white drop-shadow-md group-hover:translate-x-1 transition-transform" />
                       </div>
                       
