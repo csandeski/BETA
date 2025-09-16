@@ -14,18 +14,21 @@ function completeGuestBook(bookData: any) {
   if (storedData) {
     const guestData = JSON.parse(storedData);
     
+    // Ensure reward is a number (it might come as string)
+    const rewardAmount = typeof bookData.reward === 'string' ? parseFloat(bookData.reward) : bookData.reward;
+    
     // Update main balance and earnings
-    guestData.balance += bookData.reward;
-    guestData.totalEarnings += bookData.reward;
+    guestData.balance += rewardAmount;
+    guestData.totalEarnings += rewardAmount;
     
     // Update stats
     guestData.stats.totalBooksRead += 1;
     guestData.stats.totalActivities += 1;
     guestData.stats.todayBooksRead += 1;
-    guestData.stats.totalEarnings += bookData.reward;
-    guestData.stats.todayEarnings += bookData.reward;
-    guestData.stats.weekEarnings += bookData.reward;
-    guestData.stats.monthEarnings += bookData.reward;
+    guestData.stats.totalEarnings += rewardAmount;
+    guestData.stats.todayEarnings += rewardAmount;
+    guestData.stats.weekEarnings += rewardAmount;
+    guestData.stats.monthEarnings += rewardAmount;
     
     // Update difficulty counts based on book difficulty
     if (bookData.difficulty === 'Fácil') {
@@ -47,7 +50,7 @@ function completeGuestBook(bookData: any) {
     // Update last seven days chart (add today's earning)
     const today = guestData.stats.lastSevenDays[guestData.stats.lastSevenDays.length - 1];
     if (today) {
-      today.valor += bookData.reward;
+      today.valor += rewardAmount;
     }
     
     // Add to completed books
