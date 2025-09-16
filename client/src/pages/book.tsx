@@ -148,7 +148,7 @@ export default function BookReading() {
     "o-poder-do-habito": {
       title: "O Poder do Hábito",
       author: "Charles Duhigg",
-      reward: 45,
+      reward: 29.25,
       category: "Desenvolvimento Pessoal",
       readingLevel: "Intermediário",
       difficulty: "Médio",
@@ -241,7 +241,7 @@ Lembre-se: pequenas vitórias levam a grandes mudanças. Comece com um hábito p
     "mindset": {
       title: "Mindset",
       author: "Carol S. Dweck",
-      reward: 38,
+      reward: 24.70,
       category: "Psicologia",
       readingLevel: "Básico",
       difficulty: "Fácil",
@@ -387,7 +387,7 @@ Lembre-se: pequenas vitórias levam a grandes mudanças. Comece com um hábito p
     "como-fazer-amigos": {
       title: "Como Fazer Amigos",
       author: "Dale Carnegie",
-      reward: 42,
+      reward: 27.30,
       category: "Relacionamentos",
       readingLevel: "Básico",
       difficulty: "Fácil",
@@ -701,9 +701,10 @@ Lembre-se: "Nossa mente complacente é uma máquina de tirar conclusões precipi
         }
       ]
     },
-    "pai-rico-pai-pobre": {
-      title: "Pai Rico, Pai Pobre",
-      author: "Robert Kiyosaki",
+    // Removed duplicate pai-rico-pai-pobre entry - see new one below
+    "pai-rico-pai-pobre-old": {
+      title: "Pai Rico, Pai Pobre (OLD)",
+      author: "Robert Kiyosaki", 
       reward: 40,
       category: "Finanças Pessoais",
       readingLevel: "Intermediário",
@@ -1969,6 +1970,363 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
           correct: 2
         }
       ]
+    },
+    "o-milagre-da-manha": {
+      title: "O Milagre da Manhã",
+      author: "Hal Elrod",
+      reward: 22.75,
+      category: "Produtividade",
+      readingLevel: "Básico",
+      difficulty: "Fácil",
+      synopsis: "Transforme sua vida antes das 8 da manhã com uma rotina matinal revolucionária que aumentará sua produtividade e felicidade.",
+      estimatedTime: "35 min",
+      chapters: 8,
+      pages: 180,
+      publishYear: 2012,
+      content: `O Milagre da Manhã - Hal Elrod
+
+      Como Transformar Sua Vida Antes das 8h
+
+      Hal Elrod morreu por 6 minutos. Foi atropelado por um motorista bêbado, quebrou 11 ossos, teve traumatismo craniano e os médicos disseram que ele nunca mais andaria. Mas ele não só voltou a andar como se tornou ultramaratonista e palestrante de sucesso.
+
+      O segredo? Uma rotina matinal que mudou tudo.
+
+      A Realidade Dolorosa: 95% das Pessoas Vivem Abaixo do Seu Potencial
+
+      Estatísticas chocantes:
+      • 41% das pessoas estão endividadas
+      • 52% não têm aposentadoria planejada
+      • 64% estão acima do peso
+      • Depressão é a principal causa de incapacidade no mundo
+
+      Por quê? Porque as pessoas acordam no último minuto, correm para o trabalho e repetem o ciclo. Nunca dedicam tempo para o desenvolvimento pessoal.
+
+      "Como você acorda cada manhã e como começa cada dia tem um impacto ENORME em seus níveis de sucesso em todas as áreas da vida."
+
+      O Life S.A.V.E.R.S. - Os 6 Hábitos Que Vão Salvar Sua Vida
+
+      S - SILENCE (Silêncio/Meditação) - 5 minutos
+      
+      Comece com silêncio intencional. Não pegue o celular! 
+      
+      Opções:
+      • Meditação
+      • Oração
+      • Reflexão
+      • Respiração profunda
+      • Gratidão
+
+      Benefícios comprovados: Reduz stress, melhora foco, aumenta clareza mental.
+
+      A - AFFIRMATIONS (Afirmações) - 5 minutos
+
+      Programe sua mente para o sucesso com afirmações poderosas.
+
+      Estrutura perfeita de afirmação:
+      1. O que você quer
+      2. Por que você quer
+      3. Quem você se compromete a ser
+      4. O que você se compromete a fazer
+      5. Como isso vai fazer você se sentir
+
+      Exemplo: "Eu me comprometo a acordar às 5h todos os dias porque isso me dá tempo para me desenvolver e me tornar a pessoa que preciso ser para criar a vida dos meus sonhos."
+
+      V - VISUALIZATION (Visualização) - 5 minutos
+
+      Atletas olímpicos usam visualização. Por que você não usaria?
+
+      Visualize três coisas:
+      1. Seus objetivos já alcançados (como você se sente?)
+      2. O processo para alcançá-los (você se vendo fazendo o trabalho)
+      3. Como será seu dia perfeito hoje
+
+      Jim Carrey escreveu um cheque de $10 milhões para si mesmo antes de ficar famoso. Anos depois, recebeu exatamente isso por um filme.
+
+      E - EXERCISE (Exercício) - 20 minutos
+
+      Apenas 20 minutos de exercício aumentam:
+      • Energia em 20%
+      • Foco em 30%
+      • Humor em 40%
+
+      Não precisa ser intenso:
+      • Yoga
+      • Caminhada
+      • Polichinelos
+      • Alongamento
+      • Dança
+
+      "Se você não tem tempo para exercício, terá que arranjar tempo para doença."
+
+      R - READING (Leitura) - 20 minutos
+
+      10 páginas por dia = 18 livros por ano = 180 livros em 10 anos
+
+      Imagine aprender com os 180 maiores especialistas do mundo. Como sua vida seria diferente?
+
+      Dica: Leia livros de desenvolvimento pessoal pela manhã. Ficção à noite.
+
+      S - SCRIBING (Escrita/Diário) - 5 minutos
+
+      Escrever clarifica pensamentos e acelera resultados.
+
+      O que escrever:
+      • 3 coisas pelas quais você é grato
+      • 3 objetivos para hoje
+      • 1 afirmação positiva
+      • Reflexões e insights
+      • Lições aprendidas
+
+      "As ideias não implementadas morrem. O diário as mantém vivas."
+
+      O Desafio dos 30 Dias
+
+      Comprometa-se com 30 dias seguidos. Por quê?
+      • Dias 1-10: Insuportável (você vai querer desistir)
+      • Dias 11-20: Desconfortável (mas gerenciável)
+      • Dias 21-30: Imparável (novo hábito formado)
+
+      Adaptações Importantes
+
+      Tempo curto? Faça a versão de 6 minutos:
+      • 1 minuto cada hábito
+
+      Não é pessoa matutina? 
+      • Comece acordando 15 minutos mais cedo
+      • Adicione 15 minutos por semana
+      • Em 1 mês, você terá 1 hora extra
+
+      Tem filhos pequenos?
+      • Acorde antes deles
+      • Ou faça com eles (ensine pelo exemplo)
+
+      A Equação do Sucesso
+
+      QUANDO você acorda + COMO você acorda = SUCESSO
+
+      Acordar cedo não é suficiente. Você precisa acordar com PROPÓSITO.
+
+      História Inspiradora: John, vendedor medíocre, implementou o Milagre da Manhã. Em 2 anos:
+      • Dobrou sua renda
+      • Perdeu 30kg
+      • Salvou seu casamento
+      • Escreveu um livro
+
+      Tudo começou acordando 1 hora mais cedo.
+
+      Seu Milagre Está Esperando
+
+      "Toda manhã você tem duas escolhas: continuar dormindo com seus sonhos ou acordar e persegui-los."
+
+      Amanhã de manhã, quando o despertador tocar, lembre-se: Você está a apenas uma manhã de distância de mudar toda sua vida.`,
+      questions: [
+        {
+          id: "q1",
+          question: "O que significa a sigla S.A.V.E.R.S. no método do Milagre da Manhã?",
+          options: ["Sono, Alimentação, Vida, Exercício, Reflexão, Sucesso", "Silêncio, Afirmações, Visualização, Exercício, Leitura, Escrita", "Saúde, Amor, Vitória, Energia, Riqueza, Sabedoria", "Simplicidade, Ação, Valor, Esforço, Resultado, Satisfação"],
+          correct: 1
+        },
+        {
+          id: "q2",
+          question: "Quantos dias o autor sugere para formar o novo hábito matinal?",
+          options: ["7 dias", "14 dias", "21 dias", "30 dias"],
+          correct: 3
+        },
+        {
+          id: "q3",
+          question: "Qual é a versão reduzida do Milagre da Manhã para quem tem pouco tempo?",
+          options: ["30 minutos no total", "15 minutos no total", "6 minutos (1 minuto por hábito)", "3 minutos no total"],
+          correct: 2
+        }
+      ]
+    },
+    "pai-rico-pai-pobre": {
+      title: "Pai Rico, Pai Pobre",
+      author: "Robert Kiyosaki",
+      reward: 26.00,
+      category: "Finanças",
+      readingLevel: "Intermediário",
+      difficulty: "Médio",
+      synopsis: "Aprenda a diferença entre trabalhar por dinheiro e fazer o dinheiro trabalhar para você com lições práticas de educação financeira.",
+      estimatedTime: "42 min",
+      chapters: 9,
+      pages: 220,
+      publishYear: 1997,
+      content: `Pai Rico, Pai Pobre - Robert Kiyosaki
+
+      O Que os Ricos Ensinam a Seus Filhos Sobre Dinheiro
+
+      Robert Kiyosaki teve dois pais: seu pai biológico (Pai Pobre) - PhD, educado, funcionário público. E o pai de seu melhor amigo (Pai Rico) - sem educação formal, empresário multimilionário.
+
+      A diferença? Mentalidade.
+
+      Pai Pobre dizia: "Não posso pagar isso."
+      Pai Rico perguntava: "COMO posso pagar isso?"
+
+      Uma fecha a mente. A outra força você a pensar.
+
+      Lição 1: Os Ricos Não Trabalham Por Dinheiro
+
+      Aos 9 anos, Robert e seu amigo Mike queriam ficar ricos. O Pai Rico concordou em ensiná-los, mas com uma condição: trabalhar de graça em sua loja.
+
+      Após semanas sem pagamento, Robert ficou furioso. Pai Rico sorriu: "Você está sentindo o que a maioria sente - raiva e frustração. Mas em vez de confrontar o medo, eles acordam e vão trabalhar esperando que o dinheiro acalme o medo."
+
+      A Armadilha do Rato (Rat Race):
+      Ganhar → Gastar → Precisar de mais → Trabalhar mais → Repetir
+
+      "A maioria das pessoas tem um preço. E têm um preço por causa das emoções chamadas medo e ganância."
+
+      Medo: De não pagar as contas
+      Ganância: De querer coisas melhores
+
+      Solução: Use as emoções a seu favor, não deixe elas controlarem você.
+
+      Lição 2: Alfabetização Financeira
+
+      "Não é quanto dinheiro você ganha, mas quanto dinheiro você mantém."
+
+      Regra #1 - Conheça a diferença entre ATIVO e PASSIVO:
+      • ATIVO = Coloca dinheiro no seu bolso
+      • PASSIVO = Tira dinheiro do seu bolso
+
+      Simples assim! Mas 95% das pessoas não entendem isso.
+
+      Exemplos CHOCANTES:
+      • Sua casa? PASSIVO (sim, mesmo que valorize!)
+      • Carro novo? PASSIVO
+      • Ações que pagam dividendos? ATIVO
+      • Imóvel alugado? ATIVO
+
+      Fluxo de Caixa dos Pobres:
+      Salário → Despesas → Zero
+
+      Fluxo de Caixa da Classe Média:
+      Salário → Passivos → Despesas maiores → Mais trabalho
+
+      Fluxo de Caixa dos Ricos:
+      Ativos → Renda → Mais ativos → Liberdade financeira
+
+      Lição 3: Cuide dos Seus Negócios
+
+      Ray Kroc (McDonald's) perguntou: "Em que negócio eu estou?"
+      Resposta óbvia: "Hamburgers!"
+      Ray: "Errado. Estou no negócio IMOBILIÁRIO."
+
+      McDonald's possui as melhores esquinas do mundo!
+
+      Seu verdadeiro negócio = Sua coluna de ATIVOS
+
+      Tipos de ativos para focar:
+      1. Negócios que não exigem sua presença
+      2. Ações e títulos
+      3. Imóveis que geram renda
+      4. Royalties (música, livros, patentes)
+      5. Qualquer coisa que valorize e tenha mercado
+
+      "Os ricos compram ativos. Os pobres só têm despesas. A classe média compra passivos pensando que são ativos."
+
+      Lição 4: A História dos Impostos
+
+      Os ricos sabem jogar o jogo:
+
+      Funcionário: Ganha → Paga imposto → Gasta
+      Empresário: Ganha → Gasta → Paga imposto sobre o que sobra
+
+      Corporações = Maior vantagem dos ricos
+
+      O Poder do Q.I. Financeiro:
+      1. Contabilidade (ler números)
+      2. Investimento (fazer dinheiro gerar dinheiro)
+      3. Mercados (oferta e demanda)
+      4. Legislação (jogar dentro das regras)
+
+      Lição 5: Os Ricos Inventam Dinheiro
+
+      História real: Robert comprou uma casa por $20.000 em leilão. Vendeu por $60.000. Tempo investido: 5 horas. Ganho: $40.000.
+
+      "A mente é o ativo mais poderoso que temos."
+
+      Duas opções na vida:
+      1. Jogar pelo seguro e nunca enriquecer
+      2. Jogar inteligentemente e criar oportunidades
+
+      Inteligência Financeira = Resolver problemas financeiros
+
+      Problema: Não tenho dinheiro para investir
+      Solução pobre: Desistir
+      Solução rica: Como posso criar dinheiro para investir?
+
+      Lição 6: Trabalhe Para Aprender, Não Por Dinheiro
+
+      JOB = Just Over Broke (Apenas Acima da Falência)
+
+      Habilidades essenciais que escolas não ensinam:
+      • Vendas e marketing
+      • Comunicação
+      • Liderança
+      • Gestão de pessoas
+      • Gestão de sistemas
+      • Gestão de fluxo de caixa
+
+      "Especialistas ganham bem. Generalistas ficam ricos."
+
+      Conselho controverso: Mude de emprego frequentemente para aprender habilidades diferentes. Cada emprego é uma universidade paga.
+
+      Os 5 Maiores Obstáculos
+
+      1. MEDO - Especialmente de perder dinheiro
+      "Todos têm medo de perder. A diferença é como você lida com o medo."
+
+      2. CINISMO - Dúvidas paralisantes
+      "Os cínicos criticam. Os vencedores analisam."
+
+      3. PREGUIÇA - Disfarçada de "estar ocupado"
+      "Pessoas ocupadas são frequentemente as mais preguiçosas."
+
+      4. MAUS HÁBITOS
+      "Pague-se primeiro, sempre."
+
+      5. ARROGÂNCIA
+      "O que eu não sei me faz perder dinheiro."
+
+      Como Começar
+
+      1. Encontre uma razão maior que a realidade - O PORQUÊ
+      2. Escolha diariamente - Cada gasto é uma escolha
+      3. Escolha seus amigos cuidadosamente - Você é a média dos 5
+      4. Domine uma fórmula e aprenda outra - Aprendizado contínuo
+      5. Pague-se primeiro - Automatize
+      6. Pague bem seus consultores - Bom conselho é barato
+      7. Seja um "doador indiano" - Doe esperando retorno
+      8. Use ativos para comprar luxos - Nunca o contrário
+      9. Heróis inspiram - Quem você admira?
+      10. Ensine e receberá - Quanto mais ensina, mais aprende
+
+      A Verdade Final
+
+      "Há um mundo de diferença entre ter dinheiro e ser rico. Ser rico é ter a liberdade de não se preocupar com dinheiro."
+
+      O segredo não é trabalhar duro. É trabalhar inteligentemente. Faça o dinheiro trabalhar duro para você.`,
+      questions: [
+        {
+          id: "q1",
+          question: "Qual é a diferença fundamental entre um ativo e um passivo segundo o livro?",
+          options: ["Ativo valoriza, passivo desvaloriza", "Ativo coloca dinheiro no bolso, passivo tira", "Ativo é investimento, passivo é dívida", "Ativo é imóvel, passivo é carro"],
+          correct: 1
+        },
+        {
+          id: "q2",
+          question: "Por que Robert Kiyosaki diz que sua casa NÃO é um ativo?",
+          options: ["Porque casas sempre desvalorizam", "Porque tira dinheiro do bolso com despesas", "Porque imóveis são maus investimentos", "Porque ele prefere alugar"],
+          correct: 1
+        },
+        {
+          id: "q3",
+          question: "Qual é a principal lição sobre trabalhar por dinheiro?",
+          options: ["Sempre peça aumento", "Trabalhe mais horas para ganhar mais", "Trabalhe para aprender, não por dinheiro", "Encontre o emprego com maior salário"],
+          correct: 2
+        }
+      ]
     }
   };
 
@@ -2135,8 +2493,8 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
           
           const updatedGuestData = completeGuestBook(bookData);
           
-          // Check if this was the guest's 3rd book and redirect automatically
-          if (updatedGuestData?.stats?.totalBooksRead >= 3) {
+          // Check if this was the guest's 5th book and redirect automatically
+          if (updatedGuestData?.stats?.totalBooksRead >= 5) {
             // Wait a bit for the reward modal to show, then redirect
             setTimeout(() => {
               setLocation('/onboarding-complete');

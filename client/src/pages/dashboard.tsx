@@ -171,7 +171,7 @@ export default function Dashboard() {
         const celebrationKey = 'hasSeenThreeBooksCelebration';
         const hasSeenCelebrationBefore = localStorage.getItem(celebrationKey) === 'true';
         
-        if (data.stats.totalBooksRead >= 3 && !hasSeenCelebrationBefore) {
+        if (data.stats.totalBooksRead >= 5 && !hasSeenCelebrationBefore) {
           // Mark as seen (modal removed)
           localStorage.setItem(celebrationKey, 'true');
         }
@@ -227,7 +227,7 @@ export default function Dashboard() {
       id: 1,
       title: "O Poder do Hábito",
       author: "Charles Duhigg",
-      reward: "45",
+      reward: "29.25",
       pages: 408,
       rating: 4.5,
       readTime: "8 min",
@@ -241,7 +241,7 @@ export default function Dashboard() {
       id: 2,
       title: "Mindset",
       author: "Carol S. Dweck",
-      reward: "38",
+      reward: "24.70",
       pages: 312,
       rating: 4.7,
       readTime: "5 min",
@@ -255,7 +255,7 @@ export default function Dashboard() {
       id: 3,
       title: "Como Fazer Amigos",
       author: "Dale Carnegie",
-      reward: "42",
+      reward: "27.30",
       pages: 256,
       rating: 4.8,
       readTime: "6 min",
@@ -264,6 +264,34 @@ export default function Dashboard() {
       color: "from-blue-400 to-indigo-500",
       slug: "como-fazer-amigos",
       synopsis: "Aprenda técnicas infalíveis para melhorar seus relacionamentos, influenciar pessoas positivamente e construir conexões duradouras."
+    },
+    {
+      id: 4,
+      title: "O Milagre da Manhã",
+      author: "Hal Elrod",
+      reward: "22.75",
+      pages: 180,
+      rating: 4.6,
+      readTime: "7 min",
+      isNew: false,
+      difficulty: "Fácil",
+      color: "from-amber-400 to-orange-500",
+      slug: "o-milagre-da-manha",
+      synopsis: "Transforme sua vida antes das 8 da manhã com uma rotina matinal revolucionária que aumentará sua produtividade e felicidade."
+    },
+    {
+      id: 5,
+      title: "Pai Rico, Pai Pobre",
+      author: "Robert Kiyosaki",
+      reward: "26.00",
+      pages: 220,
+      rating: 4.5,
+      readTime: "8 min",
+      isNew: true,
+      difficulty: "Médio",
+      color: "from-cyan-400 to-blue-500",
+      slug: "pai-rico-pai-pobre",
+      synopsis: "Aprenda a diferença entre trabalhar por dinheiro e fazer o dinheiro trabalhar para você com lições práticas de educação financeira."
     },
   ];
   
@@ -279,8 +307,8 @@ export default function Dashboard() {
   const handleStartReading = (slug: string) => {
     playSound('click');
     
-    // If user completed 3 books and is on free plan, redirect to onboarding
-    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.selectedPlan !== 'premium') {
+    // If user completed 5 books and is on free plan, redirect to onboarding
+    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 5 && userData?.selectedPlan !== 'premium') {
       setLocation('/onboarding-complete');
       return;
     }
@@ -376,10 +404,10 @@ export default function Dashboard() {
             onClick={() => {
               playSound('click');
               // Check if user has completed minimum activities
-              if (!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3) {
+              if (!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 5) {
                 toast({
                   title: "Complete as atividades primeiro",
-                  description: "Você precisa completar 3 livros antes de poder sacar.",
+                  description: "Você precisa completar 5 livros antes de poder sacar.",
                   variant: "destructive"
                 });
                 return;
@@ -391,9 +419,9 @@ export default function Dashboard() {
                 setLocation('/carteira');
               }
             }}
-            disabled={!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3}
+            disabled={!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 5}
             className={`w-full py-3.5 text-white text-sm font-semibold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
-              !userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3
+              !userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 5
                 ? 'bg-gray-400 cursor-not-allowed opacity-60'
                 : `bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 hover:shadow-lg ${
                     userData?.canWithdraw ? 'animate-pulse ring-2 ring-green-400 ring-offset-2' : ''
@@ -403,7 +431,7 @@ export default function Dashboard() {
           >
             {!userData?.stats?.totalBooksRead || userData.stats.totalBooksRead < 3 ? (
               <>
-                Sacar saldo (Complete {3 - (userData?.stats?.totalBooksRead || 0)} livros)
+                Sacar saldo (Complete {5 - (userData?.stats?.totalBooksRead || 0)} livros)
               </>
             ) : (
               <>
@@ -416,7 +444,7 @@ export default function Dashboard() {
 
         {/* Welcome Message with color accent */}
         <section className="px-5 py-4 border-b border-green-100 bg-gradient-to-r from-transparent via-green-100/30 to-transparent">
-          {userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 ? (
+          {userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 5 ? (
             // Show completion message for users who finished 3 books
             <div className="space-y-3">
               <div>
@@ -456,7 +484,7 @@ export default function Dashboard() {
                   playSound('click');
                 }}
                 className={`p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg transition-all ${
-                  userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 
+                  userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 5 
                     ? 'hover:from-green-200 hover:to-emerald-200 cursor-pointer'
                     : 'cursor-default'
                 }`}

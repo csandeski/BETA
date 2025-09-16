@@ -174,10 +174,10 @@ export default function Books() {
     if (userData?.selectedPlan === 'free' || !userData?.selectedPlan) {
       const todayBooks = userData?.stats?.todayBooksRead || 0;
       
-      if (todayBooks >= 3) {
-        // Check if user has read 3 books total before showing upgrade modal
+      if (todayBooks >= 5) {
+        // Check if user has read 5 books total before showing upgrade modal
         const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-        if (totalBooksRead >= 3) {
+        if (totalBooksRead >= 5) {
           // Modal removed
         } else {
           setShowCompleteBooksModal(true);

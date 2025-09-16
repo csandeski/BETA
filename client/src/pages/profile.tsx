@@ -597,9 +597,9 @@ export default function ProfilePage() {
           onClick={() => {
             playSound('click');
             if (!userData?.selectedPlan || userData.selectedPlan !== 'premium') {
-              // Check if user has read 3 books - redirect to onboarding complete
+              // Check if user has read 5 books - redirect to onboarding complete
               const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-              if (totalBooksRead >= 3) {
+              if (totalBooksRead >= 5) {
                 setLocation('/onboarding-complete');
               } else {
                 setShowCompleteBooksModal(true);

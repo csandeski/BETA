@@ -65,7 +65,7 @@ export default function WalletPage() {
   const weekEarnings = userData?.stats.weekEarnings || 0;
   const monthlyProgress = (monthEarnings / monthlyGoal) * 100;
   
-  const canWithdraw = totalBooksRead >= 3;
+  const canWithdraw = totalBooksRead >= 5;
 
   const transactions = userData?.transactions.slice(-10).reverse() || [];
 
@@ -73,10 +73,10 @@ export default function WalletPage() {
     playSound('click');
     
     // Check if user has completed minimum activities
-    if (totalBooksRead < 3) {
+    if (totalBooksRead < 5) {
       toast({
         title: "Complete as atividades primeiro",
-        description: "Você precisa completar 3 livros antes de poder sacar.",
+        description: "Você precisa completar 5 livros antes de poder sacar.",
         variant: "destructive"
       });
       return;

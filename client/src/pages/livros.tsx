@@ -44,8 +44,9 @@ export default function Livros() {
   }).length || 0;
   
   const totalBooksCompleted = userData?.stats.totalBooksRead || 0;
-  const hasCompletedActivities = totalBooksCompleted >= 3;
-  const canReadMore = userData?.selectedPlan === 'premium' || completedBooksToday < 3;
+  // Users can read up to 5 books before payment is required
+  const hasReachedLimit = totalBooksCompleted >= 5;
+  const canReadMore = userData?.selectedPlan === 'premium' || completedBooksToday < 5;
 
   const books = [
     {
@@ -55,7 +56,7 @@ export default function Livros() {
       author: "Charles Duhigg",
       category: "Desenvolvimento Pessoal",
       rating: 4.8,
-      reward: 45,
+      reward: 29.25,
       readTime: "45 min",
       color: "from-purple-500 to-indigo-500"
     },
@@ -66,7 +67,7 @@ export default function Livros() {
       author: "Carol S. Dweck",
       category: "Psicologia",
       rating: 4.7,
-      reward: 38,
+      reward: 24.70,
       readTime: "40 min",
       color: "from-pink-500 to-rose-500"
     },
@@ -77,7 +78,7 @@ export default function Livros() {
       author: "Dale Carnegie",
       category: "Relacionamentos",
       rating: 4.9,
-      reward: 42,
+      reward: 27.30,
       readTime: "50 min",
       color: "from-green-500 to-emerald-500"
     },
@@ -88,7 +89,7 @@ export default function Livros() {
       author: "Hal Elrod",
       category: "Produtividade",
       rating: 4.6,
-      reward: 35,
+      reward: 22.75,
       readTime: "35 min",
       color: "from-amber-500 to-orange-500"
     },
@@ -99,20 +100,9 @@ export default function Livros() {
       author: "Robert Kiyosaki",
       category: "Finanças",
       rating: 4.5,
-      reward: 40,
+      reward: 26.00,
       readTime: "42 min",
       color: "from-blue-500 to-cyan-500"
-    },
-    {
-      id: 6,
-      slug: "o-poder-da-acao",
-      title: "O Poder da Ação",
-      author: "Paulo Vieira",
-      category: "Motivação",
-      rating: 4.4,
-      reward: 33,
-      readTime: "38 min",
-      color: "from-red-500 to-pink-500"
     }
   ];
 
@@ -124,17 +114,14 @@ export default function Livros() {
       return;
     }
     
-    // If user completed 3 books and is on free plan, redirect to onboarding
-    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.selectedPlan !== 'premium') {
+    // If user completed 5 books and is on free plan, redirect to onboarding
+    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 5 && userData?.selectedPlan !== 'premium') {
       setLocation('/onboarding-complete');
       return;
     }
     
-    // Verifica se completou as 3 atividades
-    if (!hasCompletedActivities) {
-      setShowActivityWarning(true);
-      return;
-    }
+    // No longer blocking users before they complete 5 activities
+    // They can read freely until they reach the limit
     
     // Verifica se atingiu o limite diário
     if (!canReadMore) {
@@ -186,8 +173,8 @@ export default function Livros() {
         </div>
       </header>
 
-      {/* Warning Banner */}
-      {!hasCompletedActivities && (
+      {/* Warning Banner - removed, users can read freely up to 5 books */}
+      {false && (
         <div className="mx-5 mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <div className="flex gap-3">
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
@@ -201,7 +188,7 @@ export default function Livros() {
         </div>
       )}
 
-      {!canReadMore && hasCompletedActivities && (
+      {!canReadMore && hasReachedLimit && (
         <div className="mx-5 mt-4 p-4 bg-purple-50 border border-purple-200 rounded-xl">
           <div className="flex gap-3">
             <Crown className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
@@ -235,7 +222,7 @@ export default function Livros() {
         <div className="grid gap-4">
           {books.map(book => {
             const isCompleted = userDataManager.isBookCompleted(book.slug);
-            const isLocked = !hasCompletedActivities || (!canReadMore && !isCompleted);
+            const isLocked = hasReachedLimit && !userData?.selectedPlan && userData?.selectedPlan !== 'premium';
             
             return (
               <div
@@ -261,7 +248,7 @@ export default function Livros() {
                     <div className="bg-white/95 p-3 rounded-xl shadow-lg">
                       <Lock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                       <p className="text-xs font-semibold text-gray-700">
-                        {!hasCompletedActivities ? 'Complete 3 atividades' : 'Limite diário atingido'}
+                        {hasReachedLimit ? 'Limite de 5 livros atingido' : 'Disponível'}
                       </p>
                     </div>
                   </div>
