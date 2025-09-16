@@ -95,6 +95,17 @@ export default function UpgradeFlow() {
       content_category: 'upgrade_flow',
       content_type: 'page'
     });
+    
+    // Track InitiateCheckout when user reaches checkout step
+    if (currentStep === 'checkout') {
+      fbPixel.trackInitiateCheckout({
+        value: 29.90,
+        currency: 'BRL',
+        content_name: 'Plano Premium',
+        content_category: 'subscription',
+        num_items: 1
+      });
+    }
   }, [currentStep]);
 
   // Form setup
