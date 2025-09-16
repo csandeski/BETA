@@ -598,20 +598,21 @@ export default function OnboardingComplete() {
           </div>
 
           {/* Supporter Plan */}
-          <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            {/* Recommended Badge - Improved Design */}
-            <div className="absolute top-3 right-3 z-10">
-              <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-                <Sparkles className="h-3 w-3" />
+          <div className="relative">
+            {/* Recommended Badge - Positioned at the top */}
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+              <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap">
+                <Sparkles className="h-3.5 w-3.5" />
                 <span>MAIS POPULAR</span>
               </div>
             </div>
             
-            {/* Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 pointer-events-none"></div>
-            
-            {/* Plan Header */}
-            <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-5">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 mt-2">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 pointer-events-none"></div>
+              
+              {/* Plan Header */}
+              <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
@@ -672,6 +673,7 @@ export default function OnboardingComplete() {
                   </div>
                 </li>
               </ul>
+            </div>
             </div>
           </div>
 
