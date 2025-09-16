@@ -126,8 +126,16 @@ export default function Dashboard() {
       const authData = await authResponse.json();
       
       if (!authData.isLoggedIn || !authData.userId) {
-        // User is not logged in - create guest data
-        const guestData = createGuestUserData();
+        // User is not logged in - load or create guest data
+        const storedData = localStorage.getItem('guestUserData');
+        let guestData;
+        if (storedData) {
+          // Load existing guest data from localStorage
+          guestData = JSON.parse(storedData);
+        } else {
+          // Create new guest data only if it doesn't exist
+          guestData = createGuestUserData();
+        }
         setUserData(guestData);
         setIsGuestUser(true);
         return;
