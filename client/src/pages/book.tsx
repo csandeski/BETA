@@ -2444,7 +2444,7 @@ DESEJO + FÉ + AUTOSUGESTÃO + CONHECIMENTO + IMAGINAÇÃO + PLANEJAMENTO + DECI
                 className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-2xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg hover:shadow-xl"
                 data-testid="button-start-reading"
               >
-                Começar Leitura
+                Começar Atividade
               </button>
             </div>
           </div>

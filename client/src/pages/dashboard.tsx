@@ -613,7 +613,7 @@ export default function Dashboard() {
                     <button 
                       onClick={() => handleStartReading(book.slug)}
                       className="w-full text-sm font-bold text-white bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 transition-all rounded-xl flex items-center justify-center gap-1.5 py-3.5 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 border-b-4 border-green-700 hover:border-green-800">
-                    Começar leitura
+                    Começar Atividade
                     <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
                     </button>
                   </div>
