@@ -49,7 +49,7 @@ export default function OnboardingComplete() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { playSound } = useSound();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(6);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [userFullName, setUserFullName] = useState("");
@@ -408,42 +408,11 @@ export default function OnboardingComplete() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-6 px-4">
       <div className="max-w-md mx-auto">
-        {/* Progress Bar */}
-        {currentStep <= 5 && (
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              {[...Array(totalSteps)].map((_, index) => (
-                <div key={index} className="flex items-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      index + 1 <= currentStep
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
-                        : 'bg-gray-200 text-gray-500'
-                    }`}
-                  >
-                    {index + 1 <= currentStep ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <span className="text-sm font-semibold">{index + 1}</span>
-                    )}
-                  </div>
-                  {index < totalSteps - 1 && (
-                    <div
-                      className={`w-full h-1 mx-1 transition-all ${
-                        index + 1 < currentStep
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                          : 'bg-gray-200'
-                      }`}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Progress Bar - Removed for direct payment flow */}
 
-        {/* Step 1: Benefits Overview */}
-        {currentStep === 1 && (
+        {/* Steps 1-5 removed - going directly to payment form */}
+        {/* Step 1: Benefits Overview - REMOVED */}
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4 shadow-xl">
@@ -494,8 +463,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 2: Success Timeline */}
-        {currentStep === 2 && (
+        {/* Step 2: Success Timeline - REMOVED */}
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -576,8 +545,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 3: Special Bonus */}
-        {currentStep === 3 && (
+        {/* Step 3: Special Bonus - REMOVED */}
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-xl animate-bounce">
@@ -657,8 +626,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 4: Social Proof */}
-        {currentStep === 4 && (
+        {/* Step 4: Social Proof - REMOVED */}
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -723,8 +692,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 5: Pricing Card */}
-        {currentStep === 5 && (
+        {/* Step 5: Pricing Card - REMOVED */}
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -1351,14 +1320,7 @@ export default function OnboardingComplete() {
                 </button>
               </div>
 
-              {/* Back Button */}
-              <button
-                onClick={() => setCurrentStep(5)}
-                className="w-full text-gray-500 text-sm hover:text-gray-700 transition-colors py-2"
-              >
-                <ChevronLeft className="inline h-4 w-4 mr-1" />
-                Voltar ao resumo
-              </button>
+              {/* Back Button - Removed for direct payment flow */}
             </div>
 
             {/* Enhanced Trust Badges */}
