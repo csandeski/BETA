@@ -28,6 +28,7 @@ function Router() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
+  const [needsPaymentFlow, setNeedsPaymentFlow] = useState(false);
   
   // Check if user is logged in via API
   useEffect(() => {
@@ -47,6 +48,22 @@ function Router() {
           await userDataManager.loadUserData();
           const data = userDataManager.getUserData();
           setUserData(data);
+          
+          // Check if user needs to complete payment flow
+          // User needs payment if: has completed 3+ activities AND is not a supporter
+          const hasCompleted3Books = (data?.stats?.totalBooksRead || 0) >= 5;
+          const isSupporter = data?.plan === 'premium';
+          const hasSeenPricing = localStorage.getItem('pricing_seen_v1') === 'true';
+          
+          if (hasCompleted3Books && !isSupporter) {
+            setNeedsPaymentFlow(true);
+            // Mark as seen if they've completed 5 books
+            if (!hasSeenPricing) {
+              localStorage.setItem('pricing_seen_v1', 'true');
+            }
+          } else {
+            setNeedsPaymentFlow(false);
+          }
         } catch (error) {
           console.error('Failed to load user data:', error);
         } finally {
@@ -58,8 +75,23 @@ function Router() {
         if (guestDataStr) {
           const guestData = JSON.parse(guestDataStr);
           setUserData(guestData);
+          
+          // Check if guest needs to complete payment flow
+          const hasCompleted3Books = (guestData?.stats?.totalBooksRead || 0) >= 5;
+          const hasSeenPricing = localStorage.getItem('pricing_seen_v1') === 'true';
+          
+          if (hasCompleted3Books) {
+            setNeedsPaymentFlow(true);
+            // Mark as seen if they've completed 5 books
+            if (!hasSeenPricing) {
+              localStorage.setItem('pricing_seen_v1', 'true');
+            }
+          } else {
+            setNeedsPaymentFlow(false);
+          }
         } else {
           setUserData(null);
+          setNeedsPaymentFlow(false);
         }
         setIsLoadingUserData(false);
       }
@@ -67,6 +99,14 @@ function Router() {
     
     loadUserData();
   }, [isLoggedIn, location]); // Add location to deps to recheck on navigation
+
+  // Global payment flow enforcement
+  useEffect(() => {
+    if (!isLoadingUserData && needsPaymentFlow && location !== '/onboarding-complete') {
+      // Force redirect to onboarding payment flow
+      setLocation('/onboarding-complete');
+    }
+  }, [location, needsPaymentFlow, isLoadingUserData, setLocation]);
   
   // Show nav on appropriate pages (for both logged in and guest users)
   const showNav = location !== '/' && !location.startsWith('/book/') && location !== '/celebration' && location !== '/confirm' && location !== '/payment' && location !== '/admin' && location !== '/planos' && location !== '/onboarding-complete';
