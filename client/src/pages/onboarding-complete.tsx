@@ -1433,10 +1433,10 @@ export default function OnboardingComplete() {
 
         {/* PIX Payment Modal */}
         {showPaymentModal && (
-          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-            <div className="bg-white w-full h-full max-w-md overflow-y-auto">
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+            <div className="bg-white w-full max-w-md rounded-2xl max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between rounded-t-2xl z-10">
                 <div>
                   <h3 className="font-bold text-lg">Pagamento PIX</h3>
                   <p className="text-xs text-gray-600">Escaneie ou copie o código</p>
@@ -1451,16 +1451,16 @@ export default function OnboardingComplete() {
               </div>
 
               {/* Content */}
-              <div className="p-6 space-y-6">
+              <div className="p-4 space-y-4">
                 {/* Timer */}
                 {!isPixExpired ? (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Clock className="h-5 w-5 text-yellow-600" />
-                        <span className="text-sm font-semibold text-gray-900">Código expira em:</span>
+                        <Clock className="h-4 w-4 text-yellow-600" />
+                        <span className="text-xs font-semibold text-gray-900">Código expira em:</span>
                       </div>
-                      <span className="text-lg font-bold text-yellow-600">
+                      <span className="text-sm font-bold text-yellow-600">
                         {pixExpirationTimer()}
                       </span>
                     </div>
@@ -1478,64 +1478,73 @@ export default function OnboardingComplete() {
                 )}
 
                 {/* Amount */}
-                <div className="text-center mb-6">
+                <div className="text-center mb-4">
                   <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide">Valor a pagar</p>
-                  <p className="text-4xl font-bold text-gray-900 mt-2">R$ 29,00</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-1">R$ 29,00</p>
                 </div>
                 
                 {/* QR Code */}
                 {!isPixExpired && (
                   <>
-                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-inner">
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex justify-center">
                       <QRCode
                         value={pixCode}
-                        size={240}
-                        className="w-full h-auto"
+                        size={180}
+                        className="w-auto h-auto"
                         bgColor="#FFFFFF"
                         fgColor="#000000"
                       />
                     </div>
 
-                    {/* Copy Code */}
-                    <div className="space-y-3">
+                    {/* Copy Code Button */}
+                    <Button
+                      onClick={copyToClipboard}
+                      variant="outline"
+                      className="w-full h-12 font-semibold border-2 hover:bg-gray-50"
+                      data-testid="button-copy-pix"
+                    >
+                      {copiedToClipboard ? (
+                        <>
+                          <Check className="h-5 w-5 mr-2 text-green-600" />
+                          Código copiado!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-5 w-5 mr-2" />
+                          Copiar código PIX
+                        </>
+                      )}
+                    </Button>
+                    
+                    {/* PIX Code Text */}
+                    <div className="space-y-2">
                       <p className="text-center text-xs text-gray-500">
                         Ou copie o código PIX abaixo:
                       </p>
-                      <div className="bg-gray-50 rounded-lg p-3 relative group">
-                        <p className="text-xs text-gray-600 font-mono break-all pr-10">
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <p className="text-[10px] text-gray-600 font-mono break-all leading-relaxed">
                           {pixCode}
                         </p>
-                        <button
-                          onClick={copyToClipboard}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                          data-testid="button-copy-pix"
-                        >
-                          {copiedToClipboard ? (
-                            <Check className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Copy className="h-4 w-4 text-gray-500" />
-                          )}
-                        </button>
                       </div>
                     </div>
 
                     {/* Instructions */}
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-sm text-blue-900 mb-3">Como pagar:</h4>
-                      <ol className="space-y-2 text-xs text-blue-700">
-                        <li className="flex items-start gap-2">
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <h4 className="font-semibold text-xs text-blue-900 mb-2">Como pagar:</h4>
+                      <ol className="space-y-1 text-xs text-blue-700">
+                        <li className="flex items-center gap-2">
                           <span className="font-bold text-blue-600">1.</span>
                           <span>Abra o app do seu banco</span>
                         </li>
-                        <li className="flex items-start gap-2">
+                        <li className="flex items-center gap-2">
                           <span className="font-bold text-blue-600">2.</span>
                           <span>Escolha pagar com PIX</span>
                         </li>
-                        <li className="flex items-start gap-2">
+                        <li className="flex items-center gap-2">
                           <span className="font-bold text-blue-600">3.</span>
                           <span>Escaneie o QR Code ou copie o código</span>
                         </li>
-                        <li className="flex items-start gap-2">
+                        <li className="flex items-center gap-2">
                           <span className="font-bold text-blue-600">4.</span>
                           <span>Confirme o pagamento de R$ 29,00</span>
                         </li>
