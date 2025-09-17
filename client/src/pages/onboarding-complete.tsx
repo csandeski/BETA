@@ -1305,50 +1305,43 @@ export default function OnboardingComplete() {
               </div>
             </Card>
 
-            {/* Enhanced Payment Method */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl blur-lg opacity-20"></div>
-              <Card className="relative overflow-hidden border-0 shadow-xl">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-1">
-                  <div className="bg-white rounded-t-xl p-5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl blur-sm"></div>
-                          <div className="relative p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl shadow-lg">
-                            <div className="text-white font-bold text-sm">PIX</div>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900 text-base">Pagamento via PIX</p>
-                          <p className="text-xs text-gray-600">Aprovação instantânea • 100% seguro</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <div className="flex items-center gap-1">
-                              <CheckCircle className="h-3 w-3 text-green-500" />
-                              <span className="text-[10px] text-gray-600">Sem taxas</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3 text-blue-500" />
-                              <span className="text-[10px] text-gray-600">Instantâneo</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Shield className="h-3 w-3 text-purple-500" />
-                              <span className="text-[10px] text-gray-600">Seguro</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center">
-                          <CheckCircle className="h-6 w-6 text-green-600" />
-                        </div>
-                        <p className="text-[9px] text-gray-500 mt-1">Aprovado</p>
-                      </div>
-                    </div>
-                  </div>
+            {/* Payment Method Card - Compact Version */}
+            <Card className="p-3 border-green-200 bg-gradient-to-br from-green-50/30 to-emerald-50/30">
+              <div className="flex items-center gap-3">
+                {/* PIX Logo */}
+                <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg shadow-sm">
+                  <div className="text-white font-bold text-xs">PIX</div>
                 </div>
-              </Card>
-            </div>
+                
+                {/* Content */}
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 text-sm">Pagamento via PIX</p>
+                  <p className="text-xs text-gray-600">Aprovação instantânea • 100% seguro</p>
+                </div>
+                
+                {/* Approved Badge */}
+                <div className="flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full">
+                  <CheckCircle className="h-3 w-3 text-green-600" />
+                  <span className="text-xs text-green-700 font-medium">Aprovado</span>
+                </div>
+              </div>
+              
+              {/* Benefits Row */}
+              <div className="flex items-center gap-3 mt-2 pt-2 border-t border-green-100">
+                <div className="flex items-center gap-1">
+                  <Check className="h-3 w-3 text-green-500" />
+                  <span className="text-xs text-gray-600">Sem taxas</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3 text-green-500" />
+                  <span className="text-xs text-gray-600">Instantâneo</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Shield className="h-3 w-3 text-green-500" />
+                  <span className="text-xs text-gray-600">Seguro</span>
+                </div>
+              </div>
+            </Card>
 
             {/* Enhanced Submit Buttons */}
             <div className="space-y-4">
