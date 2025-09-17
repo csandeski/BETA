@@ -880,18 +880,240 @@ export default function OnboardingComplete() {
               </Card>
             </div>
 
-            {/* Testimonial */}
-            <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-              <div className="flex gap-2 mb-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                ))}
+            {/* Testimonials Section */}
+            <div className="space-y-3">
+              {/* Testimonials Header with Stats */}
+              <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl p-4 text-white">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="font-bold text-base">Avaliações dos Usuários</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <span className="text-sm font-bold text-yellow-400">4.9/5.0</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-300">Total de feedbacks</p>
+                    <p className="text-sm font-bold">884 comentários</p>
+                    <p className="text-xs text-gray-400">533 avaliações</p>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-gray-700 italic mb-2">
-                "Vale cada centavo! Agora leio sem limites e ainda ganho muito mais rápido!"
-              </p>
-              <p className="text-xs text-gray-500 font-semibold">- Maria Silva, membro há 2 anos</p>
-            </Card>
+
+              {/* Individual Testimonials */}
+              <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+                {/* Testimonial 1 */}
+                <Card className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      MS
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">Maria Silva</span>
+                        <span className="text-xs text-gray-500">• há 2 anos</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Vale cada centavo! Agora leio sem limites e ainda ganho muito mais rápido!"
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 2 */}
+                <Card className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      PC
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">Pedro Costa</span>
+                        <span className="text-xs text-gray-500">• há 8 meses</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Melhor investimento que fiz! Já recuperei o valor no primeiro mês."
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 3 */}
+                <Card className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      AF
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">Ana Ferreira</span>
+                        <span className="text-xs text-gray-500">• há 1 ano</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Suporte VIP faz toda a diferença! Respondem em minutos."
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 4 */}
+                <Card className="p-3 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      JO
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">João Oliveira</span>
+                        <span className="text-xs text-gray-500">• há 3 meses</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Saque sem valor mínimo é perfeito! Posso sacar quando quiser."
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 5 */}
+                <Card className="p-3 bg-gradient-to-r from-red-50 to-pink-50 border-red-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      LS
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">Lucia Santos</span>
+                        <span className="text-xs text-gray-500">• há 6 meses</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 4].map((star, i) => (
+                          <Star key={i} className={`h-3 w-3 ${i < 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}`} />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Ótima plataforma! Só gostaria de mais livros de romance."
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 6 */}
+                <Card className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      RM
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">Rafael Mendes</span>
+                        <span className="text-xs text-gray-500">• há 2 semanas</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Impressionante! Já li 15 livros esse mês e ganhei R$ 450!"
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 7 */}
+                <Card className="p-3 bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      BG
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">Beatriz Gomes</span>
+                        <span className="text-xs text-gray-500">• há 5 meses</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Pagamento único é ótimo! Sem mensalidades me preocupando."
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 8 */}
+                <Card className="p-3 bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      CS
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">Carlos Souza</span>
+                        <span className="text-xs text-gray-500">• há 1 mês</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Recomendo! Atividades ilimitadas e ganhos reais comprovados."
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 9 */}
+                <Card className="p-3 bg-gradient-to-r from-rose-50 to-pink-50 border-rose-200">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      FB
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-gray-900">Fernanda Barbosa</span>
+                        <span className="text-xs text-gray-500">• há 4 meses</span>
+                      </div>
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-700 italic">
+                        "Plataforma séria e confiável. Pagamentos sempre em dia!"
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
           </div>
         )}
 
