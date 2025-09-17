@@ -292,14 +292,6 @@ export default function OnboardingComplete() {
       
       // Start automatic payment checking
       startPaymentCheck();
-      
-      // Track checkout initiation
-      fbPixel.trackInitiateCheckout({
-        value: 29.00,
-        currency: 'BRL',
-        content_name: 'Account Activation',
-        num_items: 1
-      });
     },
     onError: (error: Error) => {
       toast({
