@@ -66,7 +66,7 @@ export default function OnboardingComplete() {
   const [paymentOrderId, setPaymentOrderId] = useState("");
   const [isTimeoutReached, setIsTimeoutReached] = useState(false);
 
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   useEffect(() => {
     const savedData = userDataManager.getUserData();
@@ -287,7 +287,7 @@ export default function OnboardingComplete() {
       expiration.setMinutes(expiration.getMinutes() + 5);
       setPixExpiration(expiration.toISOString());
       
-      setShowPaymentModal(true);
+      setCurrentStep(8); // Go to PIX display step
       playSound('success');
       
       // Start automatic payment checking
@@ -1455,8 +1455,175 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* PIX Payment Modal */}
-        {showPaymentModal && (
+        {/* Step 8: PIX Payment Screen */}
+        {currentStep === 8 && (
+          <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white space-y-4 animate-fade-in">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-xl text-gray-900">Pagamento PIX</h3>
+                <p className="text-sm text-gray-600">Escaneie ou copie o código</p>
+              </div>
+              <button
+                onClick={() => setCurrentStep(7)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                data-testid="button-back-to-checkout"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-6">
+              {/* Timer */}
+              {!isPixExpired ? (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-yellow-600" />
+                      <span className="text-sm font-semibold text-gray-900">Código expira em:</span>
+                    </div>
+                    <span className="text-lg font-bold text-yellow-600">
+                      {pixExpirationTimer()}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <div>
+                      <p className="text-sm font-semibold text-red-900">Código PIX expirado</p>
+                      <p className="text-xs text-red-600">Gere um novo código para continuar</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Amount */}
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500 uppercase font-semibold tracking-wide">Valor a pagar</p>
+                <p className="text-4xl font-bold text-gray-900 mt-2">R$ 29,00</p>
+              </div>
+              
+              {/* QR Code */}
+              {!isPixExpired && (
+                <>
+                  <div className="bg-white p-6 rounded-xl border border-gray-200 flex justify-center shadow-sm">
+                    <QRCode
+                      value={pixCode}
+                      size={220}
+                      className="w-auto h-auto"
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                    />
+                  </div>
+
+                  {/* Copy Code Button */}
+                  <Button
+                    onClick={copyToClipboard}
+                    className="w-full h-14 font-semibold text-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                    data-testid="button-copy-pix"
+                  >
+                    {copiedToClipboard ? (
+                      <>
+                        <Check className="h-6 w-6 mr-2 text-white" />
+                        Código copiado!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-6 w-6 mr-2" />
+                        Copiar código PIX
+                      </>
+                    )}
+                  </Button>
+                  
+                  {/* PIX Code Text */}
+                  <div className="space-y-3">
+                    <p className="text-center text-sm text-gray-600">
+                      Ou copie o código PIX abaixo:
+                    </p>
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <p className="text-xs text-gray-600 font-mono break-all leading-relaxed">
+                        {pixCode}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Instructions */}
+                  <div className="bg-blue-50 rounded-xl p-4">
+                    <h4 className="font-semibold text-sm text-blue-900 mb-3">Como pagar:</h4>
+                    <ol className="space-y-2 text-sm text-blue-700">
+                      <li className="flex items-center gap-3">
+                        <span className="font-bold text-blue-600 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs">1</span>
+                        <span>Abra o app do seu banco</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="font-bold text-blue-600 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs">2</span>
+                        <span>Escolha pagar com PIX</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="font-bold text-blue-600 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs">3</span>
+                        <span>Escaneie o QR Code ou copie o código</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="font-bold text-blue-600 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs">4</span>
+                        <span>Confirme o pagamento de R$ 29,00</span>
+                      </li>
+                    </ol>
+                  </div>
+
+                  {/* Payment Status */}
+                  {isCheckingPayment && (
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                      <div className="flex items-center gap-4">
+                        <Loader2 className="h-6 w-6 text-green-600 animate-spin" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-lg text-gray-900">
+                            Aguardando pagamento...
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Aprovação automática após confirmação
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Expired State */}
+              {isPixExpired && (
+                <div className="text-center py-12">
+                  <AlertCircle className="h-20 w-20 text-red-500 mx-auto mb-6" />
+                  <h4 className="text-2xl font-semibold text-gray-900 mb-3">
+                    Tempo esgotado
+                  </h4>
+                  <p className="text-lg text-gray-600 mb-8">
+                    O código PIX expirou. Gere um novo código para continuar.
+                  </p>
+                  <Button
+                    onClick={() => setCurrentStep(7)}
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold h-12 px-8"
+                  >
+                    Gerar novo código
+                  </Button>
+                </div>
+              )}
+
+              {/* Footer Actions */}
+              {!isPixExpired && !isTimeoutReached && (
+                <div className="pt-6 border-t border-gray-200 text-center">
+                  <p className="text-sm text-gray-500">
+                    Não recebemos seu pagamento ainda
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* PIX Payment Modal - DEPRECATED, now using Step 8 */}
+        {false && showPaymentModal && (
           <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
             <div className="bg-white w-full max-w-md rounded-2xl max-h-[90vh] overflow-y-auto">
               {/* Header */}
