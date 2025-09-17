@@ -49,7 +49,7 @@ export default function OnboardingComplete() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { playSound } = useSound();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(5);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [userFullName, setUserFullName] = useState("");
@@ -256,7 +256,6 @@ export default function OnboardingComplete() {
       setPixExpiration(expiration.toISOString());
       
       setShowPaymentModal(true);
-      setCurrentStep(1);
       playSound('success');
       
       // Track checkout initiation
@@ -443,7 +442,7 @@ export default function OnboardingComplete() {
         )}
 
         {/* Step 1: Benefits Overview */}
-        {currentStep === 1 && (
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4 shadow-xl">
@@ -495,7 +494,7 @@ export default function OnboardingComplete() {
         )}
 
         {/* Step 2: Success Timeline */}
-        {currentStep === 2 && (
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -577,7 +576,7 @@ export default function OnboardingComplete() {
         )}
 
         {/* Step 3: Special Bonus */}
-        {currentStep === 3 && (
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-xl animate-bounce">
@@ -658,7 +657,7 @@ export default function OnboardingComplete() {
         )}
 
         {/* Step 4: Social Proof */}
-        {currentStep === 4 && (
+        {false && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
