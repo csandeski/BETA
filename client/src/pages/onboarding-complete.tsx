@@ -36,7 +36,8 @@ import {
   Smile,
   Gift,
   CreditCard,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 
 export default function OnboardingComplete() {
@@ -891,6 +892,58 @@ export default function OnboardingComplete() {
                   <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-500 mt-3">
                     <Shield className="h-3 w-3 text-green-600" />
                     <span>Pagamento 100% seguro via PIX</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Warranty/Guarantee Section */}
+            <div className="relative bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 rounded-xl p-[1.5px] shadow-lg">
+              <Card className="relative bg-white rounded-[10px] p-4 overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute inset-0" style={{ 
+                    backgroundImage: `repeating-linear-gradient(
+                      45deg,
+                      transparent,
+                      transparent 10px,
+                      rgba(59, 130, 246, 0.1) 10px,
+                      rgba(59, 130, 246, 0.1) 20px
+                    )`
+                  }}></div>
+                </div>
+                
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="relative">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md">
+                        <Shield className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-900">Garantia Total</h3>
+                      <p className="text-[10px] text-gray-500">Reembolso sem burocracia</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+                    <p className="text-xs text-gray-700 leading-relaxed">
+                      <span className="font-semibold text-blue-600">Aqui, seu dinheiro não é perdido.</span> 
+                      Você tem total direito de solicitar o seu reembolso total caso não goste por qualquer motivo do Beta Reader. 
+                      <span className="font-medium text-indigo-600">Confiança e transparência</span> é o destaque principal do grupo Beta Reader.
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-4 mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="h-3.5 w-3.5 text-green-500" />
+                      <span className="text-[10px] font-medium text-gray-600">7 dias de garantia</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <RefreshCw className="h-3.5 w-3.5 text-blue-500" />
+                      <span className="text-[10px] font-medium text-gray-600">100% reembolsável</span>
+                    </div>
                   </div>
                 </div>
               </Card>
