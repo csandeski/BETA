@@ -793,7 +793,7 @@ export default function OnboardingComplete() {
                       <BookOpen className="h-5 w-5 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 font-bold block">Livros ilimitados</span>
+                      <span className="text-gray-800 font-bold block">Atividades Ilimitadas</span>
                       <span className="text-xs text-gray-600">Leia quantos quiser, sem restrições</span>
                     </div>
                   </div>
@@ -803,7 +803,7 @@ export default function OnboardingComplete() {
                       <CreditCard className="h-5 w-5 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 font-bold block">Saque desde R$ 50</span>
+                      <span className="text-gray-800 font-bold block">Saque sem valor mínimo</span>
                       <span className="text-xs text-gray-600">36x mais rápido que usuários free</span>
                     </div>
                   </div>
@@ -815,16 +815,6 @@ export default function OnboardingComplete() {
                     <div className="flex-1">
                       <span className="text-gray-800 font-bold block">Suporte VIP WhatsApp</span>
                       <span className="text-xs text-gray-600">Atendimento prioritário e exclusivo</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 pt-3 border-t border-green-100">
-                    <div className="p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
-                      <Heart className="h-5 w-5 text-orange-500" />
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-gray-800 font-bold block">Apoie a comunidade</span>
-                      <span className="text-xs text-gray-600">Ajude outros leitores a ter acesso</span>
                     </div>
                   </div>
 
