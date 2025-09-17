@@ -20,7 +20,7 @@ import Planos from "@/pages/planos";
 import OnboardingComplete from "@/pages/onboarding-complete";
 import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
-// import { fbPixel } from "@/utils/facebookPixel";
+import { fbPixel } from "@/utils/facebookPixel";
 import { userDataManager, type UserData } from "@/utils/userDataManager";
 
 function Router() {
@@ -113,19 +113,19 @@ function Router() {
   const showInstallBanner = location !== '/'; // Show install banner except on home page
   
   // Inicializa Facebook Pixel apenas uma vez
-  // useEffect(() => {
-  //   fbPixel.init();
-  // }, []);
+  useEffect(() => {
+    fbPixel.init();
+  }, []);
 
   // Scroll to top and track page views whenever location changes
   useEffect(() => {
     window.scrollTo(0, 0);
     
     // Limpa o flag da página anterior para permitir novo PageView se voltar
-    // fbPixel.clearPageView();
+    fbPixel.clearPageView();
     
     // Track PageView com prevenção de duplicação
-    // fbPixel.trackPageView(location);
+    fbPixel.trackPageView(location);
     
     // Track ViewContent (pode ser enviado múltiplas vezes)
     const pageNames: Record<string, string> = {
@@ -144,11 +144,11 @@ function Router() {
       ? 'Book Reading' 
       : pageNames[location] || 'Other';
     
-    // fbPixel.trackViewContent({
-    //   content_name: pageName,
-    //   content_category: 'page_view',
-    //   content_type: 'page'
-    // });
+    fbPixel.trackViewContent({
+      content_name: pageName,
+      content_category: 'page_view',
+      content_type: 'page'
+    });
   }, [location]);
   
   return (
