@@ -80,7 +80,7 @@ export function PlanLimitationsModal({ isOpen, onClose }: PlanLimitationsModalPr
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Apenas 5 atividades diárias</span> - limitando seus ganhos a R$ 125/dia
+                  <span className="font-semibold">Apenas 3 atividades diárias</span> - limitando seus ganhos a R$ 75/dia
                 </p>
               </div>
             </div>
