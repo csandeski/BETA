@@ -407,39 +407,6 @@ export default function OnboardingComplete() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-6 px-4">
       <div className="max-w-md mx-auto">
-        {/* Progress Bar */}
-        {currentStep <= 5 && (
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              {[...Array(totalSteps)].map((_, index) => (
-                <div key={index} className="flex items-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      index + 1 <= currentStep
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
-                        : 'bg-gray-200 text-gray-500'
-                    }`}
-                  >
-                    {index + 1 <= currentStep ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <span className="text-sm font-semibold">{index + 1}</span>
-                    )}
-                  </div>
-                  {index < totalSteps - 1 && (
-                    <div
-                      className={`w-full h-1 mx-1 transition-all ${
-                        index + 1 < currentStep
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                          : 'bg-gray-200'
-                      }`}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Step 1: Benefits Overview */}
         {false && (
