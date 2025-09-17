@@ -274,7 +274,7 @@ export default function OnboardingComplete() {
       playSound('click');
       
       fbPixel.trackInitiateCheckout({
-        value: 29.90,
+        value: 29.00,
         currency: 'BRL',
         content_name: 'Account Activation',
         num_items: 1
@@ -286,7 +286,7 @@ export default function OnboardingComplete() {
       
       const requestBody = {
         plan: 'supporter',
-        amount: 29.90,
+        amount: 29.00,
         fullName: userFullName,
         email: userEmail,
         phone: cleanPhone,
@@ -319,7 +319,7 @@ export default function OnboardingComplete() {
         setIsPixExpired(false);
         
         fbPixel.trackAddPaymentInfo({
-          value: 29.90,
+          value: 29.00,
           currency: 'BRL',
           content_name: 'Account Activation'
         });
@@ -363,7 +363,7 @@ export default function OnboardingComplete() {
           setIsCheckingPayment(false);
           
           fbPixel.trackPurchase({
-            value: 29.90,
+            value: 29.00,
             currency: 'BRL',
             content_name: 'Account Activation',
             content_type: 'product'
@@ -777,7 +777,7 @@ export default function OnboardingComplete() {
                       <div className="flex items-baseline justify-center gap-1">
                         <span className="text-white text-lg">R$</span>
                         <span className="text-white text-5xl font-bold">29</span>
-                        <span className="text-white text-2xl">,90</span>
+                        <span className="text-white text-2xl">,00</span>
                       </div>
                       <p className="text-green-100 text-xs font-semibold mt-2">
                         PAGAMENTO ÚNICO
@@ -926,7 +926,7 @@ export default function OnboardingComplete() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-gray-500 line-through">R$ 49,90</p>
-                  <p className="text-2xl font-bold text-green-600">R$ 29,90</p>
+                  <p className="text-2xl font-bold text-green-600">R$ 29,00</p>
                 </div>
               </div>
               <div className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1.5 rounded-full inline-flex items-center gap-1">
@@ -1099,7 +1099,7 @@ export default function OnboardingComplete() {
             {/* Amount Display */}
             <div className="text-center mb-6">
               <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide">Valor a pagar</p>
-              <p className="text-4xl font-bold text-gray-900 mt-2">R$ 29,90</p>
+              <p className="text-4xl font-bold text-gray-900 mt-2">R$ 29,00</p>
             </div>
             
             {/* QR Code */}
@@ -1164,7 +1164,7 @@ export default function OnboardingComplete() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="font-bold text-blue-600">4.</span>
-                  <span>Confirme o pagamento de R$ 29,90</span>
+                  <span>Confirme o pagamento de R$ 29,00</span>
                 </li>
               </ol>
             </div>
