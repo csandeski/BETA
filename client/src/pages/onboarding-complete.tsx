@@ -69,6 +69,18 @@ export default function OnboardingComplete() {
   const totalSteps = 8;
 
   useEffect(() => {
+    // Fire initiate checkout event when entering step 7 (checkout form)
+    if (currentStep === 7) {
+      fbPixel.trackInitiateCheckout({
+        value: 29.00,
+        currency: 'BRL',
+        content_name: 'Account Activation',
+        num_items: 1
+      });
+    }
+  }, [currentStep]);
+
+  useEffect(() => {
     const savedData = userDataManager.getUserData();
     if (savedData?.userId && savedData?.isLoggedIn) {
       const params = new URLSearchParams(window.location.search);
@@ -287,8 +299,12 @@ export default function OnboardingComplete() {
       expiration.setMinutes(expiration.getMinutes() + 5);
       setPixExpiration(expiration.toISOString());
       
-      setCurrentStep(8); // Go to PIX display step
       playSound('success');
+      
+      // Only change to step 8 after PIX data is set
+      setTimeout(() => {
+        setCurrentStep(8); // Go to PIX display step
+      }, 100);
       
       // Start automatic payment checking
       startPaymentCheck();
@@ -306,13 +322,6 @@ export default function OnboardingComplete() {
     if (!validateForm()) return;
 
     playSound('click');
-    
-    fbPixel.trackInitiateCheckout({
-      value: 29.00,
-      currency: 'BRL',
-      content_name: 'Account Activation',
-      num_items: 1
-    });
     
     // Save UTM params
     // Save UTM params
