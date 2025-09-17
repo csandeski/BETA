@@ -66,7 +66,7 @@ export default function OnboardingComplete() {
   const [paymentOrderId, setPaymentOrderId] = useState("");
   const [isTimeoutReached, setIsTimeoutReached] = useState(false);
 
-  const totalSteps = 5;
+  const totalSteps = 7;
 
   useEffect(() => {
     const savedData = userDataManager.getUserData();
@@ -753,7 +753,7 @@ export default function OnboardingComplete() {
             <Button 
               onClick={() => {
                 playSound('click');
-                setCurrentStep(7);
+                setCurrentStep(6);
               }}
               className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-lg shadow-xl"
               data-testid="button-continue-to-pricing"
