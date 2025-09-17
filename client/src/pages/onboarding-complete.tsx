@@ -47,7 +47,7 @@ export default function OnboardingComplete() {
   // Step management - restore state from localStorage
   const [currentStep, setCurrentStep] = useState(() => {
     const savedPricing = localStorage.getItem('pricing_seen_v1') === 'true';
-    return savedPricing ? 2 : 1;  // Start at pricing if already seen (step 2 now)
+    return savedPricing ? 5 : 1;  // Start at pricing if already seen (step 5 now)
   });
   const [hasSeenPricing, setHasSeenPricing] = useState(() => {
     return localStorage.getItem('pricing_seen_v1') === 'true';
@@ -89,12 +89,12 @@ export default function OnboardingComplete() {
         }
       }
       
-      // If no user data or less than 3 books completed, redirect to dashboard
-      if (!userData || !userData.stats?.totalBooksRead || userData.stats.totalBooksRead < 3) {
+      // If no user data or less than 5 books completed, redirect to dashboard
+      if (!userData || !userData.stats?.totalBooksRead || userData.stats.totalBooksRead < 5) {
         setLocation('/dashboard');
         toast({
           title: "Acesso negado",
-          description: "Você precisa completar 3 atividades antes de acessar esta página.",
+          description: "Você precisa completar 5 atividades antes de acessar esta página.",
           variant: "destructive"
         });
       }
@@ -480,7 +480,7 @@ export default function OnboardingComplete() {
                     Obrigado pelo feedback!
                   </p>
                   <p className="text-xs text-gray-600">
-                    Você já completou 3 atividades e desbloqueou acesso a uma experiência ainda melhor
+                    Você já completou 5 atividades e desbloqueou acesso a uma experiência ainda melhor
                   </p>
                 </div>
               </div>

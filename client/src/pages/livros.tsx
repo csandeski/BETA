@@ -114,8 +114,8 @@ export default function Livros() {
       return;
     }
     
-    // If user completed 3 books and is on free plan, redirect to onboarding
-    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 3 && userData?.selectedPlan !== 'premium') {
+    // If user completed 5 books and is on free plan, redirect to onboarding
+    if (userData?.stats?.totalBooksRead && userData.stats.totalBooksRead >= 5 && userData?.selectedPlan !== 'premium') {
       setLocation('/onboarding-complete');
       return;
     }
@@ -202,7 +202,7 @@ export default function Livros() {
                   playSound('click');
                   // Check if user has read 5 books before showing upgrade modal
                   const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-                  if (totalBooksRead >= 3) {
+                  if (totalBooksRead >= 5) {
                     // Modal removed
                   } else {
                     setShowCompleteBooksModal(true);
@@ -383,7 +383,7 @@ export default function Livros() {
                   setShowLimitWarning(false);
                   // Check if user has read 5 books before showing upgrade modal
                   const totalBooksRead = userData?.stats?.totalBooksRead || 0;
-                  if (totalBooksRead >= 3) {
+                  if (totalBooksRead >= 5) {
                     // Modal removed
                   } else {
                     setShowCompleteBooksModal(true);
