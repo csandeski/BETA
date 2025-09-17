@@ -765,9 +765,9 @@ export default function OnboardingComplete() {
             {/* Price Card - Mobile Optimized */}
             <div className="relative">
               {/* Popular Badge */}
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap">
-                  <Sparkles className="h-3.5 w-3.5" />
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap">
+                  <Sparkles className="h-3 w-3" />
                   <span>OFERTA ESPECIAL</span>
                 </div>
               </div>
@@ -777,25 +777,25 @@ export default function OnboardingComplete() {
                 <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-green-50 opacity-50" />
                 
                 {/* Header */}
-                <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-8">
+                <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-4">
                   <div className="text-center">
-                    <h3 className="text-white font-bold text-2xl mb-2">Ativação Premium</h3>
-                    <p className="text-green-100 text-sm">Acesso completo e ilimitado</p>
+                    <h3 className="text-white font-bold text-lg mb-1">Ativação Premium</h3>
+                    <p className="text-green-100 text-xs">Acesso completo e ilimitado</p>
                     
                     {/* Price */}
-                    <div className="mt-6">
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <span className="text-green-100 text-sm line-through">R$ 49,90</span>
-                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    <div className="mt-3">
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <span className="text-green-100 text-xs line-through">R$ 49,90</span>
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                           -40%
                         </span>
                       </div>
                       <div className="flex items-baseline justify-center gap-1">
-                        <span className="text-white text-lg">R$</span>
-                        <span className="text-white text-5xl font-bold">29</span>
-                        <span className="text-white text-2xl">,00</span>
+                        <span className="text-white text-base">R$</span>
+                        <span className="text-white text-3xl font-bold">29</span>
+                        <span className="text-white text-lg">,00</span>
                       </div>
-                      <p className="text-green-100 text-xs font-semibold mt-2">
+                      <p className="text-green-100 text-[10px] font-semibold mt-1">
                         PAGAMENTO ÚNICO
                       </p>
                     </div>
@@ -803,44 +803,44 @@ export default function OnboardingComplete() {
                 </div>
 
                 {/* Benefits */}
-                <div className="relative p-6 space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
-                      <BookOpen className="h-5 w-5 text-green-600" />
+                <div className="relative p-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <div className="p-1 bg-gradient-to-br from-green-100 to-emerald-100 rounded-md">
+                      <BookOpen className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 font-bold block">Atividades Ilimitadas</span>
-                      <span className="text-xs text-gray-600">Leia quantos quiser, sem restrições</span>
+                      <span className="text-gray-800 font-bold text-sm block">Atividades Ilimitadas</span>
+                      <span className="text-[10px] text-gray-600">Leia quantos quiser, sem restrições</span>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
-                      <CreditCard className="h-5 w-5 text-green-600" />
+                  <div className="flex items-start gap-2">
+                    <div className="p-1 bg-gradient-to-br from-green-100 to-emerald-100 rounded-md">
+                      <CreditCard className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 font-bold block">Saque sem valor mínimo</span>
-                      <span className="text-xs text-gray-600">36x mais rápido que usuários free</span>
+                      <span className="text-gray-800 font-bold text-sm block">Saque sem valor mínimo</span>
+                      <span className="text-[10px] text-gray-600">36x mais rápido que usuários free</span>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="p-1.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
-                      <MessageCircle className="h-5 w-5 text-green-600" />
+                  <div className="flex items-start gap-2">
+                    <div className="p-1 bg-gradient-to-br from-green-100 to-emerald-100 rounded-md">
+                      <MessageCircle className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 font-bold block">Suporte VIP WhatsApp</span>
-                      <span className="text-xs text-gray-600">Atendimento prioritário e exclusivo</span>
+                      <span className="text-gray-800 font-bold text-sm block">Suporte VIP WhatsApp</span>
+                      <span className="text-[10px] text-gray-600">Atendimento prioritário e exclusivo</span>
                     </div>
                   </div>
 
                   {/* Urgency Box */}
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 mt-3">
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5 text-red-500" />
+                      <AlertCircle className="h-4 w-4 text-red-500" />
                       <div>
-                        <p className="text-xs font-bold text-red-700">Oferta por tempo limitado!</p>
-                        <p className="text-xs text-red-600">Preço normal: R$ 49,90</p>
+                        <p className="text-[10px] font-bold text-red-700">Oferta por tempo limitado!</p>
+                        <p className="text-[10px] text-red-600">Preço normal: R$ 49,90</p>
                       </div>
                     </div>
                   </div>
@@ -855,30 +855,30 @@ export default function OnboardingComplete() {
                     }}
                     data-testid="button-activate-account"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-b from-green-700 to-green-900 rounded-2xl translate-y-2 blur-sm opacity-50"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-green-700 to-green-900 rounded-xl translate-y-1 blur-sm opacity-50"></div>
                     
                     <div 
-                      className="relative py-5 px-6 rounded-2xl transform transition-all duration-200 group-hover:translate-y-0.5 group-active:translate-y-1"
+                      className="relative py-3.5 px-4 rounded-xl transform transition-all duration-200 group-hover:translate-y-0.5 group-active:translate-y-1"
                       style={{
                         background: 'linear-gradient(180deg, #22c55e 0%, #10b981 50%, #059669 100%)',
                         boxShadow: `
-                          0 8px 0 #047857,
-                          0 8px 20px rgba(34, 197, 94, 0.4),
+                          0 6px 0 #047857,
+                          0 6px 15px rgba(34, 197, 94, 0.3),
                           inset 0 2px 0 rgba(255, 255, 255, 0.3),
                           inset 0 -2px 0 rgba(0, 0, 0, 0.2)
                         `
                       }}
                     >
-                      <div className="absolute inset-0 rounded-2xl opacity-20 bg-gradient-to-b from-white to-transparent pointer-events-none"></div>
+                      <div className="absolute inset-0 rounded-xl opacity-20 bg-gradient-to-b from-white to-transparent pointer-events-none"></div>
                       
-                      <div className="relative flex items-center justify-center gap-3">
-                        <Zap className="h-6 w-6 text-white drop-shadow-md" />
-                        <span className="text-white font-bold text-lg drop-shadow-md">Ativar minha Conta</span>
-                        <ChevronRight className="h-5 w-5 text-white drop-shadow-md group-hover:translate-x-1 transition-transform" />
+                      <div className="relative flex items-center justify-center gap-2">
+                        <Zap className="h-5 w-5 text-white drop-shadow-md" />
+                        <span className="text-white font-bold text-base drop-shadow-md">Ativar minha Conta</span>
+                        <ChevronRight className="h-4 w-4 text-white drop-shadow-md group-hover:translate-x-1 transition-transform" />
                       </div>
                       
                       <div 
-                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                        className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                         style={{
                           background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%)',
                           animation: 'shine 0.8s ease-in-out'
@@ -888,8 +888,8 @@ export default function OnboardingComplete() {
                   </button>
 
                   {/* Security Badge */}
-                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mt-4">
-                    <Shield className="h-4 w-4 text-green-600" />
+                  <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-500 mt-3">
+                    <Shield className="h-3 w-3 text-green-600" />
                     <span>Pagamento 100% seguro via PIX</span>
                   </div>
                 </div>
