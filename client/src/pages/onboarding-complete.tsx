@@ -44,9 +44,9 @@ export default function OnboardingComplete() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { playSound } = useSound();
-  const [currentStep, setCurrentStep] = useState(1);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [userFullName, setUserFullName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userPhone, setUserPhone] = useState("");
@@ -60,8 +60,6 @@ export default function OnboardingComplete() {
   const [showPixConfirmation, setShowPixConfirmation] = useState(false);
   const [paymentOrderId, setPaymentOrderId] = useState("");
   const [isTimeoutReached, setIsTimeoutReached] = useState(false);
-
-  const totalSteps = 5;
 
   useEffect(() => {
     const savedData = userDataManager.getUserData();
@@ -251,7 +249,7 @@ export default function OnboardingComplete() {
       setPixExpiration(expiration.toISOString());
       
       setShowPaymentModal(true);
-      setCurrentStep(1);
+      setShowCheckoutForm(false);
       playSound('success');
       
       // Track checkout initiation
@@ -286,9 +284,6 @@ export default function OnboardingComplete() {
       num_items: 1
     });
     
-    // Save UTM params
-    // Save UTM params
-    
     const cleanPhone = userPhone.replace(/\D/g, '');
     
     const requestBody = {
@@ -305,7 +300,7 @@ export default function OnboardingComplete() {
 
   const handleActivateAccount = () => {
     playSound('click');
-    setCurrentStep(6);
+    setShowCheckoutForm(true);
     
     fbPixel.trackAddToCart({
       value: 29.00,
@@ -404,324 +399,29 @@ export default function OnboardingComplete() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-6 px-4">
       <div className="max-w-md mx-auto">
         {/* Progress Bar */}
-        {currentStep <= 5 && (
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              {[...Array(totalSteps)].map((_, index) => (
-                <div key={index} className="flex items-center">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      index + 1 <= currentStep
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
-                        : 'bg-gray-200 text-gray-500'
-                    }`}
-                  >
-                    {index + 1 <= currentStep ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <span className="text-sm font-semibold">{index + 1}</span>
-                    )}
-                  </div>
-                  {index < totalSteps - 1 && (
-                    <div
-                      className={`w-full h-1 mx-1 transition-all ${
-                        index + 1 < currentStep
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                          : 'bg-gray-200'
-                      }`}
-                    />
-                  )}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="flex items-center">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg`}
+                >
+                  <Check className="h-4 w-4" />
                 </div>
-              ))}
-            </div>
+                {index < 4 && (
+                  <div
+                    className={`w-full h-1 mx-1 transition-all bg-gradient-to-r from-green-500 to-emerald-500`}
+                  />
+                )}
+              </div>
+            ))}
           </div>
-        )}
+        </div>
 
-        {/* Step 1: Benefits Overview */}
-        {currentStep === 1 && (
+        {/* Main Activation Screen */}
+        {!showCheckoutForm && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4 shadow-xl">
-                <Heart className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Parabéns pela decisão!
-              </h2>
-              <p className="text-sm text-gray-600">
-                Você está a um passo de transformar sua leitura em renda
-              </p>
-            </div>
-
-            {/* Quick Benefits */}
-            <div className="grid grid-cols-2 gap-3">
-              <Card className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-                <BookOpen className="h-6 w-6 text-green-600 mb-2" />
-                <p className="font-semibold text-sm text-gray-900">Leia Ilimitado</p>
-                <p className="text-xs text-gray-600">Sem restrições</p>
-              </Card>
-              <Card className="p-3 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
-                <Target className="h-6 w-6 text-blue-600 mb-2" />
-                <p className="font-semibold text-sm text-gray-900">Ganhe Mais</p>
-                <p className="text-xs text-gray-600">36x mais rápido</p>
-              </Card>
-              <Card className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-                <Award className="h-6 w-6 text-purple-600 mb-2" />
-                <p className="font-semibold text-sm text-gray-900">Seja VIP</p>
-                <p className="text-xs text-gray-600">Benefícios exclusivos</p>
-              </Card>
-              <Card className="p-3 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
-                <Users className="h-6 w-6 text-orange-600 mb-2" />
-                <p className="font-semibold text-sm text-gray-900">Comunidade</p>
-                <p className="text-xs text-gray-600">Suporte premium</p>
-              </Card>
-            </div>
-
-            <Button 
-              onClick={() => {
-                playSound('click');
-                setCurrentStep(2);
-              }}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
-            >
-              Continuar para ativação
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        )}
-
-        {/* Step 2: Success Timeline */}
-        {currentStep === 2 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Sua jornada de sucesso
-              </h2>
-              <p className="text-sm text-gray-600">
-                Veja o que nossos membros conquistaram
-              </p>
-            </div>
-
-            {/* Success Stories */}
-            <div className="space-y-3">
-              <Card className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="text-2xl">📅</div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-900">1º Mês</p>
-                    <p className="text-xs text-gray-600">Ana Paula - São Paulo</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-700">
-                  "Recuperei o investimento e ainda lucrei R$ 234"
-                </p>
-                <div className="flex items-center gap-1 mt-2">
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="text-2xl">📈</div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-900">3º Mês</p>
-                    <p className="text-xs text-gray-600">Carlos - Rio de Janeiro</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-700">
-                  "Já fiz R$ 1.200 apenas lendo no tempo livre!"
-                </p>
-                <div className="flex items-center gap-1 mt-2">
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="text-2xl">🎯</div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-900">6º Mês</p>
-                    <p className="text-xs text-gray-600">Juliana - Belo Horizonte</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-700">
-                  "Consegui pagar todas as contas só com a plataforma"
-                </p>
-                <div className="flex items-center gap-1 mt-2">
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-              </Card>
-            </div>
-
-            <Button 
-              onClick={() => {
-                playSound('click');
-                setCurrentStep(3);
-              }}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
-            >
-              Quero começar agora
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        )}
-
-        {/* Step 3: Special Bonus */}
-        {currentStep === 3 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-xl animate-bounce">
-                <Gift className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Bônus Exclusivo Hoje!
-              </h2>
-              <p className="text-sm text-gray-600">
-                Por ser um dos primeiros 26 membros
-              </p>
-            </div>
-
-            {/* Bonus Items */}
-            <Card className="p-4 bg-gradient-to-br from-yellow-50 to-orange-50 border-orange-200">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="p-1 bg-green-500 rounded-full">
-                    <Check className="h-3 w-3 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-900">Acesso Vitalício</p>
-                    <p className="text-xs text-gray-600">Pague uma vez, use para sempre</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-1 bg-green-500 rounded-full">
-                    <Check className="h-3 w-3 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-900">Suporte VIP WhatsApp</p>
-                    <p className="text-xs text-gray-600">Atendimento prioritário 24/7</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-1 bg-green-500 rounded-full">
-                    <Check className="h-3 w-3 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-900">Sem Taxa de Saque</p>
-                    <p className="text-xs text-gray-600">100% do valor é seu</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-1 bg-green-500 rounded-full">
-                    <Check className="h-3 w-3 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-900">Garantia de 7 Dias</p>
-                    <p className="text-xs text-gray-600">Não gostou? Devolvemos 100%</p>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Urgency */}
-            <Card className="p-3 bg-gradient-to-r from-red-500 to-pink-500 text-white">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5" />
-                  <span className="text-sm font-bold">Oferta limitada!</span>
-                </div>
-                <span className="text-xs">Restam 5 vagas</span>
-              </div>
-            </Card>
-
-            <Button 
-              onClick={() => {
-                playSound('click');
-                setCurrentStep(4);
-              }}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
-            >
-              Garantir minha vaga
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        )}
-
-        {/* Step 4: Social Proof */}
-        {currentStep === 4 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Junte-se a 3.847 leitores
-              </h2>
-              <p className="text-sm text-gray-600">
-                Que já estão ganhando todos os dias
-              </p>
-            </div>
-
-            {/* Live Activity */}
-            <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-green-600">ATIVIDADE AO VIVO</span>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-600">Agora</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs text-gray-700">
-                  <ThumbsUp className="h-3 w-3 text-blue-500" />
-                  <span>João acabou de ativar a conta Premium</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-gray-700">
-                  <Smile className="h-3 w-3 text-yellow-500" />
-                  <span>Maria ganhou R$ 26 lendo "O Poder do Hábito"</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-gray-700">
-                  <Star className="h-3 w-3 text-purple-500" />
-                  <span>Pedro sacou R$ 450 essa semana</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <Card className="p-3 border-green-200">
-                <p className="text-2xl font-bold text-green-600">3.8K</p>
-                <p className="text-xs text-gray-600">Membros ativos</p>
-              </Card>
-              <Card className="p-3 border-blue-200">
-                <p className="text-2xl font-bold text-blue-600">R$ 2.1M</p>
-                <p className="text-xs text-gray-600">Já pagos</p>
-              </Card>
-              <Card className="p-3 border-purple-200">
-                <p className="text-2xl font-bold text-purple-600">4.9★</p>
-                <p className="text-xs text-gray-600">Avaliação</p>
-              </Card>
-            </div>
-
-            <Button 
-              onClick={() => {
-                playSound('click');
-                setCurrentStep(5);
-              }}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
-            >
-              Ativar minha conta agora
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        )}
-
-        {/* Step 5: Pricing Card */}
-        {currentStep === 5 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Ative sua conta agora
               </h2>
@@ -730,370 +430,142 @@ export default function OnboardingComplete() {
               </p>
             </div>
 
-            {/* Limited Spots Alert - Compact Design */}
-            <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-xl p-[2px] mb-6 shadow-lg">
-              <div className="bg-white rounded-[10px] p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="relative">
-                      <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center animate-pulse">
-                        <Users className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-900 leading-tight">
-                        🔥 Restam apenas <span className="text-red-600">26 vagas!</span>
-                      </p>
-                      <p className="text-[10px] text-gray-500">
-                        Oferta limitada • Garanta agora
-                      </p>
-                    </div>
+            {/* Offer Banner */}
+            <Card className="p-4 bg-gradient-to-r from-orange-100 to-red-100 border-orange-300">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-white rounded-full">
+                    <Users className="h-5 w-5 text-orange-600" />
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
-                      81%
-                    </p>
-                    <p className="text-[9px] text-gray-500 uppercase tracking-wider">ocupado</p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-2xl font-bold text-red-600">🔥</span>
+                    <span className="font-bold text-gray-900">Restam apenas <span className="text-orange-600">26 vagas!</span></span>
+                    <span className="text-3xl font-bold text-gray-900">81%</span>
                   </div>
                 </div>
-                <div className="mt-2.5">
-                  <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 h-full rounded-full transition-all duration-1000 ease-out animate-pulse" 
-                         style={{ width: '81%' }}>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <p className="text-[10px] text-gray-500">21 de 26 vagas preenchidas</p>
-                    <p className="text-[10px] font-semibold text-red-600">Últimas 5!</p>
-                  </div>
+                <span className="text-sm font-semibold text-gray-600">OCUPADO</span>
+              </div>
+              
+              {/* Offer countdown */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-gray-700">Oferta termina em: Garanta agora</span>
                 </div>
+                <div className="w-full bg-orange-200 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-orange-500 to-red-500 h-full rounded-full animate-pulse"
+                    style={{ width: '81%' }}
+                  />
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-xs text-gray-600">21 de 26 vagas preenchidas</p>
+                <p className="text-xs font-bold text-red-600 mt-1">Últimas 5!</p>
+              </div>
+            </Card>
+
+            {/* Special Offer Badge */}
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-pulse">
+                <Sparkles className="h-4 w-4" />
+                <span>OFERTA ESPECIAL</span>
               </div>
             </div>
 
-            {/* Price Card - Mobile Optimized */}
-            <div className="relative">
-              {/* Popular Badge */}
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap">
-                  <Sparkles className="h-3 w-3" />
-                  <span>OFERTA ESPECIAL</span>
+            {/* Plan Card */}
+            <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 shadow-xl">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Ativação Premium</h3>
+                <p className="text-sm text-gray-600">Acesso completo e ilimitado</p>
+              </div>
+              
+              {/* Price */}
+              <div className="text-center mb-6">
+                <p className="text-xs text-gray-500 line-through">R$ 49,90</p>
+                <p className="text-sm text-red-600 font-bold mb-1">-40%</p>
+                <p className="text-5xl font-bold text-green-600">R$ 29<span className="text-2xl">,00</span></p>
+                <p className="text-xs text-gray-600 mt-2 uppercase tracking-wide">Pagamento Único</p>
+              </div>
+
+              {/* Features */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-green-500 rounded-full flex-shrink-0">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm text-gray-900">Atividades ilimitadas</p>
+                    <p className="text-xs text-gray-600">Leia quantos quiser, sem restrições</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-green-500 rounded-full flex-shrink-0">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm text-gray-900">Saque sem valor mínimo</p>
+                    <p className="text-xs text-gray-600">36x mais rápido que usuários free</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-green-500 rounded-full flex-shrink-0">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm text-gray-900">Suporte VIP WhatsApp</p>
+                    <p className="text-xs text-gray-600">Atendimento prioritário e exclusivo</p>
+                  </div>
                 </div>
               </div>
 
-              <Card className="relative mt-2 overflow-hidden border-2 border-green-300 shadow-2xl">
-                {/* Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-green-50 opacity-50" />
-                
-                {/* Header */}
-                <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-4">
-                  <div className="text-center">
-                    <h3 className="text-white font-bold text-lg mb-1">Ativação Premium</h3>
-                    <p className="text-green-100 text-xs">Acesso completo e ilimitado</p>
-                    
-                    {/* Price */}
-                    <div className="mt-3">
-                      <div className="flex items-center justify-center gap-2 mb-1">
-                        <span className="text-green-100 text-xs line-through">R$ 49,90</span>
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                          -40%
-                        </span>
-                      </div>
-                      <div className="flex items-baseline justify-center gap-1">
-                        <span className="text-white text-base">R$</span>
-                        <span className="text-white text-3xl font-bold">29</span>
-                        <span className="text-white text-lg">,00</span>
-                      </div>
-                      <p className="text-green-100 text-[10px] font-semibold mt-1">
-                        PAGAMENTO ÚNICO
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Benefits */}
-                <div className="relative p-4 space-y-3">
-                  <div className="flex items-start gap-2">
-                    <div className="p-1 bg-gradient-to-br from-green-100 to-emerald-100 rounded-md">
-                      <BookOpen className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-gray-800 font-bold text-sm block">Atividades Ilimitadas</span>
-                      <span className="text-[10px] text-gray-600">Leia quantos quiser, sem restrições</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <div className="p-1 bg-gradient-to-br from-green-100 to-emerald-100 rounded-md">
-                      <CreditCard className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-gray-800 font-bold text-sm block">Saque sem valor mínimo</span>
-                      <span className="text-[10px] text-gray-600">36x mais rápido que usuários free</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <div className="p-1 bg-gradient-to-br from-green-100 to-emerald-100 rounded-md">
-                      <MessageCircle className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-gray-800 font-bold text-sm block">Suporte VIP WhatsApp</span>
-                      <span className="text-[10px] text-gray-600">Atendimento prioritário e exclusivo</span>
-                    </div>
-                  </div>
-
-                  {/* Urgency Box */}
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 mt-3">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-red-500" />
-                      <div>
-                        <p className="text-[10px] font-bold text-red-700">Oferta por tempo limitado!</p>
-                        <p className="text-[10px] text-red-600">Preço normal: R$ 49,90</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CTA Button */}
-                  <button
-                    onClick={handleActivateAccount}
-                    className="relative w-full group"
-                    style={{
-                      transformStyle: 'preserve-3d',
-                      perspective: '1000px'
-                    }}
-                    data-testid="button-activate-account"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-b from-green-700 to-green-900 rounded-xl translate-y-1 blur-sm opacity-50"></div>
-                    
-                    <div 
-                      className="relative py-3.5 px-4 rounded-xl transform transition-all duration-200 group-hover:translate-y-0.5 group-active:translate-y-1"
-                      style={{
-                        background: 'linear-gradient(180deg, #22c55e 0%, #10b981 50%, #059669 100%)',
-                        boxShadow: `
-                          0 6px 0 #047857,
-                          0 6px 15px rgba(34, 197, 94, 0.3),
-                          inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                          inset 0 -2px 0 rgba(0, 0, 0, 0.2)
-                        `
-                      }}
-                    >
-                      <div className="absolute inset-0 rounded-xl opacity-20 bg-gradient-to-b from-white to-transparent pointer-events-none"></div>
-                      
-                      <div className="relative flex items-center justify-center gap-2">
-                        <Zap className="h-5 w-5 text-white drop-shadow-md" />
-                        <span className="text-white font-bold text-base drop-shadow-md">Ativar minha Conta</span>
-                        <ChevronRight className="h-4 w-4 text-white drop-shadow-md group-hover:translate-x-1 transition-transform" />
-                      </div>
-                      
-                      <div 
-                        className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                        style={{
-                          background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%)',
-                          animation: 'shine 0.8s ease-in-out'
-                        }}
-                      ></div>
-                    </div>
-                  </button>
-
-                  {/* Security Badge */}
-                  <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-500 mt-3">
-                    <Shield className="h-3 w-3 text-green-600" />
-                    <span>Pagamento 100% seguro via PIX</span>
+              {/* Limited Time Offer */}
+              <Card className="p-3 bg-red-50 border-red-200 mb-4">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-red-900">Oferta por tempo limitado!</p>
+                    <p className="text-xs text-red-700">Preço normal: R$ 49,90</p>
                   </div>
                 </div>
               </Card>
-            </div>
+            </Card>
 
-            {/* Warranty/Guarantee Section */}
-            <div className="relative bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 rounded-xl p-[1.5px] shadow-lg">
-              <Card className="relative bg-white rounded-[10px] p-4 overflow-hidden">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-5">
-                  <div className="absolute inset-0" style={{ 
-                    backgroundImage: `repeating-linear-gradient(
-                      45deg,
-                      transparent,
-                      transparent 10px,
-                      rgba(59, 130, 246, 0.1) 10px,
-                      rgba(59, 130, 246, 0.1) 20px
-                    )`
-                  }}></div>
-                </div>
-                
-                <div className="relative">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md">
-                        <Shield className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-sm text-gray-900">Garantia Total</h3>
-                      <p className="text-[10px] text-gray-500">Reembolso sem burocracia</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
-                    <p className="text-xs text-gray-700 leading-relaxed">
-                      <span className="font-semibold text-blue-600">Aqui, seu dinheiro não é perdido.</span> 
-                      Você tem total direito de solicitar o seu reembolso total caso não goste por qualquer motivo do Beta Reader. 
-                      <span className="font-medium text-indigo-600">Confiança e transparência</span> é o destaque principal do grupo Beta Reader.
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center justify-center gap-4 mt-3 pt-3 border-t border-gray-100">
-                    <div className="flex items-center gap-1">
-                      <CheckCircle className="h-3.5 w-3.5 text-green-500" />
-                      <span className="text-[10px] font-medium text-gray-600">7 dias de garantia</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <RefreshCw className="h-3.5 w-3.5 text-blue-500" />
-                      <span className="text-[10px] font-medium text-gray-600">100% reembolsável</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            {/* Action Button */}
+            <Button 
+              onClick={handleActivateAccount}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl animate-pulse"
+              data-testid="button-activate"
+            >
+              <Zap className="mr-2 h-5 w-5" />
+              Ativar minha Conta
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
 
-            {/* Testimonials Section */}
-            <div className="space-y-3">
-              {/* Testimonials Header with Stats */}
-              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-base text-gray-900">Avaliações Verificadas</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <span className="text-sm font-bold text-gray-900">4.9</span>
-                      <span className="text-xs text-gray-500">(884 avaliações)</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-green-600">98%</p>
-                    <p className="text-[10px] text-gray-500">Aprovação</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Individual Testimonials */}
-              <div className="space-y-2">
-                {/* Testimonial 1 */}
-                <Card className="p-3 bg-white border-gray-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
-                      MS
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">Maria Silva</span>
-                        <span className="text-xs text-gray-500">• há 2 anos</span>
-                      </div>
-                      <div className="flex gap-0.5 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700">
-                        "Vale cada centavo! Agora leio sem limites e ainda ganho muito mais rápido!"
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 2 */}
-                <Card className="p-3 bg-white border-gray-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
-                      PC
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">Pedro Costa</span>
-                        <span className="text-xs text-gray-500">• há 8 meses</span>
-                      </div>
-                      <div className="flex gap-0.5 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700">
-                        "Melhor investimento que fiz! Já recuperei o valor no primeiro mês."
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 3 */}
-                <Card className="p-3 bg-white border-gray-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
-                      AF
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">Ana Ferreira</span>
-                        <span className="text-xs text-gray-500">• há 1 ano</span>
-                      </div>
-                      <div className="flex gap-0.5 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700">
-                        "Suporte VIP faz toda a diferença! Respondem em minutos."
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 4 */}
-                <Card className="p-3 bg-white border-gray-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
-                      JO
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">João Oliveira</span>
-                        <span className="text-xs text-gray-500">• há 3 meses</span>
-                      </div>
-                      <div className="flex gap-0.5 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700">
-                        "Saque sem valor mínimo é perfeito! Posso sacar quando quiser."
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Button to view more */}
-                <button 
-                  className="w-full text-center text-xs text-gray-500 hover:text-gray-700 py-2 transition-colors"
-                  onClick={() => {
-                    toast({
-                      title: "Carregando mais avaliações...",
-                      description: "Mais 880 avaliações disponíveis após ativação",
-                    });
-                  }}
-                >
-                  Ver todas as 884 avaliações →
-                </button>
+            {/* Payment Methods */}
+            <div className="text-center">
+              <p className="text-xs text-gray-500 mb-2">Pagamento 100% seguro via PIX</p>
+              <div className="flex items-center justify-center gap-2">
+                <Shield className="h-4 w-4 text-gray-400" />
+                <span className="text-xs text-gray-400">Pagamento 100% seguro via PIX</span>
               </div>
             </div>
+
+            {/* Guarantee */}
+            <Card className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+              <div className="flex items-center gap-3">
+                <Shield className="h-10 w-10 text-blue-600" />
+                <div>
+                  <p className="font-bold text-sm text-gray-900">Garantia Total</p>
+                  <p className="text-xs text-gray-600">Reembolso sem burocracia</p>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
-        {/* Step 6: Checkout Form */}
-        {currentStep === 6 && (
+        {/* Checkout Form */}
+        {showCheckoutForm && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -1227,7 +699,7 @@ export default function OnboardingComplete() {
               </Button>
 
               <button
-                onClick={() => setCurrentStep(5)}
+                onClick={() => setShowCheckoutForm(false)}
                 className="w-full text-gray-500 text-sm hover:text-gray-700 transition-colors"
               >
                 <ChevronLeft className="inline h-4 w-4 mr-1" />
@@ -1396,7 +868,7 @@ export default function OnboardingComplete() {
                     <Button
                       onClick={() => {
                         handleClosePayment();
-                        setCurrentStep(6);
+                        setShowCheckoutForm(true);
                       }}
                       className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold"
                     >
@@ -1498,10 +970,9 @@ export default function OnboardingComplete() {
               <Button
                 onClick={handleSuccessClose}
                 className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold"
-                data-testid="button-go-to-dashboard"
+                data-testid="button-success-continue"
               >
-                Ir para o Dashboard
-                <ChevronRight className="ml-2 h-4 w-4" />
+                Começar a ler agora
               </Button>
             </div>
           </DialogContent>
