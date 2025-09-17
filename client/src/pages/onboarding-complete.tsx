@@ -309,7 +309,7 @@ export default function OnboardingComplete() {
 
   const handleActivateAccount = () => {
     playSound('click');
-    setCurrentStep(6);
+    setCurrentStep(7);
     
     fbPixel.trackAddToCart({
       value: 29.00,
@@ -689,8 +689,83 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 5: Pricing Card */}
+        {/* Step 5: Congratulations */}
         {currentStep === 5 && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Success Icon */}
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4 shadow-xl">
+                <CheckCircle className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+                Parabéns por concluir suas atividades!
+              </h2>
+              <p className="text-lg text-gray-600 mb-2">
+                Agora é hora de oficializar a sua conta no Beta Reader Brasil
+              </p>
+            </div>
+
+            {/* Limited Spots Warning */}
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-1">
+              <div className="bg-white rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center animate-pulse">
+                      <AlertCircle className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-lg font-bold text-gray-900">
+                      ⚠️ Atenção: Restam apenas <span className="text-red-600">5 vagas!</span>
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Garanta seu lugar antes que acabe. As vagas estão sendo preenchidas rapidamente!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Benefits Preview */}
+            <Card className="p-5 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+              <h3 className="font-bold text-base text-gray-900 mb-3">Ao oficializar sua conta você terá:</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Check className="h-5 w-5 text-green-600" />
+                  <span className="text-sm text-gray-700">Acesso vitalício à plataforma</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-5 w-5 text-green-600" />
+                  <span className="text-sm text-gray-700">Atividades ilimitadas para sempre</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-5 w-5 text-green-600" />
+                  <span className="text-sm text-gray-700">Saque sem valor mínimo</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-5 w-5 text-green-600" />
+                  <span className="text-sm text-gray-700">Suporte VIP no WhatsApp</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Continue Button */}
+            <Button 
+              onClick={() => {
+                playSound('click');
+                setCurrentStep(7);
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-lg shadow-xl"
+              data-testid="button-continue-to-pricing"
+            >
+              Continuar para ativação
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 6: Pricing Card */}
+        {currentStep === 6 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -1063,8 +1138,8 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 6: Checkout Form */}
-        {currentStep === 6 && (
+        {/* Step 7: Checkout Form */}
+        {currentStep === 7 && (
           <div className="space-y-5 animate-fade-in">
             {/* Enhanced Header */}
             <div className="relative">
@@ -1319,7 +1394,7 @@ export default function OnboardingComplete() {
 
               {/* Back Button */}
               <button
-                onClick={() => setCurrentStep(5)}
+                onClick={() => setCurrentStep(6)}
                 className="w-full text-gray-500 text-sm hover:text-gray-700 transition-colors py-2"
               >
                 <ChevronLeft className="inline h-4 w-4 mr-1" />
@@ -1506,7 +1581,7 @@ export default function OnboardingComplete() {
                     <Button
                       onClick={() => {
                         handleClosePayment();
-                        setCurrentStep(6);
+                        setCurrentStep(7);
                       }}
                       className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold"
                     >
