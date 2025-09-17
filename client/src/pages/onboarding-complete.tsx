@@ -693,10 +693,10 @@ export default function OnboardingComplete() {
         {currentStep === 5 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 Ative sua conta agora
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-base text-gray-600">
                 Pagamento único, benefícios para sempre
               </p>
             </div>
@@ -713,10 +713,10 @@ export default function OnboardingComplete() {
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-gray-900 leading-tight">
+                      <p className="text-base font-bold text-gray-900 leading-tight">
                         🔥 Restam apenas <span className="text-red-600">26 vagas!</span>
                       </p>
-                      <p className="text-[10px] text-gray-500">
+                      <p className="text-sm text-gray-500">
                         Oferta limitada • Garanta agora
                       </p>
                     </div>
@@ -725,7 +725,7 @@ export default function OnboardingComplete() {
                     <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
                       81%
                     </p>
-                    <p className="text-[9px] text-gray-500 uppercase tracking-wider">ocupado</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider">ocupado</p>
                   </div>
                 </div>
                 <div className="mt-2.5">
@@ -735,8 +735,8 @@ export default function OnboardingComplete() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <p className="text-[10px] text-gray-500">21 de 26 vagas preenchidas</p>
-                    <p className="text-[10px] font-semibold text-red-600">Últimas 5!</p>
+                    <p className="text-sm text-gray-500">21 de 26 vagas preenchidas</p>
+                    <p className="text-sm font-semibold text-red-600">Últimas 5!</p>
                   </div>
                 </div>
               </div>
@@ -746,7 +746,7 @@ export default function OnboardingComplete() {
             <div className="relative">
               {/* Popular Badge */}
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap">
+                <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap">
                   <Sparkles className="h-3 w-3" />
                   <span>OFERTA ESPECIAL</span>
                 </div>
@@ -759,14 +759,14 @@ export default function OnboardingComplete() {
                 {/* Header */}
                 <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-4">
                   <div className="text-center">
-                    <h3 className="text-white font-bold text-lg mb-1">Ativação Premium</h3>
-                    <p className="text-green-100 text-xs">Acesso completo e ilimitado</p>
+                    <h3 className="text-white font-bold text-xl mb-1">Ativação Premium</h3>
+                    <p className="text-green-100 text-sm">Acesso completo e ilimitado</p>
                     
                     {/* Price */}
                     <div className="mt-3">
                       <div className="flex items-center justify-center gap-2 mb-1">
-                        <span className="text-green-100 text-xs line-through">R$ 49,90</span>
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        <span className="text-green-100 text-sm line-through">R$ 49,90</span>
+                        <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                           -40%
                         </span>
                       </div>
@@ -775,7 +775,7 @@ export default function OnboardingComplete() {
                         <span className="text-white text-3xl font-bold">29</span>
                         <span className="text-white text-lg">,00</span>
                       </div>
-                      <p className="text-green-100 text-[10px] font-semibold mt-1">
+                      <p className="text-green-100 text-sm font-semibold mt-1">
                         PAGAMENTO ÚNICO
                       </p>
                     </div>
@@ -789,8 +789,8 @@ export default function OnboardingComplete() {
                       <BookOpen className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 font-bold text-sm block">Atividades Ilimitadas</span>
-                      <span className="text-[10px] text-gray-600">Leia quantos quiser, sem restrições</span>
+                      <span className="text-gray-800 font-bold text-base block">Atividades Ilimitadas</span>
+                      <span className="text-sm text-gray-600">Leia quantos quiser, sem restrições</span>
                     </div>
                   </div>
 
@@ -799,8 +799,8 @@ export default function OnboardingComplete() {
                       <CreditCard className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 font-bold text-sm block">Saque sem valor mínimo</span>
-                      <span className="text-[10px] text-gray-600">36x mais rápido que usuários free</span>
+                      <span className="text-gray-800 font-bold text-base block">Saque sem valor mínimo</span>
+                      <span className="text-sm text-gray-600">36x mais rápido que usuários free</span>
                     </div>
                   </div>
 
@@ -809,8 +809,8 @@ export default function OnboardingComplete() {
                       <MessageCircle className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-gray-800 font-bold text-sm block">Suporte VIP WhatsApp</span>
-                      <span className="text-[10px] text-gray-600">Atendimento prioritário e exclusivo</span>
+                      <span className="text-gray-800 font-bold text-base block">Suporte VIP WhatsApp</span>
+                      <span className="text-sm text-gray-600">Atendimento prioritário e exclusivo</span>
                     </div>
                   </div>
 
@@ -819,8 +819,8 @@ export default function OnboardingComplete() {
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-4 w-4 text-red-500" />
                       <div>
-                        <p className="text-[10px] font-bold text-red-700">Oferta por tempo limitado!</p>
-                        <p className="text-[10px] text-red-600">Preço normal: R$ 49,90</p>
+                        <p className="text-sm font-bold text-red-700">Oferta por tempo limitado!</p>
+                        <p className="text-sm text-red-600">Preço normal: R$ 49,90</p>
                       </div>
                     </div>
                   </div>
@@ -869,8 +869,8 @@ export default function OnboardingComplete() {
 
                   {/* Security Badge */}
                   <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-500 mt-3">
-                    <Shield className="h-3 w-3 text-green-600" />
-                    <span>Pagamento 100% seguro via PIX</span>
+                    <Shield className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">Pagamento 100% seguro via PIX</span>
                   </div>
                 </div>
               </Card>
