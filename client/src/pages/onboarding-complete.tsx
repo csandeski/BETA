@@ -721,28 +721,44 @@ export default function OnboardingComplete() {
               </p>
             </div>
 
-            {/* Limited Spots Alert */}
-            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-4 border-2 border-orange-200 shadow-md mb-6">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center shadow-md">
-                    <Users className="h-6 w-6 text-white" />
+            {/* Limited Spots Alert - Compact Design */}
+            <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-xl p-[2px] mb-6 shadow-lg">
+              <div className="bg-white rounded-[10px] p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="relative">
+                      <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center animate-pulse">
+                        <Users className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 leading-tight">
+                        🔥 Restam apenas <span className="text-red-600">26 vagas!</span>
+                      </p>
+                      <p className="text-[10px] text-gray-500">
+                        Oferta limitada • Garanta agora
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
+                      81%
+                    </p>
+                    <p className="text-[9px] text-gray-500 uppercase tracking-wider">ocupado</p>
                   </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-lg font-bold text-gray-900">
-                    Restam apenas 26 vagas!
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Garanta sua vaga agora antes que acabe
-                  </p>
+                <div className="mt-2.5">
+                  <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 h-full rounded-full transition-all duration-1000 ease-out animate-pulse" 
+                         style={{ width: '81%' }}>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-[10px] text-gray-500">21 de 26 vagas preenchidas</p>
+                    <p className="text-[10px] font-semibold text-red-600">Últimas 5!</p>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-3">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full animate-pulse" style={{ width: '82%' }}></div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1 text-center">21 de 26 vagas preenchidas</p>
               </div>
             </div>
 
