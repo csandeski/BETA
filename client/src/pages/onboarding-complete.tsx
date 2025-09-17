@@ -44,182 +44,146 @@ export default function OnboardingComplete() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { playSound } = useSound();
-  
-  // Step management - restore state from localStorage
-  const [currentStep, setCurrentStep] = useState(() => {
-    const savedPricing = localStorage.getItem('pricing_seen_v1') === 'true';
-    return savedPricing ? 5 : 1;  // Start at pricing if already seen (step 5 now)
-  });
-  const [hasSeenPricing, setHasSeenPricing] = useState(() => {
-    return localStorage.getItem('pricing_seen_v1') === 'true';
-  });
-  
-  // User data
+  const [currentStep, setCurrentStep] = useState(1);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [userFullName, setUserFullName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [userCPF, setUserCPF] = useState("");
-  
-  // Payment state
-  const [showPixModal, setShowPixModal] = useState(false);
-  const [showGeneratingPix, setShowGeneratingPix] = useState(false);
-  const [pixPaymentId, setPixPaymentId] = useState<string | null>(null);
-  const [pixCode, setPixCode] = useState<string | null>(null);
-  const [pixCountdown, setPixCountdown] = useState(600);
-  const [isPixExpired, setIsPixExpired] = useState(false);
+  const [pixCode, setPixCode] = useState("");
+  const [pixExpiration, setPixExpiration] = useState("");
+  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
-  const [checkoutTimer, setCheckoutTimer] = useState(600);
+  const [checkPaymentCount, setCheckPaymentCount] = useState(0);
+  const [isPixExpired, setIsPixExpired] = useState(false);
+  const [showPixConfirmation, setShowPixConfirmation] = useState(false);
+  const [paymentOrderId, setPaymentOrderId] = useState("");
+  const [isTimeoutReached, setIsTimeoutReached] = useState(false);
 
-  // Check if user has completed 3 activities
+  const totalSteps = 5;
+
   useEffect(() => {
-    const checkAccess = async () => {
-      // Check if logged in user
-      const authResponse = await fetch('/api/auth/status');
-      const authData = await authResponse.json();
-      
-      let userData = null;
-      
-      if (authData.isLoggedIn && authData.userId) {
-        // Logged in user
-        userData = userDataManager.getUserData();
-      } else {
-        // Guest user - check localStorage
-        const guestDataStr = localStorage.getItem('guestUserData');
-        if (guestDataStr) {
-          userData = JSON.parse(guestDataStr);
-        }
+    const savedData = userDataManager.getUserData();
+    if (savedData?.userId && savedData?.isLoggedIn) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('payment') === 'success') {
+        setShowSuccessModal(true);
       }
-      
-      // If no user data or less than 5 books completed, redirect to dashboard
-      if (!userData || !userData.stats?.totalBooksRead || userData.stats.totalBooksRead < 5) {
-        setLocation('/dashboard');
-        toast({
-          title: "Acesso negado",
-          description: "Você precisa completar 5 atividades antes de acessar esta página.",
-          variant: "destructive"
-        });
-      }
-    };
-    
-    checkAccess();
-  }, [setLocation, toast]);
-
-  // Block navigation once pricing is seen
-  useEffect(() => {
-    if (hasSeenPricing) {
-      const handleBlockedAction = (e: any) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // Always redirect to pricing step
-        setCurrentStep(5);
-        toast({
-          title: "Ação bloqueada",
-          description: "Complete o pagamento para continuar usando o app",
-          variant: "destructive"
-        });
-      };
-      
-      // Intercept all clicks outside the payment flow
-      const handleGlobalClick = (e: MouseEvent) => {
-        const target = e.target as HTMLElement;
-        const isPaymentFlow = target.closest('[data-payment-flow="true"]');
-        if (!isPaymentFlow) {
-          handleBlockedAction(e);
-        }
-      };
-      
-      document.addEventListener('click', handleGlobalClick, true);
-      window.addEventListener('popstate', handleBlockedAction);
-      
-      return () => {
-        document.removeEventListener('click', handleGlobalClick, true);
-        window.removeEventListener('popstate', handleBlockedAction);
-      };
     }
-  }, [hasSeenPricing, toast]);
+  }, []);
 
-  // Countdown timer for checkout
-  useEffect(() => {
-    if (currentStep === 6 && checkoutTimer > 0) {
-      const interval = setInterval(() => {
-        setCheckoutTimer((prev) => {
-          if (prev <= 1) {
-            toast({
-              title: "Tempo esgotado!",
-              description: "Reiniciando processo de pagamento...",
-              variant: "destructive"
-            });
-            setCurrentStep(5);
-            setCheckoutTimer(600);
-            return 600;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [currentStep, checkoutTimer, toast]);
-
-  // PIX countdown
-  useEffect(() => {
-    if (showPixModal && pixCountdown > 0 && !isPixExpired) {
-      const interval = setInterval(() => {
-        setPixCountdown((prev) => {
-          if (prev <= 1) {
-            setIsPixExpired(true);
-            setShowPixModal(false);
-            toast({
-              title: "PIX expirado",
-              description: "O código PIX expirou. Gere um novo código para continuar.",
-              variant: "destructive"
-            });
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [showPixModal, pixCountdown, isPixExpired, toast]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 2) return `(${numbers}`;
+    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      return numbers
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d{1,2})/, '$1-$2');
-    }
-    return value;
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
   };
 
-  const formatPhone = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      return numbers
-        .replace(/(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{5})(\d)/, '$1-$2');
-    }
-    return value;
-  };
-
-  const handleNextStep = () => {
-    setCurrentStep(prev => prev + 1);
-    // Mark as seen when entering pricing step (now step 4)
-    if (currentStep === 4) {
-      setHasSeenPricing(true);
-      localStorage.setItem('pricing_seen_v1', 'true');
+  const copyToClipboard = () => {
+    if (pixCode) {
+      navigator.clipboard.writeText(pixCode);
+      setCopiedToClipboard(true);
+      toast({
+        title: "Código copiado!",
+        description: "Cole no app do seu banco para pagar",
+      });
+      
+      fbPixel.trackAddToCart({
+        content_name: 'PIX Code Copied',
+        value: 29.00,
+        currency: 'BRL'
+      });
+      
+      setTimeout(() => setCopiedToClipboard(false), 3000);
     }
   };
 
-  const handleActivateAccount = () => {
-    setCurrentStep(6);
+  const startPaymentCheck = () => {
+    setIsCheckingPayment(true);
+    setCheckPaymentCount(0);
+    setShowPixConfirmation(false);
+    setIsTimeoutReached(false);
+    checkPaymentLoop();
+  };
+
+  const checkPaymentLoop = () => {
+    const interval = setInterval(async () => {
+      setCheckPaymentCount(prev => {
+        const newCount = prev + 1;
+        
+        // Check payment status every iteration
+        if (paymentOrderId) {
+          checkPaymentStatus();
+        }
+        
+        // After 10 checks (30 seconds), show the modal
+        if (newCount === 10 && !showPixConfirmation) {
+          setShowPixConfirmation(true);
+        }
+        
+        // After 40 checks (2 minutes), stop checking
+        if (newCount >= 40) {
+          clearInterval(interval);
+          setIsCheckingPayment(false);
+          setIsTimeoutReached(true);
+        }
+        
+        return newCount;
+      });
+    }, 3000); // Check every 3 seconds
+  };
+
+  const checkPaymentStatus = async () => {
+    if (!paymentOrderId) return;
+    
+    try {
+      const response = await fetch(`/api/payment/check-status/${paymentOrderId}`);
+      const data = await response.json();
+      
+      if (data.status === 'paid' || data.status === 'approved') {
+        // Payment confirmed!
+        handlePaymentSuccess();
+      }
+    } catch (error) {
+      console.error('Error checking payment:', error);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    setIsCheckingPayment(false);
+    setShowPaymentModal(false);
+    setShowPixConfirmation(false);
+    
+    fbPixel.trackPurchase({
+      value: 29.00,
+      currency: 'BRL',
+      content_name: 'Account Activation'
+    });
+
+    // Update user data
+    const currentData = userDataManager.getUserData() || {};
+    userDataManager.updateUserData({
+      ...currentData,
+      isPremium: true,
+      premiumSince: new Date().toISOString(),
+      email: userEmail,
+      phone: userPhone,
+      name: userFullName
+    });
+
+    // Show success modal
+    setShowSuccessModal(true);
+    playSound('success');
   };
 
   const validateForm = () => {
@@ -227,484 +191,528 @@ export default function OnboardingComplete() {
       toast({
         title: "Nome inválido",
         description: "Por favor, insira seu nome completo",
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!userEmail || !emailRegex.test(userEmail)) {
+
+    if (!userEmail || !userEmail.includes('@')) {
       toast({
         title: "Email inválido",
         description: "Por favor, insira um email válido",
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
-    
-    const cleanPhone = userPhone.replace(/\D/g, '');
-    if (!cleanPhone || cleanPhone.length < 10) {
+
+    const phoneNumbers = userPhone.replace(/\D/g, '');
+    if (!userPhone || phoneNumbers.length < 10) {
       toast({
-        title: "Telefone inválido",
-        description: "Por favor, insira um telefone válido",
-        variant: "destructive"
+        title: "WhatsApp inválido",
+        description: "Por favor, insira um número válido com DDD",
+        variant: "destructive",
       });
       return false;
     }
-    
-    const cleanCPF = userCPF.replace(/\D/g, '');
-    if (!cleanCPF || cleanCPF.length !== 11) {
+
+    const cpfNumbers = userCPF.replace(/\D/g, '');
+    if (!userCPF || cpfNumbers.length !== 11) {
       toast({
         title: "CPF inválido",
         description: "Por favor, insira um CPF válido com 11 dígitos",
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
-    
+
     return true;
   };
 
   const generatePixMutation = useMutation({
-    mutationFn: async () => {
-      if (!validateForm()) {
-        throw new Error('Formulário inválido');
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/payment/generate-pix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to generate PIX");
       }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setPixCode(data.pixCode);
+      setPaymentOrderId(data.orderId);
       
-      setShowGeneratingPix(true);
-      playSound('click');
+      // Calculate expiration (5 minutes from now)
+      const expiration = new Date();
+      expiration.setMinutes(expiration.getMinutes() + 5);
+      setPixExpiration(expiration.toISOString());
       
+      setShowPaymentModal(true);
+      setCurrentStep(1);
+      playSound('success');
+      
+      // Track checkout initiation
       fbPixel.trackInitiateCheckout({
         value: 29.00,
         currency: 'BRL',
         content_name: 'Account Activation',
         num_items: 1
       });
-
-      const utmParams = UtmTracker.getForOrinPay();
-      const cleanCPF = userCPF.replace(/\D/g, '');
-      const cleanPhone = userPhone.replace(/\D/g, '');
       
-      const requestBody = {
-        plan: 'supporter',
-        amount: 29.00,
-        fullName: userFullName,
-        email: userEmail,
-        phone: cleanPhone,
-        cpf: cleanCPF,
-        ...utmParams
-      };
-
-      const response = await fetch('/api/payment/generate-pix', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-        credentials: 'include'
+      // Start checking for payment
+      startPaymentCheck();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao gerar PIX",
+        description: error.message,
+        variant: "destructive",
       });
+    },
+  });
 
-      if (!response.ok) {
-        throw new Error('Falha ao gerar PIX');
+  const handleGeneratePix = () => {
+    if (!validateForm()) return;
+
+    playSound('click');
+    
+    fbPixel.trackInitiateCheckout({
+      value: 29.00,
+      currency: 'BRL',
+      content_name: 'Account Activation',
+      num_items: 1
+    });
+    
+    // Save UTM params
+    // Save UTM params
+    
+    const cleanPhone = userPhone.replace(/\D/g, '');
+    
+    const requestBody = {
+      plan: 'supporter',
+      amount: 29.00,
+      fullName: userFullName,
+      email: userEmail,
+      phone: cleanPhone,
+      cpf: userCPF.replace(/\D/g, '')
+    };
+
+    generatePixMutation.mutate(requestBody);
+  };
+
+  const handleActivateAccount = () => {
+    playSound('click');
+    setCurrentStep(6);
+    
+    fbPixel.trackAddToCart({
+      value: 29.00,
+      currency: 'BRL',
+      content_name: 'Account Activation'
+    });
+  };
+
+  const handleClosePayment = () => {
+    setShowPaymentModal(false);
+    setIsCheckingPayment(false);
+    setPixCode("");
+    setPixExpiration("");
+    setIsPixExpired(false);
+    setShowPixConfirmation(false);
+    
+    fbPixel.trackAddPaymentInfo({
+      value: 29.00,
+      currency: 'BRL',
+      content_name: 'Account Activation'
+    });
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    setLocation('/dashboard');
+  };
+
+  const pixExpirationTimer = () => {
+    if (!pixExpiration) return null;
+    
+    const now = new Date();
+    const expiry = new Date(pixExpiration);
+    const diff = expiry.getTime() - now.getTime();
+    
+    if (diff <= 0) {
+      if (!isPixExpired) {
+        setIsPixExpired(true);
+        setIsCheckingPayment(false);
       }
+      return "00:00";
+    }
+    
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (pixExpiration && showPaymentModal) {
+      interval = setInterval(() => {
+        const timer = pixExpirationTimer();
+        if (timer === "00:00") {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [pixExpiration, showPaymentModal]);
+
+  const checkPaymentStatusMutation = useMutation({
+    mutationFn: async () => {
+      if (!paymentOrderId) throw new Error("No order ID");
+      
+      const response = await fetch(`/api/payment/check-status/${paymentOrderId}`);
+      if (!response.ok) throw new Error("Failed to check payment");
       return response.json();
     },
     onSuccess: (data) => {
-      setShowGeneratingPix(false);
-      if (data.pixCode && data.paymentId) {
-        setPixCode(data.pixCode);
-        setPixPaymentId(data.paymentId);
-        setShowPixModal(true);
-        setPixCountdown(600);
-        setIsPixExpired(false);
-        
-        fbPixel.trackAddPaymentInfo({
-          value: 29.00,
-          currency: 'BRL',
-          content_name: 'Account Activation'
+      if (data.status === 'paid' || data.status === 'approved') {
+        handlePaymentSuccess();
+      } else if (showPixConfirmation) {
+        toast({
+          title: "Pagamento pendente",
+          description: "Continue aguardando a confirmação do pagamento...",
         });
-        
-        startPollingPaymentStatus(data.paymentId);
       }
     },
-    onError: (error: any) => {
-      setShowGeneratingPix(false);
-      console.error('Payment error:', error);
-      toast({
-        title: "Erro no pagamento",
-        description: "Não foi possível gerar o PIX. Tente novamente.",
-        variant: "destructive",
-      });
+    onError: () => {
+      if (showPixConfirmation) {
+        toast({
+          title: "Erro ao verificar",
+          description: "Não foi possível verificar o status do pagamento",
+          variant: "destructive",
+        });
+      }
     }
   });
 
-  const startPollingPaymentStatus = (paymentId: string) => {
-    let pollCount = 0;
-    const maxPolls = 120;
-    
-    const pollInterval = setInterval(async () => {
-      pollCount++;
-      
-      if (pollCount >= maxPolls || isPixExpired) {
-        clearInterval(pollInterval);
-        setIsCheckingPayment(false);
-        return;
-      }
-
-      try {
-        setIsCheckingPayment(true);
-        const response = await fetch(`/api/payment/check-status?paymentId=${paymentId}`, {
-          credentials: 'include'
-        });
-        const data = await response.json();
-        
-        if (data.status === 'paid') {
-          clearInterval(pollInterval);
-          setIsCheckingPayment(false);
-          
-          fbPixel.trackPurchase({
-            value: 29.00,
-            currency: 'BRL',
-            content_name: 'Account Activation',
-            content_type: 'product'
-          });
-          
-          await userDataManager.loadUserData();
-          queryClient.invalidateQueries({ queryKey: ['/api/users/me'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/users/data'] });
-          
-          // Clear the pricing seen flag since they've paid
-          localStorage.removeItem('pricing_seen_v1');
-          
-          toast({
-            title: "Pagamento confirmado! 🎉",
-            description: "Sua conta foi ativada com sucesso!",
-          });
-          
-          playSound('reward');
-          setShowPixModal(false);
-          
-          // Force full page reload to re-evaluate global guards
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 2000);
-        }
-      } catch (error) {
-        console.error('Error checking payment status:', error);
-      } finally {
-        setIsCheckingPayment(false);
-      }
-    }, 5000);
-  };
-
-  const copyPixCode = () => {
-    if (pixCode) {
-      navigator.clipboard.writeText(pixCode);
-      playSound('click');
-      toast({
-        title: "Código copiado!",
-        description: "Cole o código no app do seu banco",
-      });
-    }
+  const handleConfirmPayment = () => {
+    checkPaymentStatusMutation.mutate();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white" data-payment-flow="true">
-      {/* Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
-        <div className="h-2 bg-gray-200">
-          <div 
-            className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500"
-            style={{ width: `${(currentStep / 6) * 100}%` }}
-          />
-        </div>
-        {currentStep === 6 && (
-          <div className="bg-red-50 border-b border-red-200 py-2 px-4">
-            <div className="flex items-center justify-center gap-2">
-              <Clock className="h-4 w-4 text-red-600 animate-pulse" />
-              <span className="text-sm font-bold text-red-600">
-                Tempo restante: {formatTime(checkoutTimer)}
-              </span>
-              <span className="text-xs text-red-500">
-                Complete o pagamento antes que o tempo acabe
-              </span>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-6 px-4">
+      <div className="max-w-md mx-auto">
+        {/* Progress Bar */}
+        {currentStep <= 5 && (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              {[...Array(totalSteps)].map((_, index) => (
+                <div key={index} className="flex items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      index + 1 <= currentStep
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
+                        : 'bg-gray-200 text-gray-500'
+                    }`}
+                  >
+                    {index + 1 <= currentStep ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <span className="text-sm font-semibold">{index + 1}</span>
+                    )}
+                  </div>
+                  {index < totalSteps - 1 && (
+                    <div
+                      className={`w-full h-1 mx-1 transition-all ${
+                        index + 1 < currentStep
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                          : 'bg-gray-200'
+                      }`}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}
-      </div>
 
-      <div className="max-w-md mx-auto px-4 py-16">
-        {/* Step 1: Congratulations for completing activities */}
+        {/* Step 1: Benefits Overview */}
         {currentStep === 1 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center">
-              <div className="inline-flex p-4 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-3xl mb-6">
-                <Award className="h-12 w-12 text-orange-600" />
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                Parabéns por concluir suas atividades! 🎉
-              </h1>
-              <p className="text-gray-600 mb-4">
-                Você completou com sucesso as 5 primeiras atividades em nosso app.
-              </p>
-              <p className="text-gray-700 font-medium mb-6">
-                Agora você conheceu e aprendeu de fato como o Beta Reader funciona!
-              </p>
-            </div>
-
-            <Card className="p-6 bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200">
-              <div className="flex items-center gap-3 mb-4">
-                <Users className="h-8 w-8 text-orange-600" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">Apenas 26 vagas</p>
-                  <p className="text-sm text-gray-600">disponíveis no momento</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-2">Vagas limitadas!</p>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{ width: '85%' }}></div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">21 de 26 vagas já preenchidas</p>
-              </div>
-            </Card>
-
-            <div className="space-y-3">
-              <Card className="p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
-                <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-900">Você está qualificado!</p>
-                  <p className="text-sm text-gray-600">Demonstrou dedicação e comprometimento</p>
-                </div>
-              </Card>
-              
-              <Card className="p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
-                <Sparkles className="h-6 w-6 text-purple-500 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-900">Acesso exclusivo</p>
-                  <p className="text-sm text-gray-600">Entre agora para o grupo seleto de leitores</p>
-                </div>
-              </Card>
-            </div>
-
-            <button
-              onClick={handleNextStep}
-              className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-xl flex items-center justify-center gap-2 animate-pulse-slow"
-              data-payment-flow="true"
-              data-testid="button-continue"
-            >
-              Continuar
-              <ChevronRight className="h-5 w-5" />
-            </button>
-
-            <p className="text-center text-xs text-gray-500">
-              Garanta sua vaga antes que acabe!
-            </p>
-          </div>
-        )}
-
-        {/* Step 2: Are you enjoying our app? */}
-        {currentStep === 2 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center">
-              <div className="inline-flex p-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-3xl mb-6">
-                <Heart className="h-12 w-12 text-green-600" />
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                Você está gostando do nosso app?
-              </h1>
-              <p className="text-gray-600 mb-8">
-                Sua opinião é muito importante para nós!
-              </p>
-            </div>
-
-            <div className="flex justify-center gap-3 mb-8">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  className="p-2 hover:scale-110 transition-transform"
-                  data-testid={`button-star-${star}`}
-                >
-                  <Star className="h-10 w-10 text-yellow-400 fill-yellow-400" />
-                </button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <Card className="p-4 text-center hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-green-500">
-                <ThumbsUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                <p className="text-sm font-semibold">Adorei!</p>
-              </Card>
-              <Card className="p-4 text-center hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-blue-500">
-                <Smile className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                <p className="text-sm font-semibold">Muito bom</p>
-              </Card>
-            </div>
-
-            <Card className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
-              <div className="flex items-start gap-3">
-                <Gift className="h-6 w-6 text-orange-500 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-800 font-semibold mb-1">
-                    Obrigado pelo feedback!
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Você já completou 5 atividades e desbloqueou acesso a uma experiência ainda melhor
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Button
-              onClick={handleNextStep}
-              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-              data-testid="button-continue-step2"
-            >
-              Continuar
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        )}
-
-        {/* Step 3: Who We Are */}
-        {currentStep === 3 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center mb-8">
-              <div className="inline-flex p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl mb-4">
-                <BookOpen className="h-10 w-10 text-blue-600" />
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4 shadow-xl">
+                <Heart className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Quem Somos
+                Parabéns pela decisão!
               </h2>
               <p className="text-sm text-gray-600">
-                Conheça nossa missão e comunidade
+                Você está a um passo de transformar sua leitura em renda
               </p>
             </div>
 
-            <div className="space-y-4">
-              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-green-100">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-green-100 rounded-xl">
-                    <Target className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-2">Nossa Missão</h3>
-                    <p className="text-sm text-gray-600">
-                      Conectamos leitores apaixonados com escritores talentosos, oferecendo feedback valioso antes do lançamento oficial dos livros.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-purple-100">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-purple-100 rounded-xl">
-                    <Users className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-2">Comunidade Ativa</h3>
-                    <p className="text-sm text-gray-600">
-                      Mais de 2.600 leitores ativos que já testaram mais de 500 livros em 6 anos de atividade.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-orange-100">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-orange-100 rounded-xl">
-                    <Heart className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-2">Sistema Colaborativo</h3>
-                    <p className="text-sm text-gray-600">
-                      Mantido por uma comunidade de apoiadores que acreditam no poder da leitura.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
+            {/* Quick Benefits */}
             <div className="grid grid-cols-2 gap-3">
-              <Card className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-                <Users className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-gray-900">2.600+</p>
-                <p className="text-xs text-gray-600">Leitores ativos</p>
+              <Card className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                <BookOpen className="h-6 w-6 text-green-600 mb-2" />
+                <p className="font-semibold text-sm text-gray-900">Leia Ilimitado</p>
+                <p className="text-xs text-gray-600">Sem restrições</p>
               </Card>
-
-              <Card className="p-4 text-center bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                <Award className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-gray-900">6+ anos</p>
-                <p className="text-xs text-gray-600">De atividade</p>
+              <Card className="p-3 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+                <Target className="h-6 w-6 text-blue-600 mb-2" />
+                <p className="font-semibold text-sm text-gray-900">Ganhe Mais</p>
+                <p className="text-xs text-gray-600">36x mais rápido</p>
+              </Card>
+              <Card className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+                <Award className="h-6 w-6 text-purple-600 mb-2" />
+                <p className="font-semibold text-sm text-gray-900">Seja VIP</p>
+                <p className="text-xs text-gray-600">Benefícios exclusivos</p>
+              </Card>
+              <Card className="p-3 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
+                <Users className="h-6 w-6 text-orange-600 mb-2" />
+                <p className="font-semibold text-sm text-gray-900">Comunidade</p>
+                <p className="text-xs text-gray-600">Suporte premium</p>
               </Card>
             </div>
 
-            <Button
-              onClick={handleNextStep}
-              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-              data-testid="button-continue-step2"
+            <Button 
+              onClick={() => {
+                playSound('click');
+                setCurrentStep(2);
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
             >
-              Continuar
+              Continuar para ativação
               <ChevronRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
         )}
 
-        {/* Step 4: Maintenance Fee Message */}
-        {currentStep === 4 && (
+        {/* Step 2: Success Timeline */}
+        {currentStep === 2 && (
           <div className="space-y-6 animate-fade-in">
-            <div className="text-center mb-8">
-              <div className="inline-flex p-4 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl mb-4">
-                <Zap className="h-10 w-10 text-indigo-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Continue sua jornada de leitura
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Sua jornada de sucesso
               </h2>
-              <p className="text-gray-600 mb-2">
-                Para continuar usando o Beta Reader sem limites, cobramos uma 
-                <span className="font-bold text-green-600"> taxa única de manutenção </span>
-                para ativação da sua conta em nossos sistemas.
+              <p className="text-sm text-gray-600">
+                Veja o que nossos membros conquistaram
               </p>
             </div>
 
-            <Card className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300">
-              <div className="flex items-center gap-3 mb-3">
-                <AlertCircle className="h-6 w-6 text-orange-500" />
-                <h3 className="font-bold text-gray-900">Por que cobramos?</h3>
+            {/* Success Stories */}
+            <div className="space-y-3">
+              <Card className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="text-2xl">📅</div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-900">1º Mês</p>
+                    <p className="text-xs text-gray-600">Ana Paula - São Paulo</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700">
+                  "Recuperei o investimento e ainda lucrei R$ 234"
+                </p>
+                <div className="flex items-center gap-1 mt-2">
+                  {[1,2,3,4,5].map((star) => (
+                    <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                  ))}
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="text-2xl">📈</div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-900">3º Mês</p>
+                    <p className="text-xs text-gray-600">Carlos - Rio de Janeiro</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700">
+                  "Já fiz R$ 1.200 apenas lendo no tempo livre!"
+                </p>
+                <div className="flex items-center gap-1 mt-2">
+                  {[1,2,3,4,5].map((star) => (
+                    <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                  ))}
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="text-2xl">🎯</div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-900">6º Mês</p>
+                    <p className="text-xs text-gray-600">Juliana - Belo Horizonte</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700">
+                  "Consegui pagar todas as contas só com a plataforma"
+                </p>
+                <div className="flex items-center gap-1 mt-2">
+                  {[1,2,3,4,5].map((star) => (
+                    <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            <Button 
+              onClick={() => {
+                playSound('click');
+                setCurrentStep(3);
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
+            >
+              Quero começar agora
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 3: Special Bonus */}
+        {currentStep === 3 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-xl animate-bounce">
+                <Gift className="h-8 w-8 text-white" />
               </div>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Manter servidores e infraestrutura funcionando 24/7</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Garantir suporte prioritário via WhatsApp</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Desenvolver novos recursos e melhorias</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Manter o app gratuito para quem não pode pagar</span>
-                </li>
-              </ul>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Bônus Exclusivo Hoje!
+              </h2>
+              <p className="text-sm text-gray-600">
+                Por ser um dos primeiros 26 membros
+              </p>
+            </div>
+
+            {/* Bonus Items */}
+            <Card className="p-4 bg-gradient-to-br from-yellow-50 to-orange-50 border-orange-200">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-green-500 rounded-full">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-900">Acesso Vitalício</p>
+                    <p className="text-xs text-gray-600">Pague uma vez, use para sempre</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-green-500 rounded-full">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-900">Suporte VIP WhatsApp</p>
+                    <p className="text-xs text-gray-600">Atendimento prioritário 24/7</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-green-500 rounded-full">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-900">Sem Taxa de Saque</p>
+                    <p className="text-xs text-gray-600">100% do valor é seu</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-green-500 rounded-full">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-900">Garantia de 7 Dias</p>
+                    <p className="text-xs text-gray-600">Não gostou? Devolvemos 100%</p>
+                  </div>
+                </div>
+              </div>
             </Card>
 
-            <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 text-center">
-              <p className="text-sm text-green-800 font-semibold">
-                💚 Junte-se a mais de 1.200 apoiadores que mantêm nossa comunidade viva!
+            {/* Urgency */}
+            <Card className="p-3 bg-gradient-to-r from-red-500 to-pink-500 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5" />
+                  <span className="text-sm font-bold">Oferta limitada!</span>
+                </div>
+                <span className="text-xs">Restam 5 vagas</span>
+              </div>
+            </Card>
+
+            <Button 
+              onClick={() => {
+                playSound('click');
+                setCurrentStep(4);
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
+            >
+              Garantir minha vaga
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 4: Social Proof */}
+        {currentStep === 4 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Junte-se a 3.847 leitores
+              </h2>
+              <p className="text-sm text-gray-600">
+                Que já estão ganhando todos os dias
               </p>
             </div>
 
-            <Button
-              onClick={handleNextStep}
-              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-              data-testid="button-continue-step3"
+            {/* Live Activity */}
+            <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-green-600">ATIVIDADE AO VIVO</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-gray-600">Agora</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs text-gray-700">
+                  <ThumbsUp className="h-3 w-3 text-blue-500" />
+                  <span>João acabou de ativar a conta Premium</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-700">
+                  <Smile className="h-3 w-3 text-yellow-500" />
+                  <span>Maria ganhou R$ 26 lendo "O Poder do Hábito"</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-700">
+                  <Star className="h-3 w-3 text-purple-500" />
+                  <span>Pedro sacou R$ 450 essa semana</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <Card className="p-3 border-green-200">
+                <p className="text-2xl font-bold text-green-600">3.8K</p>
+                <p className="text-xs text-gray-600">Membros ativos</p>
+              </Card>
+              <Card className="p-3 border-blue-200">
+                <p className="text-2xl font-bold text-blue-600">R$ 2.1M</p>
+                <p className="text-xs text-gray-600">Já pagos</p>
+              </Card>
+              <Card className="p-3 border-purple-200">
+                <p className="text-2xl font-bold text-purple-600">4.9★</p>
+                <p className="text-xs text-gray-600">Avaliação</p>
+              </Card>
+            </div>
+
+            <Button 
+              onClick={() => {
+                playSound('click');
+                setCurrentStep(5);
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
             >
-              Ver valor da ativação
+              Ativar minha conta agora
               <ChevronRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
@@ -952,33 +960,33 @@ export default function OnboardingComplete() {
             {/* Testimonials Section */}
             <div className="space-y-3">
               {/* Testimonials Header with Stats */}
-              <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl p-4 text-white">
-                <div className="flex items-center justify-between mb-3">
+              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-base">Avaliações dos Usuários</h3>
+                    <h3 className="font-bold text-base text-gray-900">Avaliações Verificadas</h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex gap-1">
+                      <div className="flex gap-0.5">
                         {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                          <Star key={star} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                         ))}
                       </div>
-                      <span className="text-sm font-bold text-yellow-400">4.9/5.0</span>
+                      <span className="text-sm font-bold text-gray-900">4.9</span>
+                      <span className="text-xs text-gray-500">(884 avaliações)</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-300">Total de feedbacks</p>
-                    <p className="text-sm font-bold">884 comentários</p>
-                    <p className="text-xs text-gray-400">533 avaliações</p>
+                    <p className="text-2xl font-bold text-green-600">98%</p>
+                    <p className="text-[10px] text-gray-500">Aprovação</p>
                   </div>
                 </div>
               </div>
 
               {/* Individual Testimonials */}
-              <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+              <div className="space-y-2">
                 {/* Testimonial 1 */}
-                <Card className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <Card className="p-3 bg-white border-gray-200">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
                       MS
                     </div>
                     <div className="flex-1">
@@ -986,12 +994,12 @@ export default function OnboardingComplete() {
                         <span className="font-semibold text-sm text-gray-900">Maria Silva</span>
                         <span className="text-xs text-gray-500">• há 2 anos</span>
                       </div>
-                      <div className="flex gap-1 mb-1">
+                      <div className="flex gap-0.5 mb-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-700 italic">
+                      <p className="text-xs text-gray-700">
                         "Vale cada centavo! Agora leio sem limites e ainda ganho muito mais rápido!"
                       </p>
                     </div>
@@ -999,9 +1007,9 @@ export default function OnboardingComplete() {
                 </Card>
 
                 {/* Testimonial 2 */}
-                <Card className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+                <Card className="p-3 bg-white border-gray-200">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
                       PC
                     </div>
                     <div className="flex-1">
@@ -1009,12 +1017,12 @@ export default function OnboardingComplete() {
                         <span className="font-semibold text-sm text-gray-900">Pedro Costa</span>
                         <span className="text-xs text-gray-500">• há 8 meses</span>
                       </div>
-                      <div className="flex gap-1 mb-1">
+                      <div className="flex gap-0.5 mb-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-700 italic">
+                      <p className="text-xs text-gray-700">
                         "Melhor investimento que fiz! Já recuperei o valor no primeiro mês."
                       </p>
                     </div>
@@ -1022,9 +1030,9 @@ export default function OnboardingComplete() {
                 </Card>
 
                 {/* Testimonial 3 */}
-                <Card className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+                <Card className="p-3 bg-white border-gray-200">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
                       AF
                     </div>
                     <div className="flex-1">
@@ -1032,12 +1040,12 @@ export default function OnboardingComplete() {
                         <span className="font-semibold text-sm text-gray-900">Ana Ferreira</span>
                         <span className="text-xs text-gray-500">• há 1 ano</span>
                       </div>
-                      <div className="flex gap-1 mb-1">
+                      <div className="flex gap-0.5 mb-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-700 italic">
+                      <p className="text-xs text-gray-700">
                         "Suporte VIP faz toda a diferença! Respondem em minutos."
                       </p>
                     </div>
@@ -1045,9 +1053,9 @@ export default function OnboardingComplete() {
                 </Card>
 
                 {/* Testimonial 4 */}
-                <Card className="p-3 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
+                <Card className="p-3 bg-white border-gray-200">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
                       JO
                     </div>
                     <div className="flex-1">
@@ -1055,132 +1063,30 @@ export default function OnboardingComplete() {
                         <span className="font-semibold text-sm text-gray-900">João Oliveira</span>
                         <span className="text-xs text-gray-500">• há 3 meses</span>
                       </div>
-                      <div className="flex gap-1 mb-1">
+                      <div className="flex gap-0.5 mb-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-700 italic">
+                      <p className="text-xs text-gray-700">
                         "Saque sem valor mínimo é perfeito! Posso sacar quando quiser."
                       </p>
                     </div>
                   </div>
                 </Card>
 
-                {/* Testimonial 5 */}
-                <Card className="p-3 bg-gradient-to-r from-red-50 to-pink-50 border-red-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      LS
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">Lucia Santos</span>
-                        <span className="text-xs text-gray-500">• há 6 meses</span>
-                      </div>
-                      <div className="flex gap-1 mb-1">
-                        {[1, 2, 3, 4, 4].map((star, i) => (
-                          <Star key={i} className={`h-3 w-3 ${i < 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-300'}`} />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700 italic">
-                        "Ótima plataforma! Só gostaria de mais livros de romance."
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 6 */}
-                <Card className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      RM
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">Rafael Mendes</span>
-                        <span className="text-xs text-gray-500">• há 2 semanas</span>
-                      </div>
-                      <div className="flex gap-1 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700 italic">
-                        "Impressionante! Já li 15 livros esse mês e ganhei R$ 450!"
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 7 */}
-                <Card className="p-3 bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      BG
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">Beatriz Gomes</span>
-                        <span className="text-xs text-gray-500">• há 5 meses</span>
-                      </div>
-                      <div className="flex gap-1 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700 italic">
-                        "Pagamento único é ótimo! Sem mensalidades me preocupando."
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 8 */}
-                <Card className="p-3 bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      CS
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">Carlos Souza</span>
-                        <span className="text-xs text-gray-500">• há 1 mês</span>
-                      </div>
-                      <div className="flex gap-1 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700 italic">
-                        "Recomendo! Atividades ilimitadas e ganhos reais comprovados."
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 9 */}
-                <Card className="p-3 bg-gradient-to-r from-rose-50 to-pink-50 border-rose-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      FB
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-gray-900">Fernanda Barbosa</span>
-                        <span className="text-xs text-gray-500">• há 4 meses</span>
-                      </div>
-                      <div className="flex gap-1 mb-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-700 italic">
-                        "Plataforma séria e confiável. Pagamentos sempre em dia!"
-                      </p>
-                    </div>
-                  </div>
-                </Card>
+                {/* Button to view more */}
+                <button 
+                  className="w-full text-center text-xs text-gray-500 hover:text-gray-700 py-2 transition-colors"
+                  onClick={() => {
+                    toast({
+                      title: "Carregando mais avaliações...",
+                      description: "Mais 880 avaliações disponíveis após ativação",
+                    });
+                  }}
+                >
+                  Ver todas as 884 avaliações →
+                </button>
               </div>
             </div>
           </div>
@@ -1295,172 +1201,312 @@ export default function OnboardingComplete() {
                   <p className="font-bold text-gray-900">Pagamento via PIX</p>
                   <p className="text-xs text-gray-600">Aprovação instantânea</p>
                 </div>
-                <Check className="h-6 w-6 text-green-600" />
+                <CheckCircle className="h-6 w-6 text-green-500" />
               </div>
             </Card>
 
-            {/* Generate PIX Button */}
-            <Button
-              onClick={() => generatePixMutation.mutate()}
-              disabled={generatePixMutation.isPending}
-              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50"
-              data-testid="button-generate-pix"
-            >
-              {generatePixMutation.isPending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <>
-                  <CreditCard className="mr-2 h-5 w-5" />
-                  Gerar PIX de Inscrição
-                </>
-              )}
-            </Button>
+            {/* Submit Buttons */}
+            <div className="space-y-3">
+              <Button
+                onClick={handleGeneratePix}
+                disabled={generatePixMutation.isPending}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 text-base shadow-xl"
+                data-testid="button-generate-pix"
+              >
+                {generatePixMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Gerando PIX...
+                  </>
+                ) : (
+                  <>
+                    Gerar código PIX
+                    <ChevronRight className="ml-2 h-5 w-5" />
+                  </>
+                )}
+              </Button>
 
-            {/* Security Note */}
-            <div className="text-center text-xs text-gray-500">
-              <div className="flex items-center justify-center gap-1 mb-2">
-                <Shield className="h-4 w-4 text-green-600" />
-                <span>Ambiente 100% seguro e criptografado</span>
+              <button
+                onClick={() => setCurrentStep(5)}
+                className="w-full text-gray-500 text-sm hover:text-gray-700 transition-colors"
+              >
+                <ChevronLeft className="inline h-4 w-4 mr-1" />
+                Voltar
+              </button>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
+              <div className="flex items-center gap-1">
+                <Shield className="h-4 w-4" />
+                <span>Seguro</span>
               </div>
-              <p>Seus dados estão protegidos e não serão compartilhados</p>
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                <span>Instantâneo</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CheckCircle className="h-4 w-4" />
+                <span>Garantido</span>
+              </div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Generating PIX Popup */}
-      {showGeneratingPix && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="p-8 text-center max-w-sm w-full">
-            <Loader2 className="h-12 w-12 animate-spin text-green-500 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">GERANDO PIX</h3>
-            <p className="text-sm text-gray-600">Aguarde enquanto preparamos seu pagamento...</p>
-          </Card>
-        </div>
-      )}
-
-      {/* PIX Payment Modal - Full Screen for Mobile */}
-      {showPixModal && (
-        <div className="fixed inset-0 z-[9999] bg-white" data-payment-flow="true">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-4 shadow-lg">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Shield className="h-5 w-5 text-white" />
-                </div>
+        {/* PIX Payment Modal */}
+        {showPaymentModal && (
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+            <div className="bg-white w-full h-full max-w-md overflow-y-auto">
+              {/* Header */}
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-white">Pagamento Seguro via PIX</h2>
-                  <p className="text-xs text-green-100">Transação protegida e verificada</p>
+                  <h3 className="font-bold text-lg">Pagamento PIX</h3>
+                  <p className="text-xs text-gray-600">Escaneie ou copie o código</p>
                 </div>
+                <button
+                  onClick={handleClosePayment}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  data-testid="button-close-payment"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setShowPixModal(false)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                data-testid="button-close-pix"
-              >
-                <X className="h-5 w-5 text-white" />
-              </button>
-            </div>
-            
-            {/* Timer Bar */}
-            <div className="bg-white/20 rounded-lg px-3 py-2">
-              <div className="flex items-center justify-center gap-2">
-                <Clock className="h-4 w-4 text-white animate-pulse" />
-                <span className="text-white text-sm font-medium">
-                  Tempo restante: <span className="font-bold text-lg">{formatTime(pixCountdown)}</span>
-                </span>
+
+              {/* Content */}
+              <div className="p-6 space-y-6">
+                {/* Timer */}
+                {!isPixExpired ? (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-yellow-600" />
+                        <span className="text-sm font-semibold text-gray-900">Código expira em:</span>
+                      </div>
+                      <span className="text-lg font-bold text-yellow-600">
+                        {pixExpirationTimer()}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5 text-red-600" />
+                      <div>
+                        <p className="text-sm font-semibold text-red-900">Código PIX expirado</p>
+                        <p className="text-xs text-red-600">Gere um novo código para continuar</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Amount */}
+                <div className="text-center mb-6">
+                  <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide">Valor a pagar</p>
+                  <p className="text-4xl font-bold text-gray-900 mt-2">R$ 29,00</p>
+                </div>
+                
+                {/* QR Code */}
+                {!isPixExpired && (
+                  <>
+                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-inner">
+                      <QRCode
+                        value={pixCode}
+                        size={240}
+                        className="w-full h-auto"
+                        bgColor="#FFFFFF"
+                        fgColor="#000000"
+                      />
+                    </div>
+
+                    {/* Copy Code */}
+                    <div className="space-y-3">
+                      <p className="text-center text-xs text-gray-500">
+                        Ou copie o código PIX abaixo:
+                      </p>
+                      <div className="bg-gray-50 rounded-lg p-3 relative group">
+                        <p className="text-xs text-gray-600 font-mono break-all pr-10">
+                          {pixCode}
+                        </p>
+                        <button
+                          onClick={copyToClipboard}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                          data-testid="button-copy-pix"
+                        >
+                          {copiedToClipboard ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4 text-gray-500" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Instructions */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-sm text-blue-900 mb-3">Como pagar:</h4>
+                      <ol className="space-y-2 text-xs text-blue-700">
+                        <li className="flex items-start gap-2">
+                          <span className="font-bold text-blue-600">1.</span>
+                          <span>Abra o app do seu banco</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="font-bold text-blue-600">2.</span>
+                          <span>Escolha pagar com PIX</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="font-bold text-blue-600">3.</span>
+                          <span>Escaneie o QR Code ou copie o código</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="font-bold text-blue-600">4.</span>
+                          <span>Confirme o pagamento de R$ 29,00</span>
+                        </li>
+                      </ol>
+                    </div>
+
+                    {/* Payment Status */}
+                    {isCheckingPayment && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+                        <div className="flex items-center gap-3">
+                          <Loader2 className="h-5 w-5 text-green-600 animate-spin" />
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm text-gray-900">
+                              Aguardando pagamento...
+                            </p>
+                            <p className="text-xs text-gray-600 mt-1">
+                              Aprovação automática após confirmação
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Expired State */}
+                {isPixExpired && (
+                  <div className="text-center py-8">
+                    <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                      Tempo esgotado
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-6">
+                      O código PIX expirou. Gere um novo código para continuar.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        handleClosePayment();
+                        setCurrentStep(6);
+                      }}
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold"
+                    >
+                      Gerar novo código
+                    </Button>
+                  </div>
+                )}
+
+                {/* Footer Actions */}
+                {!isPixExpired && !isTimeoutReached && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <p className="text-center text-xs text-gray-500">
+                      Não recebemos seu pagamento ainda
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-          
-          {/* Scrollable Content */}
-          <div className="overflow-y-auto h-[calc(100vh-140px)] px-4 py-6">
-            
-            {/* Amount Display */}
-            <div className="text-center mb-6">
-              <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide">Valor a pagar</p>
-              <p className="text-4xl font-bold text-gray-900 mt-2">R$ 29,00</p>
-            </div>
-            
-            {/* QR Code */}
-            {pixCode && (
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 mb-5 shadow-sm">
-                <p className="text-sm text-gray-600 text-center mb-4 font-semibold">Escaneie o QR Code</p>
-                <div className="bg-white p-4 rounded-xl mx-auto" style={{ maxWidth: '220px' }}>
-                  <QRCode
-                    value={pixCode}
-                    size={188}
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    viewBox={`0 0 188 188`}
-                    level="M"
-                    data-testid="img-qrcode"
-                  />
+        )}
+
+        {/* PIX Confirmation Modal */}
+        {showPixConfirmation && !isPixExpired && (
+          <Dialog open={showPixConfirmation} onOpenChange={setShowPixConfirmation}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Clock className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Você já fez o PIX?
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Se você já realizou o pagamento, clique em confirmar para verificarmos
+                  </p>
                 </div>
+              </DialogHeader>
+
+              <div className="space-y-4 mt-4">
+                <Button
+                  onClick={handleConfirmPayment}
+                  disabled={checkPaymentStatusMutation.isPending}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold"
+                  data-testid="button-confirm-payment"
+                >
+                  {checkPaymentStatusMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Verificando...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Já fiz o pagamento
+                    </>
+                  )}
+                </Button>
+
+                <button
+                  onClick={() => setShowPixConfirmation(false)}
+                  className="w-full text-gray-500 text-sm hover:text-gray-700 transition-colors"
+                  data-testid="button-continue-waiting"
+                >
+                  Ainda não paguei
+                </button>
               </div>
-            )}
-            
-            {/* PIX Code */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 mb-5 shadow-sm">
-              <p className="text-sm text-gray-700 mb-3 text-center font-semibold">Ou use o código PIX copia e cola:</p>
-              <div className="bg-white rounded-xl p-3 mb-3 border border-green-200">
-                <textarea
-                  value={pixCode || ''}
-                  readOnly
-                  className="w-full bg-transparent text-xs font-mono text-gray-700 resize-none border-0 outline-none"
-                  rows={3}
-                  style={{ minHeight: '60px' }}
-                  data-testid="input-pix-code"
-                />
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Success Modal */}
+        <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+          <DialogContent className="sm:max-w-md">
+            <div className="text-center py-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <CheckCircle className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Parabéns! 🎉
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Sua conta Premium foi ativada com sucesso!
+              </p>
+              <div className="space-y-3 text-left bg-green-50 rounded-lg p-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-gray-700">Acesso ilimitado liberado</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-gray-700">Suporte VIP ativado</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-gray-700">Saque sem limite mínimo</span>
+                </div>
               </div>
               <Button
-                onClick={copyPixCode}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg"
-                size="lg"
-                data-testid="button-copy-pix"
+                onClick={handleSuccessClose}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold"
+                data-testid="button-go-to-dashboard"
               >
-                <Copy className="h-5 w-5 mr-2" />
-                Copiar Código PIX
+                Ir para o Dashboard
+                <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-            
-            {/* Instructions */}
-            <div className="bg-blue-50 rounded-2xl p-4 mb-5 shadow-sm">
-              <h4 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
-                Como fazer o pagamento:
-              </h4>
-              <ol className="text-sm text-blue-800 space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-blue-600">1.</span>
-                  <span>Abra o app do seu banco</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-blue-600">2.</span>
-                  <span>Escolha a opção PIX</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-blue-600">3.</span>
-                  <span>Escaneie o QR Code ou use "Pix Copia e Cola"</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-blue-600">4.</span>
-                  <span>Confirme o pagamento de R$ 29,00</span>
-                </li>
-              </ol>
-            </div>
-            
-            {/* Security Badge */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center justify-center gap-2 text-sm text-gray-600">
-              <Shield className="h-5 w-5 text-green-600" />
-              <span className="font-medium">Pagamento 100% seguro e criptografado</span>
-            </div>
-            
-            {/* Bottom Spacing */}
-            <div className="h-6"></div>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
