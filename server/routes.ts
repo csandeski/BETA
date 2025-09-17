@@ -737,10 +737,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payment status check endpoint
-  app.get('/api/payment/check-status', async (req: Request, res: Response) => {
+  // Track conversion endpoint for Lira
+  app.post('/api/payment/track-conversion', async (req: Request, res: Response) => {
     try {
-      const { paymentId } = req.query;
+      const { order_id, value, customer, utm_params } = req.body;
+      
+      const apiKey = process.env.LIRAPAY_API_KEY;
+      if (!apiKey || !order_id) {
+        console.log('Skipping Lira conversion tracking - missing API key or order ID');
+        return res.json({ success: true, skipped: true });
+      }
+      
+      console.log('Sending Lira conversion event for order:', order_id);
+      
+      try {
+        // Send conversion event to LiraPay tracking endpoint
+        const liraResponse = await fetch('https://api.lirapaybr.com/v1/tracking/conversion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-secret': apiKey
+          },
+          body: JSON.stringify({
+            transaction_id: order_id,
+            event_type: 'purchase',
+            value: value,
+            currency: 'BRL',
+            customer: customer,
+            utm_params: utm_params,
+            timestamp: new Date().toISOString()
+          })
+        });
+        
+        if (!liraResponse.ok) {
+          console.error('Lira tracking response:', await liraResponse.text());
+        } else {
+          console.log('Lira conversion tracked successfully');
+        }
+      } catch (error) {
+        console.error('Error tracking Lira conversion:', error);
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Track conversion error:', error);
+      res.json({ success: true }); // Don't fail the main flow
+    }
+  });
+
+  // Payment status check endpoint (supports both query and param)
+  app.get('/api/payment/check-status/:paymentId?', async (req: Request, res: Response) => {
+    try {
+      const paymentId = req.params.paymentId || req.query.paymentId;
       
       if (!paymentId || typeof paymentId !== 'string') {
         return res.status(400).json({ message: "Payment ID required" });

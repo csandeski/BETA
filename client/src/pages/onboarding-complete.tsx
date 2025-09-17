@@ -131,13 +131,8 @@ export default function OnboardingComplete() {
           checkPaymentStatus();
         }
         
-        // After 10 checks (30 seconds), show the modal
-        if (newCount === 10 && !showPixConfirmation) {
-          setShowPixConfirmation(true);
-        }
-        
-        // After 40 checks (2 minutes), stop checking
-        if (newCount >= 40) {
+        // After 60 checks (5 minutes), stop checking
+        if (newCount >= 60) {
           clearInterval(interval);
           setIsCheckingPayment(false);
           setIsTimeoutReached(true);
@@ -145,7 +140,7 @@ export default function OnboardingComplete() {
         
         return newCount;
       });
-    }, 3000); // Check every 3 seconds
+    }, 5000); // Check every 5 seconds
   };
 
   const checkPaymentStatus = async () => {
@@ -164,16 +159,53 @@ export default function OnboardingComplete() {
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     setIsCheckingPayment(false);
     setShowPaymentModal(false);
     setShowPixConfirmation(false);
     
+    // Get stored UTM parameters from UtmTracker
+    const utmData = UtmTracker.getStoredUTMParams();
+    
+    // Fire Facebook Pixel Purchase event with UTM parameters
     fbPixel.trackPurchase({
       value: 29.00,
       currency: 'BRL',
-      content_name: 'Account Activation'
+      content_name: 'Account Activation',
+      content_category: 'Premium Subscription',
+      content_ids: ['premium_account'],
+      num_items: 1,
+      // Include UTM parameters
+      utm_source: utmData.utm_source || undefined,
+      utm_medium: utmData.utm_medium || undefined,
+      utm_campaign: utmData.utm_campaign || undefined,
+      utm_content: utmData.utm_content || undefined,
+      utm_term: utmData.utm_term || undefined
     });
+    
+    // Send Lira tracking event through backend
+    try {
+      if (paymentOrderId) {
+        await fetch('/api/payment/track-conversion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            order_id: paymentOrderId,
+            value: 29.00,
+            customer: {
+              email: userEmail,
+              phone: userPhone,
+              name: userFullName
+            },
+            utm_params: utmData
+          })
+        });
+      }
+    } catch (error) {
+      console.error('Error sending Lira tracking:', error);
+    }
 
     // Update user data
     const currentData = userDataManager.getUserData() || {};
@@ -258,6 +290,9 @@ export default function OnboardingComplete() {
       setShowPaymentModal(true);
       playSound('success');
       
+      // Start automatic payment checking
+      startPaymentCheck();
+      
       // Track checkout initiation
       fbPixel.trackInitiateCheckout({
         value: 29.00,
@@ -265,9 +300,6 @@ export default function OnboardingComplete() {
         content_name: 'Account Activation',
         num_items: 1
       });
-      
-      // Start checking for payment
-      startPaymentCheck();
     },
     onError: (error: Error) => {
       toast({
