@@ -139,7 +139,7 @@ export default function OnboardingComplete() {
 
   // Countdown timer for checkout
   useEffect(() => {
-    if (currentStep === 3 && checkoutTimer > 0) {
+    if (currentStep === 6 && checkoutTimer > 0) {
       const interval = setInterval(() => {
         setCheckoutTimer((prev) => {
           if (prev <= 1) {
@@ -210,15 +210,15 @@ export default function OnboardingComplete() {
 
   const handleNextStep = () => {
     setCurrentStep(prev => prev + 1);
-    // Mark as seen when entering pricing step (now step 2)
-    if (currentStep === 1) {
+    // Mark as seen when entering pricing step (now step 4)
+    if (currentStep === 4) {
       setHasSeenPricing(true);
       localStorage.setItem('pricing_seen_v1', 'true');
     }
   };
 
   const handleActivateAccount = () => {
-    setCurrentStep(3);
+    setCurrentStep(6);
   };
 
   const validateForm = () => {
@@ -415,10 +415,10 @@ export default function OnboardingComplete() {
         <div className="h-2 bg-gray-200">
           <div 
             className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500"
-            style={{ width: `${(currentStep / 3) * 100}%` }}
+            style={{ width: `${(currentStep / 6) * 100}%` }}
           />
         </div>
-        {currentStep === 3 && (
+        {currentStep === 6 && (
           <div className="bg-red-50 border-b border-red-200 py-2 px-4">
             <div className="flex items-center justify-center gap-2">
               <Clock className="h-4 w-4 text-red-600 animate-pulse" />
@@ -434,18 +434,87 @@ export default function OnboardingComplete() {
       </div>
 
       <div className="max-w-md mx-auto px-4 py-16">
-        {/* Step 1: Are you enjoying Beta Reader? */}
+        {/* Step 1: Congratulations for completing activities */}
         {currentStep === 1 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center">
+              <div className="inline-flex p-4 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-3xl mb-6">
+                <Award className="h-12 w-12 text-orange-600" />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                Parabéns por concluir suas atividades! 🎉
+              </h1>
+              <p className="text-gray-600 mb-4">
+                Você completou com sucesso as 5 primeiras atividades em nosso app.
+              </p>
+              <p className="text-gray-700 font-medium mb-6">
+                Agora você conheceu e aprendeu de fato como o Beta Reader funciona!
+              </p>
+            </div>
+
+            <Card className="p-6 bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">Apenas 26 vagas</p>
+                  <p className="text-sm text-gray-600">disponíveis no momento</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-2">Vagas limitadas!</p>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">21 de 26 vagas já preenchidas</p>
+              </div>
+            </Card>
+
+            <div className="space-y-3">
+              <Card className="p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
+                <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-900">Você está qualificado!</p>
+                  <p className="text-sm text-gray-600">Demonstrou dedicação e comprometimento</p>
+                </div>
+              </Card>
+              
+              <Card className="p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
+                <Sparkles className="h-6 w-6 text-purple-500 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-900">Acesso exclusivo</p>
+                  <p className="text-sm text-gray-600">Entre agora para o grupo seleto de leitores</p>
+                </div>
+              </Card>
+            </div>
+
+            <button
+              onClick={handleNextStep}
+              className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-xl flex items-center justify-center gap-2 animate-pulse-slow"
+              data-payment-flow="true"
+              data-testid="button-continue"
+            >
+              Continuar
+              <ChevronRight className="h-5 w-5" />
+            </button>
+
+            <p className="text-center text-xs text-gray-500">
+              Garanta sua vaga antes que acabe!
+            </p>
+          </div>
+        )}
+
+        {/* Step 2: Are you enjoying our app? */}
+        {currentStep === 2 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center">
               <div className="inline-flex p-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-3xl mb-6">
                 <Heart className="h-12 w-12 text-green-600" />
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                Você está gostando do Beta Reader?
+                Você está gostando do nosso app?
               </h1>
               <p className="text-gray-600 mb-8">
-                Nossa plataforma já ajudou milhares de leitores!
+                Sua opinião é muito importante para nós!
               </p>
             </div>
 
@@ -497,8 +566,151 @@ export default function OnboardingComplete() {
           </div>
         )}
 
-        {/* Step 2: Pricing Card */}
-        {currentStep === 2 && (
+        {/* Step 3: Who We Are */}
+        {currentStep === 3 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center mb-8">
+              <div className="inline-flex p-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl mb-4">
+                <BookOpen className="h-10 w-10 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Quem Somos
+              </h2>
+              <p className="text-sm text-gray-600">
+                Conheça nossa missão e comunidade
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-green-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-green-100 rounded-xl">
+                    <Target className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-2">Nossa Missão</h3>
+                    <p className="text-sm text-gray-600">
+                      Conectamos leitores apaixonados com escritores talentosos, oferecendo feedback valioso antes do lançamento oficial dos livros.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-purple-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-purple-100 rounded-xl">
+                    <Users className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-2">Comunidade Ativa</h3>
+                    <p className="text-sm text-gray-600">
+                      Mais de 2.600 leitores ativos que já testaram mais de 500 livros em 6 anos de atividade.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-5 bg-white/90 backdrop-blur border-2 border-orange-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-orange-100 rounded-xl">
+                    <Heart className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 mb-2">Sistema Colaborativo</h3>
+                    <p className="text-sm text-gray-600">
+                      Mantido por uma comunidade de apoiadores que acreditam no poder da leitura.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                <Users className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-gray-900">2.600+</p>
+                <p className="text-xs text-gray-600">Leitores ativos</p>
+              </Card>
+
+              <Card className="p-4 text-center bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                <Award className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-gray-900">6+ anos</p>
+                <p className="text-xs text-gray-600">De atividade</p>
+              </Card>
+            </div>
+
+            <Button
+              onClick={handleNextStep}
+              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+              data-testid="button-continue-step2"
+            >
+              Continuar
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 4: Maintenance Fee Message */}
+        {currentStep === 4 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center mb-8">
+              <div className="inline-flex p-4 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl mb-4">
+                <Zap className="h-10 w-10 text-indigo-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Continue sua jornada de leitura
+              </h2>
+              <p className="text-gray-600 mb-2">
+                Para continuar usando o Beta Reader sem limites, cobramos uma 
+                <span className="font-bold text-green-600"> taxa única de manutenção </span>
+                para ativação da sua conta em nossos sistemas.
+              </p>
+            </div>
+
+            <Card className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300">
+              <div className="flex items-center gap-3 mb-3">
+                <AlertCircle className="h-6 w-6 text-orange-500" />
+                <h3 className="font-bold text-gray-900">Por que cobramos?</h3>
+              </div>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Manter servidores e infraestrutura funcionando 24/7</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Garantir suporte prioritário via WhatsApp</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Desenvolver novos recursos e melhorias</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Manter o app gratuito para quem não pode pagar</span>
+                </li>
+              </ul>
+            </Card>
+
+            <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 text-center">
+              <p className="text-sm text-green-800 font-semibold">
+                💚 Junte-se a mais de 1.200 apoiadores que mantêm nossa comunidade viva!
+              </p>
+            </div>
+
+            <Button
+              onClick={handleNextStep}
+              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+              data-testid="button-continue-step3"
+            >
+              Ver valor da ativação
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 5: Pricing Card */}
+        {currentStep === 5 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -509,44 +721,28 @@ export default function OnboardingComplete() {
               </p>
             </div>
 
-            {/* Limited Spots Alert - Compact Design */}
-            <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-xl p-[2px] mb-6 shadow-lg">
-              <div className="bg-white rounded-[10px] p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="relative">
-                      <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center animate-pulse">
-                        <Users className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-900 leading-tight">
-                        🔥 Restam apenas <span className="text-red-600">26 vagas!</span>
-                      </p>
-                      <p className="text-[10px] text-gray-500">
-                        Oferta limitada • Garanta agora
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
-                      81%
-                    </p>
-                    <p className="text-[9px] text-gray-500 uppercase tracking-wider">ocupado</p>
+            {/* Limited Spots Alert */}
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-4 border-2 border-orange-200 shadow-md mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center shadow-md">
+                    <Users className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <div className="mt-2.5">
-                  <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 h-full rounded-full transition-all duration-1000 ease-out animate-pulse" 
-                         style={{ width: '81%' }}>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <p className="text-[10px] text-gray-500">21 de 26 vagas preenchidas</p>
-                    <p className="text-[10px] font-semibold text-red-600">Últimas 5!</p>
-                  </div>
+                <div className="flex-1">
+                  <p className="text-lg font-bold text-gray-900">
+                    Restam apenas 26 vagas!
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Garanta sua vaga agora antes que acabe
+                  </p>
                 </div>
+              </div>
+              <div className="mt-3">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full animate-pulse" style={{ width: '82%' }}></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 text-center">21 de 26 vagas preenchidas</p>
               </div>
             </div>
 
@@ -920,8 +1116,9 @@ export default function OnboardingComplete() {
             </div>
           </div>
         )}
-        {/* Step 3: Checkout Form */}
-        {currentStep === 3 && (
+
+        {/* Step 6: Checkout Form */}
+        {currentStep === 6 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
